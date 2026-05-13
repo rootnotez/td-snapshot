@@ -1,12 +1,3 @@
-# td-snapshot.py — BUILT FILE. Do not edit directly.
-# Edit src/core.py, then run ./build.sh to regenerate.
-#
-# Quick paste usage: copy this file into a Text DAT. Open Dialogs > Textport
-# and DATs, then run:
-#   op('/project1/text1').run()
-# Replace 'text1' with your DAT name. Captures me.parent() by default.
-# To target a different network: snapshot_patch('/some/comp')
-
 import re
 
 def op_display_type(o):
@@ -191,5 +182,3 @@ def snapshot_patch(root=None):
     lines.extend(node_blocks)
 
     return '\n\n'.join(lines)
-
-print(snapshot_patch())

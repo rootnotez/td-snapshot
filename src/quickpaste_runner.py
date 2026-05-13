@@ -1,0 +1,1 @@
+print(snapshot_patch())

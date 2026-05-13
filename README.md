@@ -33,37 +33,77 @@ It also works without LLMs: snapshot before and after a change and diff the outp
 
 Only parameters that differ from their defaults are shown — or any parameter driven by an expression, export, or bind, regardless of value. Stock settings are omitted to keep the output readable.
 
-## Setup
+---
 
-The script runs **inside TouchDesigner** — not as a standalone Python script. No packages or build steps needed.
+## Option 1: Quick paste
 
-1. Copy the contents of `td-snapshot.py` into a **Text DAT** inside your project.
+The fastest way to use it. No TOX required.
+
+1. Copy `td-snapshot.py` into a **Text DAT** in your project.
 2. Open **Dialogs > Textport and DATs**.
-3. Run the DAT from the Textport:
+3. Run it:
 
 ```python
 op('/project1/text1').run()
 ```
 
-Replace `text1` with whatever you named the DAT. The output prints to the Textport — copy and paste it wherever you need it.
+The output prints to the Textport — copy and paste it wherever you need it.
 
-## Targeting a specific network
-
-By default, the script captures the parent of the Text DAT (`me.parent()`). To target a different component, pass its path:
+To target a specific network instead of the Text DAT's parent:
 
 ```python
-# From the Textport:
 snapshot_patch('/project1/mycomp')
 ```
 
-Or edit the last line of the script before running:
+---
 
-```python
-print(snapshot_patch('/project1/mycomp'))
-```
+## Option 2: TOX component (reusable, button-triggered)
+
+A Container COMP saved as a `.tox` that you can drop into any project. Click a button, read the output from a Text DAT inside the component — no Textport needed.
+
+### TOX structure
+
+Build the component with these operators inside a Container COMP:
+
+| Operator | Type | Name | Contents |
+|---|---|---|---|
+| Script | Text DAT | `core` | `src/core.py` |
+| Script | Text DAT | `runner` | `src/tox_runner.py` |
+| Output | Text DAT | `output` | *(leave empty)* |
+| Trigger | Button COMP | `button` | *(any label)* |
+| Events | Panel Execute DAT | `panel_exec` | *(see below)* |
+
+### Wiring the button
+
+1. Create a **Panel Execute DAT** inside the Container COMP.
+2. In its **Panel** parameter, point it at `button`.
+3. Paste the contents of `src/tox_runner.py` into it (or set its DAT parameter to `runner`).
+
+When clicked, the button fires `onOffToOn`, which calls `snapshot_patch` on the network containing the TOX (`me.parent().parent()`) and writes the result to the `output` Text DAT.
+
+### Saving and reusing
+
+Right-click the Container COMP > **Save Component** to save it as a `.tox`. Drop that file into any future project from the palette or filesystem.
+
+---
 
 ## Scope
 
-Only the **direct children** of the target network are captured — it does not recurse into sub-networks. To snapshot a nested component, pass its path directly.
+Only the **direct children** of the target network are captured — it does not recurse into sub-networks. To snapshot a nested component, pass its path directly to `snapshot_patch()`.
 
 OP-typed value refs are only recorded when the target operator lives within the captured network. References into `/sys/`, `/local/`, and other system paths are excluded.
+
+---
+
+## Repo structure
+
+```
+src/
+  core.py              ← edit this — snapshot_patch() lives here
+  quickpaste_runner.py ← one-liner entry point for the quick paste build
+  tox_runner.py        ← Panel Execute DAT content for the TOX button
+td-snapshot.py         ← BUILT — do not edit directly
+build.sh               ← rebuilds td-snapshot.py from src/
+```
+
+After editing `src/core.py`, run `./build.sh` to regenerate `td-snapshot.py`. The TOX's `core` DAT reads `src/core.py` directly so it stays in sync automatically.
