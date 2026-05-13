@@ -1,6 +1,0 @@
-cookrate 60
-clock -f 1 -s 1 -o 0 -w 0
-realtime on
-viewers off
-#expectednodes 75 35346
-resetaudioondevicechange off

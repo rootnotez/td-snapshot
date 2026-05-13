@@ -1,6 +1,0 @@
-DAT:panelexec
-tile -375 -454 307 144
-flags =  current on viewer 1 parlanguage 0
-color 0.67 0.67 0.67 
-view -1 8 0 1 1 1 0 -2.41235 0 0 1 1 0
-end

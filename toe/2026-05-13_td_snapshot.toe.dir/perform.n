@@ -1,6 +1,0 @@
-COMP:window
-comment "Perform Mode configuration:\\nPress F1 to enter Perform Mode, ESC to exit"
-tile -200 40 160 130
-flags =  viewer 1 parlanguage 0
-color 0.67 0.67 0.67 
-end

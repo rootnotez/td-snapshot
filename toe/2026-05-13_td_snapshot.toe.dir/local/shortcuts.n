@@ -1,5 +1,0 @@
-DAT:filein
-tile 325 0 130 90
-flags =  parlanguage 0
-color 0.67 0.67 0.67 
-end
