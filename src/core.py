@@ -11,7 +11,15 @@ def snapshot_patch(root=None):
         root_op = me.parent()
     else:
         root_op = op(root)
-    ops = [root_op] + list(root_op.findChildren(includeUtility=True))
+    def collect_all(o):
+        result = [o]
+        try:
+            for child in o.findChildren(includeUtility=True, depth=1):
+                result.extend(collect_all(child))
+        except:
+            pass
+        return result
+    ops = collect_all(root_op)
 
     op_by_path = {o.path: o for o in ops}
 
