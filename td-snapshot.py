@@ -189,4 +189,7 @@ def snapshot_patch(root=None):
 
     return '\n\n'.join(lines)
 
-print(snapshot_patch())
+result = snapshot_patch()
+out = me.parent().create(textDAT, 'td_snapshot_out')
+out.text = result
+out.openViewer(unique=True, borders=True)
