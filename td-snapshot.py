@@ -20,6 +20,20 @@ def snapshot_patch(root=None):
         root_op = op(root)
     ops = [root_op] + list(root_op.findChildren(includeUtility=True))
 
+    # Exclude the component containing this script from the snapshot.
+    # Walk up from me to find its direct child of root_op, then drop that subtree.
+    self_op = me
+    while self_op.parent() is not None and self_op.parent() != root_op:
+        self_op = self_op.parent()
+    if self_op.parent() == root_op:
+        exclude = {self_op.path}
+        try:
+            for child in self_op.findChildren(includeUtility=True):
+                exclude.add(child.path)
+        except:
+            pass
+        ops = [o for o in ops if o.path not in exclude]
+
     op_by_path = {o.path: o for o in ops}
 
     wire_edges = set()

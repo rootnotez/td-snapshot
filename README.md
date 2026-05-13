@@ -6,9 +6,11 @@ It also works without LLMs: snapshot before and after a change and diff the outp
 
 ## Scope
 
-Only the **direct children** of the target network are captured — it does not recurse into sub-networks. To snapshot a nested component, pass its path directly to `snapshot_patch()`.
+`snapshot_patch()` captures the root operator and **all of its descendants** recursively. To target a specific sub-network, pass its path directly to `snapshot_patch()`.
 
-OP-typed value refs are only recorded when the target operator lives within the captured network. References into `/sys/`, `/local/`, and other system paths are excluded.
+The component running the snapshot excludes itself and its own children from the output automatically.
+
+OP-typed value refs are recorded unconditionally — including targets in `/sys/`, `/local/`, and other system paths.
 
 ## Repo structure
 
@@ -102,7 +104,7 @@ Set both Button COMPs to **Momentary** mode.
 
 ### Wiring the buttons
 
-Each Panel Execute DAT needs its **Panels** parameter pointed at its corresponding button (use the full path, e.g. `/project1/td_snapshot/copy_btn`), **Panel Value** set to `select`, and **Off to On** set to **On**.
+Each Panel Execute DAT needs its **Panels** parameter pointed at its corresponding button using the **relative name** (e.g. `copy_btn`, not a full path — absolute paths break when the component is dropped into a different network), **Panel Value** set to `select`, and **Off to On** set to **On**.
 
 - **Copy** — runs the snapshot, writes to `output`, copies text to clipboard
 - **Inspect** — runs the snapshot, writes to `output`, opens a floating DAT viewer you can select and copy from
