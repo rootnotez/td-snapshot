@@ -5,11 +5,9 @@ cat <<'HEADER' > td-snapshot.py
 # td-snapshot.py — BUILT FILE. Do not edit directly.
 # Edit src/core.py, then run ./build.sh to regenerate.
 #
-# Quick paste usage: copy this file into a Text DAT. Open Dialogs > Textport
-# and DATs, then run:
-#   op('/project1/text1').run()
-# Replace 'text1' with your DAT name. Captures me.parent() by default.
-# To target a different network: snapshot_patch('/some/comp')
+# USAGE: Paste into a Text DAT, then RIGHT-CLICK the DAT > Run Script.
+# Captures the network containing this DAT (me.parent()) by default.
+# To target a different network: snapshot_patch('/project1/some/comp')
 
 HEADER
 

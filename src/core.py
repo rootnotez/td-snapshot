@@ -11,7 +11,7 @@ def snapshot_patch(root=None):
         root_op = me.parent()
     else:
         root_op = op(root)
-    ops = [root_op] + list(root_op.findChildren(depth=1, maxDepth=1, includeUtility=True))
+    ops = [root_op] + list(root_op.findChildren(includeUtility=True))
 
     op_by_path = {o.path: o for o in ops}
 
@@ -122,9 +122,8 @@ def snapshot_patch(root=None):
                 # OP-typed value ref: parameter holds an operator object directly
                 # (e.g. Feedback TOP's "top" parameter pointing to a comp by value).
                 # Only record if the target is within the captured network.
-                if cur.path == root_op.path or cur.path.startswith(root_op.path + '/'):
-                    local_refs.add((p.name, cur.path))
-                    ref_edges.add((o.path, cur.path, p.name))
+                local_refs.add((p.name, cur.path))
+                ref_edges.add((o.path, cur.path, p.name))
 
             if changed:
                 found_any = True
