@@ -59,31 +59,53 @@ snapshot_patch('/project1/mycomp')
 
 ## Option 2: TOX component (reusable, button-triggered)
 
-A Container COMP saved as a `.tox` that you can drop into any project. Click a button, read the output from a Text DAT inside the component — no Textport needed.
+A Container COMP saved as a `.tox` that you can drop into any project. Two buttons — **Copy** and **Inspect** — each run the snapshot fresh and either put the result on your clipboard or open it in a floating viewer for reading.
 
 ### TOX structure
 
+![TOX panel](tox-panel.png)
+
 Build the component with these operators inside a Container COMP:
 
-| Operator | Type | Name | Contents |
-|---|---|---|---|
-| Script | Text DAT | `core` | `src/core.py` |
-| Script | Text DAT | `runner` | `src/tox_runner.py` |
-| Output | Text DAT | `output` | *(leave empty)* |
-| Trigger | Button COMP | `button` | *(any label)* |
-| Events | Panel Execute DAT | `panel_exec` | *(see below)* |
+| Type | Name | Contents |
+|---|---|---|
+| Text DAT | `core` | `src/core.py` |
+| Text DAT | `output` | *(leave empty)* |
+| Button COMP | `copy_btn` | Label: "Copy" |
+| Button COMP | `inspect_btn` | Label: "Inspect" |
+| Panel Execute DAT | `panel_exec_copy` | `src/tox_runner_copy.py` |
+| Panel Execute DAT | `panel_exec_inspect` | `src/tox_runner_inspect.py` |
 
-### Wiring the button
+Set both Button COMPs to **Momentary** mode.
 
-1. Create a **Panel Execute DAT** inside the Container COMP.
-2. In its **Panel** parameter, point it at `button`.
-3. Paste the contents of `src/tox_runner.py` into it (or set its DAT parameter to `runner`).
+![TOX network](tox-network.png)
 
-When clicked, the button fires `onOffToOn`, which calls `snapshot_patch` on the network containing the TOX (`me.parent().parent()`) and writes the result to the `output` Text DAT.
+### Wiring the buttons
+
+Each Panel Execute DAT needs its **Panels** parameter pointed at its corresponding button (use the full path, e.g. `/project1/td_snapshot/copy_btn`), **Panel Value** set to `select`, and **Off to On** set to **On**.
+
+- **Copy** — runs the snapshot, writes to `output`, copies text to clipboard
+- **Inspect** — runs the snapshot, writes to `output`, opens a floating DAT viewer you can select and copy from
+
+### Loading the scripts
+
+In the **File** tab of each Panel Execute DAT, set **File** to the path of the corresponding `src/` file and enable **Sync to File**. This avoids copy-paste issues and keeps the DAT in sync with the source.
 
 ### Saving and reusing
 
-Right-click the Container COMP > **Save Component** to save it as a `.tox`. Drop that file into any future project from the palette or filesystem.
+Before saving for distribution, strip the file paths from each DAT that has one (`core`, `panel_exec`, `panel_exec_inspect`):
+
+1. Go to the **File** tab on each DAT
+2. Clear the **File** field
+3. Turn **Sync to File** off
+
+The text content is already embedded — clearing the path just removes the external reference and any personal file system information. Nothing is lost.
+
+Then right-click the Container COMP > **Save Component** and save as `td-snapshot.tox`.
+
+If you want to keep the live file sync for your own development copy, re-set the File paths after saving — the `.tox` is a separate snapshot and won't be affected.
+
+Drop the `.tox` into any future project from the palette or filesystem.
 
 ---
 
@@ -99,11 +121,12 @@ OP-typed value refs are only recorded when the target operator lives within the 
 
 ```
 src/
-  core.py              ← edit this — snapshot_patch() lives here
-  quickpaste_runner.py ← one-liner entry point for the quick paste build
-  tox_runner.py        ← Panel Execute DAT content for the TOX button
-td-snapshot.py         ← BUILT — do not edit directly
-build.sh               ← rebuilds td-snapshot.py from src/
+  core.py                ← edit this — snapshot_patch() lives here
+  quickpaste_runner.py   ← one-liner entry point for the quick paste build
+  tox_runner_copy.py     ← Panel Execute DAT for the Copy button
+  tox_runner_inspect.py  ← Panel Execute DAT for the Inspect button
+td-snapshot.py           ← BUILT — do not edit directly
+build.sh                 ← rebuilds td-snapshot.py from src/
 ```
 
 After editing `src/core.py`, run `./build.sh` to regenerate `td-snapshot.py`. The TOX's `core` DAT reads `src/core.py` directly so it stays in sync automatically.
