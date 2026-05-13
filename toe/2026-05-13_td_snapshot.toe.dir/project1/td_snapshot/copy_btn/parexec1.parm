@@ -1,0 +1,10 @@
+?
+pageindex 0 1
+op 0 ..
+pars 0 value0
+onpulse 0 off
+file 48 "" f'scripts/{me.name}.py'
+defaultreadencoding 0 cp1252
+loadonstart 0 on
+language 0 python
+?

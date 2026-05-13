@@ -1,0 +1,7 @@
+?
+extractrows 0 bynames
+rowindexend 17 0 "me.inputs[0].numRows - 1"
+rownames 0 ?*
+fromcol 0 1
+colindexend 17 1 "me.inputs[0].numCols - 1"
+?

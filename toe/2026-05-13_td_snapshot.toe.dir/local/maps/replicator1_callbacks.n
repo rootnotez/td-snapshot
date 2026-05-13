@@ -1,0 +1,7 @@
+DAT:text
+tile 10 -20 160 130
+flags =  viewer 1 parlanguage 0
+color 0.67 0.67 0.67 
+dock replicator1
+view -1 8 0 1 1 1 0 0 0 0 1 1 0
+end
