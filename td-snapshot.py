@@ -189,7 +189,9 @@ def snapshot_patch(root=None):
 
     return '\n\n'.join(lines)
 
+import datetime
 result = snapshot_patch()
-out = me.parent().create(textDAT, 'td_snapshot_out')
+name = 'td_snapshot_' + datetime.datetime.now().strftime('%Y%m%dT%H%M%S')
+out = me.parent().create(textDAT, name)
 out.text = result
 out.openViewer(unique=True, borders=True)
