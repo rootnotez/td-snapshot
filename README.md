@@ -4,6 +4,26 @@ TouchDesigner networks are invisible to LLMs. This script captures your network 
 
 It also works without LLMs: snapshot before and after a change and diff the output, or just audit what's actually non-default in a patch you inherited.
 
+## Scope
+
+Only the **direct children** of the target network are captured — it does not recurse into sub-networks. To snapshot a nested component, pass its path directly to `snapshot_patch()`.
+
+OP-typed value refs are only recorded when the target operator lives within the captured network. References into `/sys/`, `/local/`, and other system paths are excluded.
+
+## Repo structure
+
+```
+src/
+  core.py                ← edit this — snapshot_patch() lives here
+  quickpaste_runner.py   ← one-liner entry point for the quick paste build
+  tox_runner_copy.py     ← Panel Execute DAT for the Copy button
+  tox_runner_inspect.py  ← Panel Execute DAT for the Inspect button
+td-snapshot.py           ← BUILT — do not edit directly
+build.sh                 ← rebuilds td-snapshot.py from src/
+```
+
+After editing `src/core.py`, run `./build.sh` to regenerate `td-snapshot.py`. The TOX's `core` DAT reads `src/core.py` directly so it stays in sync automatically.
+
 ## What it captures
 
 **WIRE EDGES** — every operator wire connection, annotated with input/output slot indices.
@@ -33,9 +53,9 @@ It also works without LLMs: snapshot before and after a change and diff the outp
 
 Only parameters that differ from their defaults are shown — or any parameter driven by an expression, export, or bind, regardless of value. Stock settings are omitted to keep the output readable.
 
----
 
-## Option 1: Quick paste
+
+## Usage Option 1: Quick paste
 
 The fastest way to use it. No TOX required.
 
@@ -55,13 +75,14 @@ To target a specific network instead of the Text DAT's parent:
 snapshot_patch('/project1/mycomp')
 ```
 
----
 
-## Option 2: TOX component (reusable, button-triggered)
 
-A Container COMP saved as a `.tox` that you can drop into any project. Two buttons — **Copy** and **Inspect** — each run the snapshot fresh and either put the result on your clipboard or open it in a floating viewer for reading.
+## Usage Option 2: TOX component (reusable, button-triggered)
 
-### TOX structure
+A Container COMP saved as a `.tox` that you can drop into any project. Two buttons — **Copy** and **Inspect** — each run the snapshot fresh and either put the result on your clipboard or open it in a floating viewer for reading. You can use the `.tox` direclty form this repo.
+
+### TOX Development
+If you want to make changes, here is how the project is built.
 
 ![TOX panel](media/tox-panel.png)
 
@@ -107,26 +128,5 @@ If you want to keep the live file sync for your own development copy, re-set the
 
 Drop the `.tox` into any future project from the palette or filesystem.
 
----
 
-## Scope
 
-Only the **direct children** of the target network are captured — it does not recurse into sub-networks. To snapshot a nested component, pass its path directly to `snapshot_patch()`.
-
-OP-typed value refs are only recorded when the target operator lives within the captured network. References into `/sys/`, `/local/`, and other system paths are excluded.
-
----
-
-## Repo structure
-
-```
-src/
-  core.py                ← edit this — snapshot_patch() lives here
-  quickpaste_runner.py   ← one-liner entry point for the quick paste build
-  tox_runner_copy.py     ← Panel Execute DAT for the Copy button
-  tox_runner_inspect.py  ← Panel Execute DAT for the Inspect button
-td-snapshot.py           ← BUILT — do not edit directly
-build.sh                 ← rebuilds td-snapshot.py from src/
-```
-
-After editing `src/core.py`, run `./build.sh` to regenerate `td-snapshot.py`. The TOX's `core` DAT reads `src/core.py` directly so it stays in sync automatically.
