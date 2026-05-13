@@ -1,9 +1,0 @@
-DAT:null
-tile 175 0 130 90
-flags =  parlanguage 0
-inputs
-{
-0 	set_variables
-}
-color 0.67 0.67 0.67 
-end
