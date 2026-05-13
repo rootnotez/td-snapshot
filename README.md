@@ -63,7 +63,7 @@ A Container COMP saved as a `.tox` that you can drop into any project. Two butto
 
 ### TOX structure
 
-![TOX panel](tox-panel.png)
+![TOX panel](media/tox-panel.png)
 
 Build the component with these operators inside a Container COMP:
 
@@ -78,7 +78,7 @@ Build the component with these operators inside a Container COMP:
 
 Set both Button COMPs to **Momentary** mode.
 
-![TOX network](tox-network.png)
+![TOX network](media/tox-network.png)
 
 ### Wiring the buttons
 
