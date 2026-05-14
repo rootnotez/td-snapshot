@@ -1,6 +1,6 @@
 td-snapshot — source file checksums
 
-core.py:                       v1.0.0    3041764fd0391add640ec8ac8dfa0e01afe4a8bf72adf8fdd146be671e7a58b6
+core.py:                       v1.1.1    f3e61bd1dcf662bccb32bec014cdaf9780975004b0869635c36e833847658fef
 quickpaste_runner.py:          v1.0.0    483271940e07bb28d1b4f896443f8b6034e5edea57ed352887f31bce7e04eb91
 tox_runner_copy.py:            v1.0.0    0b5137746c322ce135b0af0544d7b452a9a3aaadeb356c5abab90c43f3d9c4af
 tox_runner_inspect.py:         v1.0.0    19467831a364093deb7c6f338b5d3632155036b457b09ae64649b1ed681eb662

@@ -1,4 +1,4 @@
-# core.py v1.0.0 | sha256:3041764fd0391add640ec8ac8dfa0e01afe4a8bf72adf8fdd146be671e7a58b6
+# core.py v1.1.1 | sha256:f3e61bd1dcf662bccb32bec014cdaf9780975004b0869635c36e833847658fef
 import re
 
 def op_display_type(o):
@@ -112,9 +112,15 @@ def snapshot_patch(root=None):
             except:
                 continue
 
-            # A parameter is "changed" if its evaluated value differs from the default,
-            # or if it is driven by an expression, export, or bind (regardless of value).
-            changed = (cur != default) or (mode in ('EXPRESSION', 'EXPORT', 'BIND'))
+            try:
+                changed = not p.isDefault
+            except:
+                changed = (cur != default) or (mode in ('EXPRESSION', 'EXPORT', 'BIND'))
+
+            if changed and mode == 'CONSTANT':
+                def _empty(v): return v is None or v == ''
+                if cur == default or (_empty(cur) and _empty(default)):
+                    changed = False
 
             expr_text = None
             try:
