@@ -6,9 +6,9 @@ stamp_file() {
     local name
     name=$(basename "$file")
     local version
-    version=$(awk -v n="$name" '$1 == n { print $2 }' versions.txt)
+    version=$(awk -v n="$name" '$1 == n { print $2 }' src/versions.txt)
     if [ -z "$version" ]; then
-        echo "ERROR: no version entry for $name in versions.txt" >&2
+        echo "ERROR: no version entry for $name in src/versions.txt" >&2
         exit 1
     fi
 
@@ -33,7 +33,7 @@ done
     echo ""
     for f in src/*.py; do
         name=$(basename "$f")
-        version=$(awk -v n="$name" '$1 == n { print $2 }' versions.txt)
+        version=$(awk -v n="$name" '$1 == n { print $2 }' src/versions.txt)
         hash=$(tail -n +2 "$f" | shasum -a 256 | cut -d' ' -f1)
         printf "%-30s v%-8s %s\n" "${name}:" "$version" "$hash"
     done
