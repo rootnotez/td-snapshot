@@ -1,0 +1,13 @@
+?
+pageindex 0 1
+label 0 "> Clipboard"
+x 0 50
+y 32 200
+w 0 100
+h 0 75
+borderover 0 off
+enablecloning 0 off
+clone 17 "" op.TDTox.op('defaultCOMPs/button')
+enableexternaltox 0 off
+relpath 0 externaltox
+?

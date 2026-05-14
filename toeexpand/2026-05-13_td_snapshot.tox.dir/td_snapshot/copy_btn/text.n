@@ -1,0 +1,5 @@
+COMP:text
+tile 74 26 113 96
+flags =  current on viewer 1 parlanguage 0
+color 0.55 0.55 0.55 
+end

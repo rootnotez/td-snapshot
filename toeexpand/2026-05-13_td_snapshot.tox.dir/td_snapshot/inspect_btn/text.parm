@@ -1,0 +1,31 @@
+?
+pageindex 0 1
+text 17 "" parent().par.label
+type 0 multiline
+legacyfontselection 0 on
+scaletofit 49 onlyshrink "parent().par[me.curPar.name] or me.curPar.val"
+fontsize 49 10 "parent().par[me.curPar.name] or me.curPar.val"
+linespacing 49 1 "parent().par[me.curPar.name] or me.curPar.val"
+fontcolorr 49 1 "[c/.5 for c in [.1, .3]][parent().par.value0] * parent().par.colorr + .5"
+fontcolorg 49 1 "[c/.5 for c in [.1, .3]][parent().par.value0] * parent().par.colorg + .5"
+fontcolorb 49 1 "[c/.5 for c in [.1, .3]][parent().par.value0] * parent().par.colorb + .5"
+textpaddingl 49 3 "parent().par[me.curPar.name] or me.curPar.val"
+textpaddingr 49 3 "parent().par[me.curPar.name] or me.curPar.val"
+textpaddingb 49 3 "parent().par[me.curPar.name] or me.curPar.val"
+textpaddingt 49 3 "parent().par[me.curPar.name] or me.curPar.val"
+hmode 0 fill
+vmode 0 fill
+clickthrough 0 on
+bgcolorr 49 0 "[c/.5 for c in [.2, .4, .15, .35]][parent().par.value0 + 2*(r:=parent().panel.rollover)] * parent().par.colorr + r * 0.1"
+bgcolorg 49 0 "[c/.5 for c in [.2, .4, .15, .35]][parent().par.value0 + 2*(r:=parent().panel.rollover)] * parent().par.colorg + r * 0.1"
+bgcolorb 49 0 "[c/.5 for c in [.2, .4, .15, .35]][parent().par.value0 + 2*(r:=parent().panel.rollover)] * parent().par.colorb + r * 0.1"
+bgalpha 0 1
+borderar 49 1 "[c/.5 for c in [.23, .4, .3, .6]][parent().par.value0 + 2*parent().panel.rollover] * parent().par.colorr + .2"
+borderag 49 1 "[c/.5 for c in [.23, .4, .3, .6]][parent().par.value0 + 2*parent().panel.rollover] * parent().par.colorg + .2"
+borderab 49 1 "[c/.5 for c in [.23, .4, .3, .6]][parent().par.value0 + 2*parent().panel.rollover] * parent().par.colorb + .2"
+leftborder 0 bordera
+rightborder 0 bordera
+bottomborder 0 bordera
+topborder 0 bordera
+borderover 0 off
+?
