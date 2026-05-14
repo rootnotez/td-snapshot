@@ -37,6 +37,15 @@ done
         hash=$(tail -n +2 "$f" | shasum -a 256 | cut -d' ' -f1)
         printf "%-30s v%-8s %s\n" "${name}:" "$version" "$hash"
     done
+    echo ""
+    echo "td-snapshot — binary artifact checksum"
+    echo ""
+    if [ -f td-snapshot.tox ]; then
+        tox_hash=$(shasum -a 256 td-snapshot.tox | cut -d' ' -f1)
+        printf "%-30s %s\n" "td-snapshot.tox:" "$tox_hash"
+    else
+        printf "%-30s %s\n" "td-snapshot.tox:" "(not found)"
+    fi
 } > src/hashes.txt
 
 echo "Generated src/hashes.txt"
