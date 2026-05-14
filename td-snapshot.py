@@ -5,7 +5,7 @@
 # Captures the network containing this DAT (me.parent()) by default.
 # To target a different network: snapshot_patch('/project1/some/comp')
 
-# core.py v1.0.0 | sha256:3041764fd0391add640ec8ac8dfa0e01afe4a8bf72adf8fdd146be671e7a58b6
+# core.py v1.1.2 | sha256:cd7a6f507c23b47c053cd584de6419043772ed5b0a05d2a76e0d1ed3ad9e627e
 import re
 
 def op_display_type(o):
@@ -101,6 +101,9 @@ def snapshot_patch(root=None):
         found_any = False
 
         for p in o.pars():
+            if p.name == 'pageindex':
+                continue
+
             try:
                 mode = str(p.mode).split('.')[-1]
             except:
@@ -119,9 +122,15 @@ def snapshot_patch(root=None):
             except:
                 continue
 
-            # A parameter is "changed" if its evaluated value differs from the default,
-            # or if it is driven by an expression, export, or bind (regardless of value).
-            changed = (cur != default) or (mode in ('EXPRESSION', 'EXPORT', 'BIND'))
+            try:
+                changed = not p.isDefault
+            except:
+                changed = (cur != default) or (mode in ('EXPRESSION', 'EXPORT', 'BIND'))
+
+            if changed and mode == 'CONSTANT':
+                def _empty(v): return v is None or v == ''
+                if cur == default or (_empty(cur) and _empty(default)):
+                    changed = False
 
             expr_text = None
             try:
