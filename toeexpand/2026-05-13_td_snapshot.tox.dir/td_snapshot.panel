@@ -5,8 +5,8 @@ u 0.496241
 v 0.311037
 trueu 0.496241
 truev 0.311037
-rollu 0.87218
-rollv 0.00668896
+rollu 1
+rollv 0.113712
 radioname scopy_btn
 lradioname scopy_btn
 children 2
