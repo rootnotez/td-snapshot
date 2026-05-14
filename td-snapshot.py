@@ -5,7 +5,7 @@
 # Captures the network containing this DAT (me.parent()) by default.
 # To target a different network: snapshot_patch('/project1/some/comp')
 
-# core.py v1.1.1 | sha256:f3e61bd1dcf662bccb32bec014cdaf9780975004b0869635c36e833847658fef
+# core.py v1.1.2 | sha256:cd7a6f507c23b47c053cd584de6419043772ed5b0a05d2a76e0d1ed3ad9e627e
 import re
 
 def op_display_type(o):
@@ -101,6 +101,9 @@ def snapshot_patch(root=None):
         found_any = False
 
         for p in o.pars():
+            if p.name == 'pageindex':
+                continue
+
             try:
                 mode = str(p.mode).split('.')[-1]
             except:
