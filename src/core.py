@@ -1,3 +1,4 @@
+# core.py v1.0.0 | sha256:3041764fd0391add640ec8ac8dfa0e01afe4a8bf72adf8fdd146be671e7a58b6
 import re
 
 def op_display_type(o):

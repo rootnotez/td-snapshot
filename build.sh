@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+./stamp.sh
+
 cat <<'HEADER' > td-snapshot.py
 # td-snapshot.py — BUILT FILE. Do not edit directly.
 # Edit src/core.py, then run ./build.sh to regenerate.

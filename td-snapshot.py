@@ -5,6 +5,7 @@
 # Captures the network containing this DAT (me.parent()) by default.
 # To target a different network: snapshot_patch('/project1/some/comp')
 
+# core.py v1.0.0 | sha256:3041764fd0391add640ec8ac8dfa0e01afe4a8bf72adf8fdd146be671e7a58b6
 import re
 
 def op_display_type(o):
@@ -203,6 +204,7 @@ def snapshot_patch(root=None):
 
     return '\n\n'.join(lines)
 
+# quickpaste_runner.py v1.0.0 | sha256:483271940e07bb28d1b4f896443f8b6034e5edea57ed352887f31bce7e04eb91
 import datetime
 result = snapshot_patch()
 name = 'td_snapshot_' + datetime.datetime.now().strftime('%Y%m%dT%H%M%S')
