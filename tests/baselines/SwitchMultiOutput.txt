@@ -1,0 +1,70 @@
+WIRE EDGES
+
+  /project1/constant1 [Constant TOP] -[in:0]-> /project1/switch1 [Switch TOP]
+
+  /project1/constant2 [Constant TOP] -[in:1]-> /project1/switch1 [Switch TOP]
+
+  /project1/switch1 [Switch TOP] -[in:0]-> /project1/out1 [Out TOP]
+
+  /project1/switch1 [Switch TOP] -[in:0]-> /project1/out2 [Out TOP]
+
+
+
+REFERENCE EDGES
+
+  /project1 [Container COMP] -[opviewer]-> /project1/out1 [Out TOP]
+
+  /project1 [Container COMP] -[top]-> /project1/out1 [Out TOP]
+
+  /project1 [Container COMP] -[dragscript]-> /sys/drag
+
+  /project1 [Container COMP] -[dropscript]-> /sys/drop
+
+
+
+NODES
+
+
+
+/project1 [Container COMP]
+  input_slots: (none)
+  outputs: (none)
+  par w: current=1280, default=400, mode=CONSTANT
+  par h: current=720, default=300, mode=CONSTANT
+  par top: current=type:outTOP path:/project1/out1, default='', mode=CONSTANT
+  par borderover: current=False, default=True, mode=CONSTANT
+  par parentshortcut: current='Project', default='', mode=CONSTANT
+  refs:
+    dragscript -> /sys/drag
+    dropscript -> /sys/drop
+    opviewer -> /project1/out1
+    top -> /project1/out1
+
+/project1/out1 [Out TOP]
+  input_slots:
+    [0] /project1/switch1
+  outputs: (none)
+  par (no changed parameters found)
+
+/project1/out2 [Out TOP]
+  input_slots:
+    [0] /project1/switch1
+  outputs: (none)
+  par (no changed parameters found)
+
+/project1/switch1 [Switch TOP]
+  input_slots:
+    [0] /project1/constant1
+    [1] /project1/constant2
+  outputs: /project1/out1 [Out TOP], /project1/out2 [Out TOP]
+  par (no changed parameters found)
+
+/project1/constant1 [Constant TOP]
+  input_slots: (none)
+  outputs: /project1/switch1 [Switch TOP]
+  par (no changed parameters found)
+
+/project1/constant2 [Constant TOP]
+  input_slots: (none)
+  outputs: /project1/switch1 [Switch TOP]
+  par (no changed parameters found)
