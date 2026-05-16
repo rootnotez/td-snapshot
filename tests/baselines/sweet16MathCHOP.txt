@@ -1,0 +1,1733 @@
+WIRE EDGES
+
+  /project1/Sweet16MathCHOP/constant10 [Constant CHOP] -[in:0]-> /project1/Sweet16MathCHOP/Add [Math CHOP]
+
+  /project1/Sweet16MathCHOP/constant10 [Constant CHOP] -[in:0]-> /project1/Sweet16MathCHOP/Average [Math CHOP]
+
+  /project1/Sweet16MathCHOP/constant10 [Constant CHOP] -[in:0]-> /project1/Sweet16MathCHOP/Divide [Math CHOP]
+
+  /project1/Sweet16MathCHOP/constant10 [Constant CHOP] -[in:0]-> /project1/Sweet16MathCHOP/Multiply [Math CHOP]
+
+  /project1/Sweet16MathCHOP/constant10 [Constant CHOP] -[in:0]-> /project1/Sweet16MathCHOP/Subtract [Math CHOP]
+
+  /project1/Sweet16MathCHOP/constant11 [Constant CHOP] -[in:1]-> /project1/Sweet16MathCHOP/Add [Math CHOP]
+
+  /project1/Sweet16MathCHOP/constant11 [Constant CHOP] -[in:1]-> /project1/Sweet16MathCHOP/Average [Math CHOP]
+
+  /project1/Sweet16MathCHOP/constant11 [Constant CHOP] -[in:1]-> /project1/Sweet16MathCHOP/Divide [Math CHOP]
+
+  /project1/Sweet16MathCHOP/constant11 [Constant CHOP] -[in:1]-> /project1/Sweet16MathCHOP/Multiply [Math CHOP]
+
+  /project1/Sweet16MathCHOP/constant11 [Constant CHOP] -[in:1]-> /project1/Sweet16MathCHOP/Subtract [Math CHOP]
+
+  /project1/Sweet16MathCHOP/constant12 [Constant CHOP] -[in:0]-> /project1/Sweet16MathCHOP/Add_Channels [Math CHOP]
+
+  /project1/Sweet16MathCHOP/constant12 [Constant CHOP] -[in:0]-> /project1/Sweet16MathCHOP/Negate [Math CHOP]
+
+  /project1/Sweet16MathCHOP/constant12 [Constant CHOP] -[in:0]-> /project1/Sweet16MathCHOP/Round [Math CHOP]
+
+  /project1/Sweet16MathCHOP/lfo8 [LFO CHOP] -[in:0]-> /project1/Sweet16MathCHOP/Range_Map [Math CHOP]
+
+
+
+REFERENCE EDGES
+
+  /project1 [Container COMP] -[dragscript]-> /sys/drag
+
+  /project1 [Container COMP] -[dropscript]-> /sys/drop
+
+  /project1/Sweet16MathCHOP [Container COMP] -[dragscript]-> /sys/drag
+
+  /project1/Sweet16MathCHOP [Container COMP] -[dropscript]-> /sys/drop
+
+  /project1/Sweet16MathCHOP/annotate52 [Annotate COMP] -[opviewer]-> /project1/Sweet16MathCHOP/annotate52/annotation [Container COMP]
+
+  /project1/Sweet16MathCHOP/annotate52/annotation [Container COMP] -[dragscript]-> /sys/drag
+
+  /project1/Sweet16MathCHOP/annotate52/annotation [Container COMP] -[dropscript]-> /sys/drop
+
+  /project1/Sweet16MathCHOP/annotate52/annotation/back [Container COMP] -[dragscript]-> /sys/drag
+
+  /project1/Sweet16MathCHOP/annotate52/annotation/back [Container COMP] -[dropscript]-> /sys/drop
+
+  /project1/Sweet16MathCHOP/annotate52/annotation/back/bodyBack [Container COMP] -[dragscript]-> /sys/drag
+
+  /project1/Sweet16MathCHOP/annotate52/annotation/back/bodyBack [Container COMP] -[dropscript]-> /sys/drop
+
+  /project1/Sweet16MathCHOP/annotate52/annotation/back/titleBack [Container COMP] -[h]-> ../title
+
+  /project1/Sweet16MathCHOP/annotate52/annotation/back/titleBack [Container COMP] -[dragscript]-> /sys/drag
+
+  /project1/Sweet16MathCHOP/annotate52/annotation/back/titleBack [Container COMP] -[dropscript]-> /sys/drop
+
+  /project1/Sweet16MathCHOP/annotate52/annotation/body [Container COMP] -[dragscript]-> /sys/drag
+
+  /project1/Sweet16MathCHOP/annotate52/annotation/body [Container COMP] -[dropscript]-> /sys/drop
+
+  /project1/Sweet16MathCHOP/annotate52/annotation/body [Container COMP] -[h]-> title
+
+  /project1/Sweet16MathCHOP/annotate52/annotation/body/bodyDragger [Container COMP] -[clickthrough]-> ../title/titleText
+
+  /project1/Sweet16MathCHOP/annotate52/annotation/body/bodyDragger [Container COMP] -[Coveredop]-> /project1/Sweet16MathCHOP/annotate52/annotation/body/bodyText [Text COMP]
+
+  /project1/Sweet16MathCHOP/annotate52/annotation/body/bodyDragger [Container COMP] -[dragscript]-> /sys/drag
+
+  /project1/Sweet16MathCHOP/annotate52/annotation/body/bodyDragger [Container COMP] -[dropscript]-> /sys/drop
+
+  /project1/Sweet16MathCHOP/annotate52/annotation/body/bodyDragger [Container COMP] -[helpdat]-> annotation/title/dragger/help
+
+  /project1/Sweet16MathCHOP/annotate52/annotation/body/bodyDragger [Container COMP] -[clickthrough]-> bodyText
+
+  /project1/Sweet16MathCHOP/annotate52/annotation/body/bodyText [Text COMP] -[fieldfocus]-> /project1/Sweet16MathCHOP/annotate52/annotation/focusOrder [Table DAT]
+
+  /project1/Sweet16MathCHOP/annotate52/annotation/body/bodyText [Text COMP] -[dragscript]-> /sys/drag
+
+  /project1/Sweet16MathCHOP/annotate52/annotation/body/bodyText [Text COMP] -[dropscript]-> /sys/drop
+
+  /project1/Sweet16MathCHOP/annotate52/annotation/opview [Container COMP] -[dragscript]-> /sys/drag
+
+  /project1/Sweet16MathCHOP/annotate52/annotation/opview [Container COMP] -[dropscript]-> /sys/drop
+
+  /project1/Sweet16MathCHOP/annotate52/annotation/opview/opviewer [OP Viewer COMP] -[dragscript]-> /sys/drag
+
+  /project1/Sweet16MathCHOP/annotate52/annotation/opview/opviewer [OP Viewer COMP] -[dropscript]-> /sys/drop
+
+  /project1/Sweet16MathCHOP/annotate52/annotation/opview/select_opviewer [Select COMP] -[selectpanel]-> /project1/Sweet16MathCHOP/annotate52/annotation/opview/opviewer [OP Viewer COMP]
+
+  /project1/Sweet16MathCHOP/annotate52/annotation/opview/select_opviewer [Select COMP] -[dragscript]-> /sys/drag
+
+  /project1/Sweet16MathCHOP/annotate52/annotation/opview/select_opviewer [Select COMP] -[dropscript]-> /sys/drop
+
+  /project1/Sweet16MathCHOP/annotate52/annotation/opview/select_opviewer [Select COMP] -[Aspectviewer]-> opviewer
+
+  /project1/Sweet16MathCHOP/annotate52/annotation/title [Container COMP] -[resizecomp]-> /project1/Sweet16MathCHOP/annotate52/annotation/title [Container COMP]
+
+  /project1/Sweet16MathCHOP/annotate52/annotation/title [Container COMP] -[dragscript]-> /sys/drag
+
+  /project1/Sweet16MathCHOP/annotate52/annotation/title [Container COMP] -[dropscript]-> /sys/drop
+
+  /project1/Sweet16MathCHOP/annotate52/annotation/title/buttons [Container COMP] -[dragscript]-> /sys/drag
+
+  /project1/Sweet16MathCHOP/annotate52/annotation/title/buttons [Container COMP] -[dropscript]-> /sys/drop
+
+  /project1/Sweet16MathCHOP/annotate52/annotation/title/buttons/edit [Text COMP] -[helpdat]-> /project1/Sweet16MathCHOP/annotate52/annotation/title/buttons/edit/help [Evaluate DAT]
+
+  /project1/Sweet16MathCHOP/annotate52/annotation/title/buttons/edit [Text COMP] -[callbacks]-> /project1/Sweet16MathCHOP/annotate52/annotation/title/buttons/text1_callbacks [Text DAT]
+
+  /project1/Sweet16MathCHOP/annotate52/annotation/title/buttons/edit [Text COMP] -[dragscript]-> /sys/drag
+
+  /project1/Sweet16MathCHOP/annotate52/annotation/title/buttons/edit [Text COMP] -[dropscript]-> /sys/drop
+
+  /project1/Sweet16MathCHOP/annotate52/annotation/title/dragger [Container COMP] -[clickthrough]-> ../body/bodyText
+
+  /project1/Sweet16MathCHOP/annotate52/annotation/title/dragger [Container COMP] -[helpdat]-> /project1/Sweet16MathCHOP/annotate52/annotation/title/dragger/help [Text DAT]
+
+  /project1/Sweet16MathCHOP/annotate52/annotation/title/dragger [Container COMP] -[Coveredop]-> /project1/Sweet16MathCHOP/annotate52/annotation/title/titleText [Text COMP]
+
+  /project1/Sweet16MathCHOP/annotate52/annotation/title/dragger [Container COMP] -[dragscript]-> /sys/drag
+
+  /project1/Sweet16MathCHOP/annotate52/annotation/title/dragger [Container COMP] -[dropscript]-> /sys/drop
+
+  /project1/Sweet16MathCHOP/annotate52/annotation/title/dragger [Container COMP] -[clickthrough]-> titleText
+
+  /project1/Sweet16MathCHOP/annotate52/annotation/title/textSpacer [Field COMP] -[h]-> ./text
+
+  /project1/Sweet16MathCHOP/annotate52/annotation/title/textSpacer [Field COMP] -[fieldfocus]-> /project1/Sweet16MathCHOP/annotate52/annotation/focusOrder [Table DAT]
+
+  /project1/Sweet16MathCHOP/annotate52/annotation/title/textSpacer [Field COMP] -[dragscript]-> /sys/drag
+
+  /project1/Sweet16MathCHOP/annotate52/annotation/title/textSpacer [Field COMP] -[dropscript]-> /sys/drop
+
+  /project1/Sweet16MathCHOP/annotate52/annotation/title/titleText [Text COMP] -[h]-> ./text
+
+  /project1/Sweet16MathCHOP/annotate52/annotation/title/titleText [Text COMP] -[fieldfocus]-> /project1/Sweet16MathCHOP/annotate52/annotation/focusOrder [Table DAT]
+
+  /project1/Sweet16MathCHOP/annotate52/annotation/title/titleText [Text COMP] -[callbacks]-> /project1/Sweet16MathCHOP/annotate52/annotation/title/titleText_callbacks [Text DAT]
+
+  /project1/Sweet16MathCHOP/annotate52/annotation/title/titleText [Text COMP] -[dragscript]-> /sys/drag
+
+  /project1/Sweet16MathCHOP/annotate52/annotation/title/titleText [Text COMP] -[dropscript]-> /sys/drop
+
+  /project1/Sweet16MathCHOP/annotate52/annotation/title/titleText [Text COMP] -[leftoffset]-> buttons
+
+  /project1/Sweet16MathCHOP/annotate_networkLabel [Annotate COMP] -[opviewer]-> /project1/Sweet16MathCHOP/annotate_networkLabel/annotation [Container COMP]
+
+  /project1/Sweet16MathCHOP/annotate_networkLabel/annotation [Container COMP] -[dragscript]-> /sys/drag
+
+  /project1/Sweet16MathCHOP/annotate_networkLabel/annotation [Container COMP] -[dropscript]-> /sys/drop
+
+  /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/back [Container COMP] -[dragscript]-> /sys/drag
+
+  /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/back [Container COMP] -[dropscript]-> /sys/drop
+
+  /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/back/bodyBack [Container COMP] -[dragscript]-> /sys/drag
+
+  /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/back/bodyBack [Container COMP] -[dropscript]-> /sys/drop
+
+  /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/back/titleBack [Container COMP] -[h]-> ../title
+
+  /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/back/titleBack [Container COMP] -[dragscript]-> /sys/drag
+
+  /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/back/titleBack [Container COMP] -[dropscript]-> /sys/drop
+
+  /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/body [Container COMP] -[dragscript]-> /sys/drag
+
+  /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/body [Container COMP] -[dropscript]-> /sys/drop
+
+  /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/body [Container COMP] -[h]-> title
+
+  /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/body/bodyDragger [Container COMP] -[clickthrough]-> ../title/titleText
+
+  /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/body/bodyDragger [Container COMP] -[Coveredop]-> /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/body/bodyText [Text COMP]
+
+  /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/body/bodyDragger [Container COMP] -[dragscript]-> /sys/drag
+
+  /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/body/bodyDragger [Container COMP] -[dropscript]-> /sys/drop
+
+  /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/body/bodyDragger [Container COMP] -[helpdat]-> annotation/title/dragger/help
+
+  /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/body/bodyDragger [Container COMP] -[clickthrough]-> bodyText
+
+  /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/body/bodyText [Text COMP] -[fieldfocus]-> /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/focusOrder [Table DAT]
+
+  /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/body/bodyText [Text COMP] -[dragscript]-> /sys/drag
+
+  /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/body/bodyText [Text COMP] -[dropscript]-> /sys/drop
+
+  /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/opview [Container COMP] -[dragscript]-> /sys/drag
+
+  /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/opview [Container COMP] -[dropscript]-> /sys/drop
+
+  /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/opview/opviewer [OP Viewer COMP] -[dragscript]-> /sys/drag
+
+  /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/opview/opviewer [OP Viewer COMP] -[dropscript]-> /sys/drop
+
+  /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/opview/select_opviewer [Select COMP] -[selectpanel]-> /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/opview/opviewer [OP Viewer COMP]
+
+  /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/opview/select_opviewer [Select COMP] -[dragscript]-> /sys/drag
+
+  /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/opview/select_opviewer [Select COMP] -[dropscript]-> /sys/drop
+
+  /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/opview/select_opviewer [Select COMP] -[Aspectviewer]-> opviewer
+
+  /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/title [Container COMP] -[resizecomp]-> /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/title [Container COMP]
+
+  /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/title [Container COMP] -[dragscript]-> /sys/drag
+
+  /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/title [Container COMP] -[dropscript]-> /sys/drop
+
+  /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/title/buttons [Container COMP] -[dragscript]-> /sys/drag
+
+  /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/title/buttons [Container COMP] -[dropscript]-> /sys/drop
+
+  /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/title/buttons/edit [Text COMP] -[helpdat]-> /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/title/buttons/edit/help [Evaluate DAT]
+
+  /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/title/buttons/edit [Text COMP] -[callbacks]-> /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/title/buttons/text1_callbacks [Text DAT]
+
+  /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/title/buttons/edit [Text COMP] -[dragscript]-> /sys/drag
+
+  /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/title/buttons/edit [Text COMP] -[dropscript]-> /sys/drop
+
+  /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/title/dragger [Container COMP] -[clickthrough]-> ../body/bodyText
+
+  /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/title/dragger [Container COMP] -[helpdat]-> /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/title/dragger/help [Text DAT]
+
+  /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/title/dragger [Container COMP] -[Coveredop]-> /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/title/titleText [Text COMP]
+
+  /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/title/dragger [Container COMP] -[dragscript]-> /sys/drag
+
+  /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/title/dragger [Container COMP] -[dropscript]-> /sys/drop
+
+  /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/title/dragger [Container COMP] -[clickthrough]-> titleText
+
+  /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/title/textSpacer [Field COMP] -[h]-> ./text
+
+  /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/title/textSpacer [Field COMP] -[fieldfocus]-> /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/focusOrder [Table DAT]
+
+  /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/title/textSpacer [Field COMP] -[dragscript]-> /sys/drag
+
+  /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/title/textSpacer [Field COMP] -[dropscript]-> /sys/drop
+
+  /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/title/titleText [Text COMP] -[h]-> ./text
+
+  /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/title/titleText [Text COMP] -[fieldfocus]-> /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/focusOrder [Table DAT]
+
+  /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/title/titleText [Text COMP] -[callbacks]-> /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/title/titleText_callbacks [Text DAT]
+
+  /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/title/titleText [Text COMP] -[dragscript]-> /sys/drag
+
+  /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/title/titleText [Text COMP] -[dropscript]-> /sys/drop
+
+  /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/title/titleText [Text COMP] -[leftoffset]-> buttons
+
+  /project1/Sweet16MathCHOP/base_annotateHelper [Base COMP] -[opviewer]-> /project1/Sweet16MathCHOP/base_annotateHelper/text_label [Text COMP]
+
+  /project1/Sweet16MathCHOP/base_annotateHelper [Base COMP] -[clone]-> base_annotateHelper
+
+  /project1/Sweet16MathCHOP/base_annotateHelper/text_label [Text COMP] -[callbacks]-> /project1/Sweet16MathCHOP/base_annotateHelper/text1_callbacks [Text DAT]
+
+  /project1/Sweet16MathCHOP/base_annotateHelper/text_label [Text COMP] -[dragscript]-> /sys/drag
+
+  /project1/Sweet16MathCHOP/base_annotateHelper/text_label [Text COMP] -[dropscript]-> /sys/drop
+
+  /project1/Sweet16MathCHOP/container_sweet16TopicLabel [Container COMP] -[dragscript]-> /sys/drag
+
+  /project1/Sweet16MathCHOP/container_sweet16TopicLabel [Container COMP] -[dropscript]-> /sys/drop
+
+  /project1/Sweet16MathCHOP/container_sweet16TopicLabel [Container COMP] -[Colorb]-> annotate_networkLabel
+
+  /project1/Sweet16MathCHOP/container_sweet16TopicLabel [Container COMP] -[Colorg]-> annotate_networkLabel
+
+  /project1/Sweet16MathCHOP/container_sweet16TopicLabel [Container COMP] -[Colorr]-> annotate_networkLabel
+
+  /project1/Sweet16MathCHOP/container_sweet16TopicLabel [Container COMP] -[clone]-> container_sweet16TopicLabel
+
+  /project1/Sweet16MathCHOP/container_sweet16TopicLabel/text_body [Text COMP] -[callbacks]-> /project1/Sweet16MathCHOP/container_sweet16TopicLabel/text2_callbacks [Text DAT]
+
+  /project1/Sweet16MathCHOP/container_sweet16TopicLabel/text_body [Text COMP] -[dragscript]-> /sys/drag
+
+  /project1/Sweet16MathCHOP/container_sweet16TopicLabel/text_body [Text COMP] -[dropscript]-> /sys/drop
+
+  /project1/Sweet16MathCHOP/container_sweet16TopicLabel/text_header [Text COMP] -[callbacks]-> /project1/Sweet16MathCHOP/container_sweet16TopicLabel/text1_callbacks [Text DAT]
+
+  /project1/Sweet16MathCHOP/container_sweet16TopicLabel/text_header [Text COMP] -[dragscript]-> /sys/drag
+
+  /project1/Sweet16MathCHOP/container_sweet16TopicLabel/text_header [Text COMP] -[dropscript]-> /sys/drop
+
+  /project1/Sweet16MathCHOP/docsHelper [Container COMP] -[dragscript]-> /sys/drag
+
+  /project1/Sweet16MathCHOP/docsHelper [Container COMP] -[dropscript]-> /sys/drop
+
+  /project1/Sweet16MathCHOP/docsHelper [Container COMP] -[clone]-> docsHelper
+
+  /project1/Sweet16MathCHOP/docsHelper/parexec1 [Parameter Execute DAT] -[op]-> /project1/Sweet16MathCHOP/docsHelper [Container COMP]
+
+
+
+NODES
+
+
+
+/project1 [Container COMP]
+  input_slots: (none)
+  outputs: (none)
+  par w: current=1280, default=400, mode=CONSTANT
+  par h: current=720, default=300, mode=CONSTANT
+  par borderover: current=False, default=True, mode=CONSTANT
+  par parentshortcut: current='Project', default='', mode=CONSTANT
+  refs:
+    dragscript -> /sys/drag
+    dropscript -> /sys/drop
+
+/project1/Sweet16MathCHOP [Container COMP]
+  input_slots: (none)
+  outputs: (none)
+  par hmode: current='fill', default='fixed', mode=EXPRESSION | expr="0 if parent().type == 'base' else 1"
+  par vmode: current='fill', default='fixed', mode=EXPRESSION | expr="0 if parent().type == 'base' else 1"
+  par topfill: current='best', default='off', mode=CONSTANT
+  par topsmoothness: current='mipmap', default='linear', mode=CONSTANT
+  par borderover: current=False, default=True, mode=CONSTANT
+  par enableexternaltox: current=False, default=True, mode=CONSTANT
+  par externaltox: current='$HOME/rootnotez/touch-designer/td-snapshot-worktree/../td-docs/work/CurriculumExamples/toxExamples/sweet16/CHOP/sweet16MathCHOP.tox', default='', mode=EXPRESSION | expr="me.parent().fileFolder + '/' + '../td-docs/work/CurriculumExamples/toxExamples/sweet16/CHOP/sweet16MathCHOP.tox'"
+  par savebackup: current=False, default=True, mode=CONSTANT
+  par Family: current='CHOP', default='', mode=CONSTANT
+  par Operator: current='Math', default='', mode=CONSTANT
+  par Version: current='0.0.11111', default='', mode=CONSTANT
+  refs:
+    dragscript -> /sys/drag
+    dropscript -> /sys/drop
+
+/project1/Sweet16MathCHOP/Add [Math CHOP]
+  input_slots:
+    [0] /project1/Sweet16MathCHOP/constant10
+    [1] /project1/Sweet16MathCHOP/constant11
+  outputs: (none)
+  par chopop: current='add', default='off', mode=CONSTANT
+  par autoexportroot: current=type:containerCOMP path:/project1/Sweet16MathCHOP, default='..', mode=EXPRESSION | expr='me.parent()'
+
+/project1/Sweet16MathCHOP/lfo8 [LFO CHOP]
+  input_slots: (none)
+  outputs: /project1/Sweet16MathCHOP/Range_Map [Math CHOP]
+  par timeslice: current=True, default=False, mode=CONSTANT
+  par autoexportroot: current=type:containerCOMP path:/project1/Sweet16MathCHOP, default='..', mode=EXPRESSION | expr='me.parent()'
+
+/project1/Sweet16MathCHOP/Round [Math CHOP]
+  input_slots:
+    [0] /project1/Sweet16MathCHOP/constant12
+  outputs: (none)
+  par integer: current='round', default='off', mode=CONSTANT
+  par autoexportroot: current=type:containerCOMP path:/project1/Sweet16MathCHOP, default='..', mode=EXPRESSION | expr='me.parent()'
+
+/project1/Sweet16MathCHOP/Divide [Math CHOP]
+  input_slots:
+    [0] /project1/Sweet16MathCHOP/constant10
+    [1] /project1/Sweet16MathCHOP/constant11
+  outputs: (none)
+  par chopop: current='div', default='off', mode=CONSTANT
+  par autoexportroot: current=type:containerCOMP path:/project1/Sweet16MathCHOP, default='..', mode=EXPRESSION | expr='me.parent()'
+
+/project1/Sweet16MathCHOP/Negate [Math CHOP]
+  input_slots:
+    [0] /project1/Sweet16MathCHOP/constant12
+  outputs: (none)
+  par gain: current=-1.0, default=1.0, mode=CONSTANT
+  par autoexportroot: current=type:containerCOMP path:/project1/Sweet16MathCHOP, default='..', mode=EXPRESSION | expr='me.parent()'
+
+/project1/Sweet16MathCHOP/Average [Math CHOP]
+  input_slots:
+    [0] /project1/Sweet16MathCHOP/constant10
+    [1] /project1/Sweet16MathCHOP/constant11
+  outputs: (none)
+  par chopop: current='avg', default='off', mode=CONSTANT
+  par autoexportroot: current=type:containerCOMP path:/project1/Sweet16MathCHOP, default='..', mode=EXPRESSION | expr='me.parent()'
+
+/project1/Sweet16MathCHOP/Multiply [Math CHOP]
+  input_slots:
+    [0] /project1/Sweet16MathCHOP/constant10
+    [1] /project1/Sweet16MathCHOP/constant11
+  outputs: (none)
+  par chopop: current='mul', default='off', mode=CONSTANT
+  par autoexportroot: current=type:containerCOMP path:/project1/Sweet16MathCHOP, default='..', mode=EXPRESSION | expr='me.parent()'
+
+/project1/Sweet16MathCHOP/Subtract [Math CHOP]
+  input_slots:
+    [0] /project1/Sweet16MathCHOP/constant10
+    [1] /project1/Sweet16MathCHOP/constant11
+  outputs: (none)
+  par chopop: current='sub', default='off', mode=CONSTANT
+  par autoexportroot: current=type:containerCOMP path:/project1/Sweet16MathCHOP, default='..', mode=EXPRESSION | expr='me.parent()'
+
+/project1/Sweet16MathCHOP/Range_Map [Math CHOP]
+  input_slots:
+    [0] /project1/Sweet16MathCHOP/lfo8
+  outputs: (none)
+  par fromrange1: current=-1.0, default=0.0, mode=CONSTANT
+  par torange2: current=10.0, default=1.0, mode=CONSTANT
+  par autoexportroot: current=type:containerCOMP path:/project1/Sweet16MathCHOP, default='..', mode=EXPRESSION | expr='me.parent()'
+
+/project1/Sweet16MathCHOP/annotate52 [Annotate COMP]
+  input_slots: (none)
+  outputs: (none)
+  par opviewer: current=type:containerCOMP path:/project1/Sweet16MathCHOP/annotate52/annotation, default='./out1', mode=CONSTANT
+  par encloseops: current=True, default=True, mode=EXPRESSION | expr="me.EncloseOPs if hasattr(me, 'EncloseOPs') else True"
+  par includeinorder: current=True, default=False, mode=CONSTANT
+  par layerzone: current='belowgrid', default='belowgrid', mode=EXPRESSION | expr="0 if hasattr(me, 'EncloseOPs') and me.EncloseOPs else 1"
+  par ext0object: current='op.TDAnnotate.mod.AnnotateExt.AnnotateExt(me)', default='', mode=CONSTANT
+  par ext0promote: current=True, default=False, mode=CONSTANT
+  par parentshortcut: current='Annotate', default='', mode=CONSTANT
+  par clone: current=type:annotateCOMP path:/sys/TDTox/TDAnnotate/annotate, default='', mode=EXPRESSION | expr="op.TDAnnotate.op('annotate', includeUtility=True)"
+  par Titletext: current='Math', default='Annotate', mode=CONSTANT
+  par Bodytext: current='Add, multiply or scale channels.', default='', mode=CONSTANT
+  par Bodylimitwidth: current=True, default=False, mode=CONSTANT
+  par Bodymaxwidth: current=400, default=1000, mode=CONSTANT
+  par Mode: current='annotate', default='comment', mode=CONSTANT
+  par Backcolorr: current=0.44999998807907104, default=1.0, mode=EXPRESSION | expr='me.color[0] # node color'
+  par Backcolorg: current=0.44999998807907104, default=0.0, mode=EXPRESSION | expr='me.color[1] # node color'
+  par Backcolorb: current=0.44999998807907104, default=0.0, mode=EXPRESSION | expr='me.color[2] # node color'
+  par Opviewerdisplay: current=True, default=False, mode=CONSTANT
+  refs:
+    opviewer -> /project1/Sweet16MathCHOP/annotate52/annotation
+
+/project1/Sweet16MathCHOP/annotate52/annotation [Container COMP]
+  input_slots: (none)
+  outputs: (none)
+  par w: current=600, default=400, mode=CONSTANT
+  par h: current=600, default=300, mode=CONSTANT
+  par hmode: current='fill', default='fixed', mode=CONSTANT
+  par vmode: current='fill', default='fixed', mode=CONSTANT
+  par clickthrough: current=True, default=False, mode=CONSTANT
+  par allowuishortcuts: current=True, default=False, mode=CONSTANT
+  par resizecomp: current=type:annotateCOMP path:/project1/Sweet16MathCHOP/annotate52, default='.', mode=EXPRESSION | expr='parent.Annotate'
+  par resizewmin: current=-10000.0, default=5.0, mode=CONSTANT
+  par resizewmax: current=10000.0, default=400.0, mode=CONSTANT
+  par resizehmin: current=-10000.0, default=5.0, mode=CONSTANT
+  par resizehmax: current=10000.0, default=400.0, mode=CONSTANT
+  par reposition: current='component', default='off', mode=CONSTANT
+  par borderaalpha: current=0.0, default=1.0, mode=CONSTANT
+  par leftborder: current='bordera', default='off', mode=CONSTANT
+  par rightborder: current='bordera', default='off', mode=CONSTANT
+  par bottomborder: current='bordera', default='off', mode=CONSTANT
+  par topborder: current='bordera', default='off', mode=CONSTANT
+  par opacity: current=1.0, default=1.0, mode=EXPRESSION | expr='parent.Annotate.par.Opacity'
+  par align: current='verttb', default='none', mode=CONSTANT
+  par enablecloning: current=False, default=True, mode=CONSTANT
+  refs:
+    dragscript -> /sys/drag
+    dropscript -> /sys/drop
+
+/project1/Sweet16MathCHOP/annotate52/annotation/back [Container COMP]
+  input_slots: (none)
+  outputs: (none)
+  par layer: current=-2.0, default=0.0, mode=CONSTANT
+  par hmode: current='fill', default='fixed', mode=CONSTANT
+  par vmode: current='fill', default='fixed', mode=CONSTANT
+  par alignallow: current='ignore', default='allow', mode=CONSTANT
+  par enable: current=False, default=True, mode=CONSTANT
+  par clickthrough: current=True, default=False, mode=CONSTANT
+  par allowuishortcuts: current=True, default=False, mode=CONSTANT
+  par borderar: current=0.44999998807907104, default=1.0, mode=EXPRESSION | expr='parent.Annotate.TitleColor[0] + 0.1'
+  par borderag: current=0.44999998807907104, default=1.0, mode=EXPRESSION | expr='parent.Annotate.TitleColor[1] + 0.1'
+  par borderab: current=0.44999998807907104, default=1.0, mode=EXPRESSION | expr='parent.Annotate.TitleColor[2] + 0.1'
+  par borderaalpha: current=0.0, default=1.0, mode=EXPRESSION | expr='parent.Annotate.Editing'
+  par leftborder: current='bordera', default='off', mode=CONSTANT
+  par leftborderi: current='bordera', default='off', mode=CONSTANT
+  par rightborder: current='bordera', default='off', mode=CONSTANT
+  par rightborderi: current='bordera', default='off', mode=CONSTANT
+  par bottomborder: current='bordera', default='off', mode=CONSTANT
+  par bottomborderi: current='bordera', default='off', mode=CONSTANT
+  par topborder: current='bordera', default='off', mode=CONSTANT
+  par topborderi: current='bordera', default='off', mode=CONSTANT
+  par align: current='verttb', default='none', mode=CONSTANT
+  refs:
+    dragscript -> /sys/drag
+    dropscript -> /sys/drop
+
+/project1/Sweet16MathCHOP/annotate52/annotation/back/bodyBack [Container COMP]
+  input_slots: (none)
+  outputs: (none)
+  par hmode: current='fill', default='fixed', mode=CONSTANT
+  par vmode: current='fill', default='fixed', mode=CONSTANT
+  par alignorder: current=1.0, default=0.0, mode=CONSTANT
+  par clickthrough: current=True, default=False, mode=CONSTANT
+  par bgcolorr: current=0.14999998807907106, default=0.0, mode=EXPRESSION | expr='parent.Annotate.BodyColor[0]'
+  par bgcolorg: current=0.14999998807907106, default=0.0, mode=EXPRESSION | expr='parent.Annotate.BodyColor[1]'
+  par bgcolorb: current=0.14999998807907106, default=0.0, mode=EXPRESSION | expr='parent.Annotate.BodyColor[2]'
+  par bgalpha: current=1.0, default=0.0, mode=EXPRESSION | expr='parent.Annotate.par.Backcoloralpha'
+  par borderover: current=False, default=True, mode=CONSTANT
+  refs:
+    dragscript -> /sys/drag
+    dropscript -> /sys/drop
+
+/project1/Sweet16MathCHOP/annotate52/annotation/back/titleBack [Container COMP]
+  input_slots: (none)
+  outputs: (none)
+  par h: current=30, default=300, mode=EXPRESSION | expr="op('../title').height"
+  par hmode: current='fill', default='fixed', mode=CONSTANT
+  par display: current=True, default=True, mode=EXPRESSION | expr="parent.Annotate.par.Mode in ['annotate', 'networkbox']"
+  par clickthrough: current=True, default=False, mode=CONSTANT
+  par bgcolorr: current=0.34999998807907107, default=0.0, mode=EXPRESSION | expr='parent.Annotate.TitleColor[0]'
+  par bgcolorg: current=0.34999998807907107, default=0.0, mode=EXPRESSION | expr='parent.Annotate.TitleColor[1]'
+  par bgcolorb: current=0.34999998807907107, default=0.0, mode=EXPRESSION | expr='parent.Annotate.TitleColor[2]'
+  par bgalpha: current=1.0, default=0.0, mode=EXPRESSION | expr='parent.Annotate.par.Backcoloralpha'
+  par borderover: current=False, default=True, mode=CONSTANT
+  refs:
+    dragscript -> /sys/drag
+    dropscript -> /sys/drop
+    h -> ../title
+
+/project1/Sweet16MathCHOP/annotate52/annotation/body [Container COMP]
+  input_slots: (none)
+  outputs: (none)
+  par x: current=10, default=0, mode=CONSTANT
+  par y: current=-10, default=0, mode=CONSTANT
+  par w: current=1000, default=400, mode=EXPRESSION | expr='min(parent().width, 1000)'
+  par h: current=500, default=300, mode=EXPRESSION | expr="min(parent().height - op('title').height, 500)"
+  par hmode: current='fill', default='fixed', mode=CONSTANT
+  par vmode: current='fill', default='fixed', mode=CONSTANT
+  par bottomanchor: current=1.0, default=0.0, mode=CONSTANT
+  par vorigin: current=1.0, default=0.0, mode=CONSTANT
+  par alignorder: current=1.0, default=0.0, mode=CONSTANT
+  par display: current=True, default=True, mode=EXPRESSION | expr="parent.Annotate.par.Mode in ['annotate', 'comment']"
+  par clickthrough: current=True, default=False, mode=EXPRESSION | expr='not parent.Annotate.Editing'
+  par allowuishortcuts: current=True, default=False, mode=CONSTANT
+  par resizecomp: current=None, default='.', mode=CONSTANT
+  par resizewmin: current=-4000.0, default=5.0, mode=CONSTANT
+  par resizewmax: current=4000.0, default=400.0, mode=CONSTANT
+  par resizehmin: current=-4000.0, default=5.0, mode=CONSTANT
+  par resizehmax: current=4000.0, default=400.0, mode=CONSTANT
+  par repocomp: current=None, default='.', mode=CONSTANT
+  par borderar: current=0.34999998807907107, default=1.0, mode=EXPRESSION | expr='parent.Annotate.TitleColor[0]'
+  par borderag: current=0.34999998807907107, default=1.0, mode=EXPRESSION | expr='parent.Annotate.TitleColor[1]'
+  par borderab: current=0.34999998807907107, default=1.0, mode=EXPRESSION | expr='parent.Annotate.TitleColor[2]'
+  par borderbalpha: current=0.0, default=1.0, mode=CONSTANT
+  par borderover: current=False, default=True, mode=CONSTANT
+  par justifyh: current='left', default='off', mode=CONSTANT
+  par scrollbarthickness: current=79, default=10, mode=CONSTANT
+  refs:
+    dragscript -> /sys/drag
+    dropscript -> /sys/drop
+    h -> title
+
+/project1/Sweet16MathCHOP/annotate52/annotation/body/bodyText [Text COMP]
+  input_slots: (none)
+  outputs: (none)
+  par text: current='Add, multiply or scale channels.', default='Derivative', mode=BIND | expr='parent.Annotate.par.Bodytext'
+  par type: current='multiline', default='string', mode=CONSTANT
+  par formatcodes: current=True, default=False, mode=CONSTANT
+  par smartpunct: current=False, default=False, mode=EXPRESSION | expr='parent.Annotate.par.Smartquote'
+  par wordwrap: current=True, default=False, mode=BIND | expr='parent.Annotate.par.Bodywordwrap'
+  par editmode: current='locked', default='locked', mode=EXPRESSION | expr="'editable' if parent.Annotate.Editing else 'locked'"
+  par fieldfocus: current=type:tableDAT path:/project1/Sweet16MathCHOP/annotate52/annotation/focusOrder, default='', mode=CONSTANT
+  par dragdropmode: current='panel', default='textinsert', mode=CONSTANT
+  par legacyfontselection: current=True, default=False, mode=CONSTANT
+  par font: current='Open Sans', default='Verdana', mode=CONSTANT
+  par fontsize: current=10.0, default=20.0, mode=EXPRESSION | expr='parent.Annotate.par.Bodyfontsize'
+  par fontsizeunits: current='points', default='panelunits', mode=CONSTANT
+  par linespacing: current=1.1, default=1.0, mode=CONSTANT
+  par fontcolorr: current=0.8499999880790711, default=1.0, mode=EXPRESSION | expr='parent.Annotate.BodyFontColor[0]'
+  par fontcolorg: current=0.8499999880790711, default=1.0, mode=EXPRESSION | expr='parent.Annotate.BodyFontColor[1]'
+  par fontcolorb: current=0.8499999880790711, default=1.0, mode=EXPRESSION | expr='parent.Annotate.BodyFontColor[2]'
+  par customselectcolor: current=True, default=False, mode=CONSTANT
+  par selectcolorr: current=0.34999998807907107, default=0.0, mode=EXPRESSION | expr='parent.Annotate.BodySelectColor[0]'
+  par selectcolorg: current=0.34999998807907107, default=0.25, mode=EXPRESSION | expr='parent.Annotate.BodySelectColor[1]'
+  par selectcolorb: current=0.34999998807907107, default=0.35, mode=EXPRESSION | expr='parent.Annotate.BodySelectColor[2]'
+  par textpaddingl: current=8.0, default=0.0, mode=CONSTANT
+  par textpaddingt: current=10.0, default=0.0, mode=CONSTANT
+  par alignx: current='left', default='center', mode=CONSTANT
+  par aligny: current='top', default='center', mode=CONSTANT
+  par w: current=400, default=400, mode=EXPRESSION | expr='min(parent().width, parent.Annotate.par.Bodymaxwidth.eval()) if parent.Annotate.par.Bodylimitwidth.eval() else parent().width '
+  par h: current=645, default=300, mode=EXPRESSION | expr='parent().height'
+  par cursor: current='ibeam', default='pointer', mode=CONSTANT
+  par clickthrough: current=True, default=False, mode=EXPRESSION | expr='not parent.Annotate.Editing and not (me.panel.focus or ext.AnnotateExt.titleText.panel.focus)'
+  par topfill: current='best', default='off', mode=CONSTANT
+  par borderover: current=False, default=True, mode=CONSTANT
+  refs:
+    dragscript -> /sys/drag
+    dropscript -> /sys/drop
+    fieldfocus -> /project1/Sweet16MathCHOP/annotate52/annotation/focusOrder
+
+/project1/Sweet16MathCHOP/annotate52/annotation/body/bodyDragger [Container COMP]
+  input_slots: (none)
+  outputs: (none)
+  par layer: current=1.0, default=0.0, mode=CONSTANT
+  par hmode: current='fill', default='fixed', mode=CONSTANT
+  par vmode: current='fill', default='fixed', mode=CONSTANT
+  par alignallow: current='ignoremargin', default='allow', mode=CONSTANT
+  par display: current=False, default=True, mode=EXPRESSION | expr="parent.Annotate.par.Mode in ['comment'] and not parent.Annotate.Editing"
+  par helpdat: current=type:textDAT path:/project1/Sweet16MathCHOP/annotate52/annotation/title/dragger/help, default='./help', mode=EXPRESSION | expr="parent.Annotate.op('annotation/title/dragger/help')"
+  par cursor: current='arrowAll', default='pointer', mode=CONSTANT
+  par clickthrough: current=False, default=False, mode=EXPRESSION | expr="op('bodyText').panel.focus or op('../title/titleText').panel.focus"
+  par allowuishortcuts: current=True, default=False, mode=CONSTANT
+  par resizecomp: current=type:annotateCOMP path:/project1/Sweet16MathCHOP/annotate52, default='.', mode=EXPRESSION | expr='parent.Annotate'
+  par resizewmin: current=-100000.0, default=5.0, mode=CONSTANT
+  par resizewmax: current=100000.0, default=400.0, mode=CONSTANT
+  par resizehmin: current=-100000.0, default=5.0, mode=CONSTANT
+  par resizehmax: current=100000.0, default=400.0, mode=CONSTANT
+  par reposition: current='component', default='off', mode=EXPRESSION | expr='2 if me.panel.click <= 1 else 0'
+  par repocomp: current=type:annotateCOMP path:/project1/Sweet16MathCHOP/annotate52, default='.', mode=EXPRESSION | expr='parent.Annotate'
+  par repositionxmin: current=-2000000.0, default=0.0, mode=CONSTANT
+  par repositionxmax: current=2000000.0, default=100.0, mode=CONSTANT
+  par repositionymin: current=-2000000.0, default=0.0, mode=CONSTANT
+  par repositionymax: current=2000000.0, default=100.0, mode=CONSTANT
+  par borderover: current=False, default=True, mode=CONSTANT
+  par Coveredop: current=type:textCOMP path:/project1/Sweet16MathCHOP/annotate52/annotation/body/bodyText, default='', mode=CONSTANT
+  refs:
+    Coveredop -> /project1/Sweet16MathCHOP/annotate52/annotation/body/bodyText
+    clickthrough -> ../title/titleText
+    clickthrough -> bodyText
+    dragscript -> /sys/drag
+    dropscript -> /sys/drop
+    helpdat -> annotation/title/dragger/help
+
+/project1/Sweet16MathCHOP/annotate52/annotation/title [Container COMP]
+  input_slots: (none)
+  outputs: (none)
+  par x: current=10, default=0, mode=CONSTANT
+  par h: current=30, default=300, mode=EXPRESSION | expr='parent.Annotate.par.Titleheight'
+  par hmode: current='fill', default='fixed', mode=CONSTANT
+  par bottomanchor: current=1.0, default=0.0, mode=CONSTANT
+  par vorigin: current=1.0, default=0.0, mode=CONSTANT
+  par display: current=True, default=True, mode=EXPRESSION | expr="parent.Annotate.par.Mode in ['annotate', 'networkbox']"
+  par allowuishortcuts: current=True, default=False, mode=CONSTANT
+  par resizecomp: current=type:containerCOMP path:/project1/Sweet16MathCHOP/annotate52/annotation/title, default='.', mode=CONSTANT
+  par resizewmin: current=-10000.0, default=5.0, mode=CONSTANT
+  par resizewmax: current=10000.0, default=400.0, mode=CONSTANT
+  par resizehmin: current=10.0, default=5.0, mode=CONSTANT
+  par resizehmax: current=10000.0, default=400.0, mode=CONSTANT
+  par repocomp: current=None, default='.', mode=CONSTANT
+  par repositionxmin: current=-10000.0, default=0.0, mode=CONSTANT
+  par repositionxmax: current=10000.0, default=100.0, mode=CONSTANT
+  par repositionymin: current=-10000.0, default=0.0, mode=CONSTANT
+  par repositionymax: current=10000.0, default=100.0, mode=CONSTANT
+  par topfill: current='vertical', default='off', mode=CONSTANT
+  par borderar: current=0.498039, default=1.0, mode=CONSTANT
+  par borderag: current=0.866667, default=1.0, mode=CONSTANT
+  par borderover: current=False, default=True, mode=CONSTANT
+  par align: current='horizlr', default='none', mode=CONSTANT
+  par justifyv: current='center', default='off', mode=CONSTANT
+  refs:
+    dragscript -> /sys/drag
+    dropscript -> /sys/drop
+    resizecomp -> /project1/Sweet16MathCHOP/annotate52/annotation/title
+
+/project1/Sweet16MathCHOP/annotate52/annotation/title/buttons [Container COMP]
+  input_slots: (none)
+  outputs: (none)
+  par w: current=30, default=400, mode=EXPRESSION | expr='me.height + me.par.marginl * 2'
+  par h: current=30, default=300, mode=EXPRESSION | expr='parent().height '
+  par fixedaspect: current='vertical', default='off', mode=CONSTANT
+  par vmode: current='fill', default='fixed', mode=CONSTANT
+  par bottomanchor: current=0.1, default=0.0, mode=CONSTANT
+  par topanchor: current=0.9, default=1.0, mode=CONSTANT
+  par alignorder: current=1.0, default=0.0, mode=EXPRESSION | expr="1 if parent.Annotate.par.Titlealign != 'right' else - 1"
+  par allowuishortcuts: current=True, default=False, mode=CONSTANT
+  par bgcolorr: current=1.0, default=0.0, mode=CONSTANT
+  par bgcolorg: current=1.0, default=0.0, mode=CONSTANT
+  par bgcolorb: current=1.0, default=0.0, mode=CONSTANT
+  par borderover: current=False, default=True, mode=CONSTANT
+  par composite: current='add', default='over', mode=CONSTANT
+  par align: current='verttb', default='none', mode=CONSTANT
+  par justifyh: current='center', default='off', mode=CONSTANT
+  par justifyv: current='center', default='off', mode=CONSTANT
+  refs:
+    dragscript -> /sys/drag
+    dropscript -> /sys/drop
+
+/project1/Sweet16MathCHOP/annotate52/annotation/title/buttons/edit [Text COMP]
+  input_slots: (none)
+  outputs: (none)
+  par text: current='\U000f1781', default='Derivative', mode=EXPRESSION | expr='chr(0xf1781) '
+  par callbacks: current=type:textDAT path:/project1/Sweet16MathCHOP/annotate52/annotation/title/buttons/text1_callbacks, default='', mode=CONSTANT
+  par legacyfontselection: current=True, default=False, mode=CONSTANT
+  par font: current='Material Design Icons', default='Verdana', mode=CONSTANT
+  par fontsize: current=15.0, default=20.0, mode=EXPRESSION | expr='parent().height*.5'
+  par fontcolorr: current=0.5499999880790711, default=1.0, mode=EXPRESSION | expr='parent.Annotate.TitleColor[0] + (0.35 if me.panel.inside else 0.2) + (0.2 if parent.Annotate.Editing else 0)'
+  par fontcolorg: current=0.5499999880790711, default=1.0, mode=EXPRESSION | expr='parent.Annotate.TitleColor[1] + (0.35 if me.panel.inside else 0.2) + (0.2 if parent.Annotate.Editing else 0)'
+  par fontcolorb: current=0.5499999880790711, default=1.0, mode=EXPRESSION | expr='parent.Annotate.TitleColor[2] + (0.35 if me.panel.inside else 0.2) + (0.2 if parent.Annotate.Editing else 0)'
+  par textpaddingb: current=0.25, default=0.0, mode=CONSTANT
+  par textpaddingt: current=0.25, default=0.0, mode=CONSTANT
+  par textpaddingunits: current='fract', default='panelunits', mode=CONSTANT
+  par alignxmode: current='bbox', default='metrics', mode=CONSTANT
+  par alignymode: current='bbox', default='metrics', mode=CONSTANT
+  par w: current=30, default=400, mode=CONSTANT
+  par fixedaspect: current='vertical', default='off', mode=CONSTANT
+  par vmode: current='fill', default='fixed', mode=CONSTANT
+  par display: current=False, default=True, mode=EXPRESSION | expr='parent(3).panel.inside or parent.Annotate.Editing'
+  par allowuishortcuts: current=True, default=False, mode=CONSTANT
+  par bgcolorr: current=1.0, default=0.0, mode=CONSTANT
+  par bgcolorg: current=1.0, default=0.0, mode=CONSTANT
+  par bgcolorb: current=1.0, default=0.0, mode=CONSTANT
+  par borderover: current=False, default=True, mode=CONSTANT
+  par composite: current='add', default='over', mode=CONSTANT
+  refs:
+    callbacks -> /project1/Sweet16MathCHOP/annotate52/annotation/title/buttons/text1_callbacks
+    dragscript -> /sys/drag
+    dropscript -> /sys/drop
+    helpdat -> /project1/Sweet16MathCHOP/annotate52/annotation/title/buttons/edit/help
+
+/project1/Sweet16MathCHOP/annotate52/annotation/title/buttons/edit/help [Evaluate DAT]
+  input_slots: (none)
+  outputs: (none)
+  par expr: current="'Text Editable' if parent.Annotate.Editing else 'Click to make text editable'", default='', mode=CONSTANT
+  par language: current='text', default='input', mode=CONSTANT
+
+/project1/Sweet16MathCHOP/annotate52/annotation/title/buttons/text1_callbacks [Text DAT]
+  input_slots: (none)
+  outputs: (none)
+  par language: current='python', default='input', mode=CONSTANT
+
+/project1/Sweet16MathCHOP/annotate52/annotation/title/dragger [Container COMP]
+  input_slots: (none)
+  outputs: (none)
+  par layer: current=1.0, default=0.0, mode=CONSTANT
+  par hmode: current='fill', default='fixed', mode=CONSTANT
+  par vmode: current='fill', default='fixed', mode=CONSTANT
+  par alignallow: current='ignoremargin', default='allow', mode=CONSTANT
+  par display: current=True, default=True, mode=EXPRESSION | expr='not parent.Annotate.Editing'
+  par cursor: current='arrowAll', default='pointer', mode=CONSTANT
+  par clickthrough: current=False, default=False, mode=EXPRESSION | expr="op('titleText').panel.focus or op('../body/bodyText').panel.focus"
+  par allowuishortcuts: current=True, default=False, mode=CONSTANT
+  par resizecomp: current=type:annotateCOMP path:/project1/Sweet16MathCHOP/annotate52, default='.', mode=EXPRESSION | expr='parent.Annotate'
+  par resizewmin: current=-100000.0, default=5.0, mode=CONSTANT
+  par resizewmax: current=100000.0, default=400.0, mode=CONSTANT
+  par resizehmin: current=-100000.0, default=5.0, mode=CONSTANT
+  par resizehmax: current=100000.0, default=400.0, mode=CONSTANT
+  par reposition: current='component', default='off', mode=EXPRESSION | expr='2 if not parent.Annotate.Editing else 0'
+  par repocomp: current=type:annotateCOMP path:/project1/Sweet16MathCHOP/annotate52, default='.', mode=EXPRESSION | expr='parent.Annotate'
+  par repositionxmin: current=-2000000.0, default=0.0, mode=CONSTANT
+  par repositionxmax: current=2000000.0, default=100.0, mode=CONSTANT
+  par repositionymin: current=-2000000.0, default=0.0, mode=CONSTANT
+  par repositionymax: current=2000000.0, default=100.0, mode=CONSTANT
+  par borderover: current=False, default=True, mode=CONSTANT
+  par Coveredop: current=type:textCOMP path:/project1/Sweet16MathCHOP/annotate52/annotation/title/titleText, default='', mode=CONSTANT
+  refs:
+    Coveredop -> /project1/Sweet16MathCHOP/annotate52/annotation/title/titleText
+    clickthrough -> ../body/bodyText
+    clickthrough -> titleText
+    dragscript -> /sys/drag
+    dropscript -> /sys/drop
+    helpdat -> /project1/Sweet16MathCHOP/annotate52/annotation/title/dragger/help
+
+/project1/Sweet16MathCHOP/annotate52/annotation/title/dragger/help [Text DAT]
+  input_slots: (none)
+  outputs: (none)
+  par language: current='text', default='input', mode=CONSTANT
+
+/project1/Sweet16MathCHOP/annotate52/annotation/title/titleText [Text COMP]
+  input_slots: (none)
+  outputs: (none)
+  par text: current='Math', default='Derivative', mode=BIND | expr='parent.Annotate.par.Titletext'
+  par smartpunct: current=False, default=False, mode=EXPRESSION | expr='parent.Annotate.par.Smartquote'
+  par editmode: current='editable', default='locked', mode=CONSTANT
+  par fieldfocus: current=type:tableDAT path:/project1/Sweet16MathCHOP/annotate52/annotation/focusOrder, default='', mode=CONSTANT
+  par dragdropmode: current='panel', default='textinsert', mode=CONSTANT
+  par callbacks: current=type:textDAT path:/project1/Sweet16MathCHOP/annotate52/annotation/title/titleText_callbacks, default='', mode=CONSTANT
+  par legacyfontselection: current=True, default=False, mode=CONSTANT
+  par font: current='Open Sans', default='Verdana', mode=CONSTANT
+  par bold: current=True, default=False, mode=CONSTANT
+  par scaletofit: current='onlyshrink', default='never', mode=CONSTANT
+  par fontsize: current=18.0, default=20.0, mode=EXPRESSION | expr='me.height*0.6'
+  par linespacing: current=1.43, default=1.0, mode=CONSTANT
+  par fontcolorr: current=0.8499999880790711, default=1.0, mode=EXPRESSION | expr='parent.Annotate.TitleFontColor[0]'
+  par fontcolorg: current=0.8499999880790711, default=1.0, mode=EXPRESSION | expr='parent.Annotate.TitleFontColor[1]'
+  par fontcolorb: current=0.8499999880790711, default=1.0, mode=EXPRESSION | expr='parent.Annotate.TitleFontColor[2]'
+  par customselectcolor: current=True, default=False, mode=CONSTANT
+  par selectcolorr: current=0.14999998807907106, default=0.0, mode=EXPRESSION | expr='parent.Annotate.TitleSelectColor[0]'
+  par selectcolorg: current=0.14999998807907106, default=0.25, mode=EXPRESSION | expr='parent.Annotate.TitleSelectColor[1]'
+  par selectcolorb: current=0.14999998807907106, default=0.35, mode=EXPRESSION | expr='parent.Annotate.TitleSelectColor[2]'
+  par textpaddingl: current=8.0, default=0.0, mode=EXPRESSION | expr='2 + me.height/5 '
+  par textpaddingr: current=8.0, default=0.0, mode=EXPRESSION | expr='me.par.textpaddingl'
+  par textpaddingb: current=6.0, default=0.0, mode=EXPRESSION | expr='me.height / 5'
+  par textpaddingt: current=6.0, default=0.0, mode=EXPRESSION | expr='me.height / 5'
+  par alignx: current='left', default='center', mode=EXPRESSION | expr='parent.Annotate.par.Titlealign'
+  par x: current=10, default=0, mode=CONSTANT
+  par y: current=10, default=0, mode=CONSTANT
+  par h: current=30, default=300, mode=EXPRESSION | expr="op('./text').par.fontsizex * 1.1"
+  par hmode: current='anchors', default='fixed', mode=CONSTANT
+  par leftoffset: current=0.0, default=0.0, mode=EXPRESSION | expr="op('buttons').width if parent.Annotate.par.Titlealign == 'center' else 0"
+  par vmode: current='fill', default='fixed', mode=CONSTANT
+  par bottomanchor: current=1.0, default=0.0, mode=CONSTANT
+  par vorigin: current=1.0, default=0.0, mode=CONSTANT
+  par cursor: current='ibeam', default='pointer', mode=CONSTANT
+  par resizecomp: current=None, default='.', mode=CONSTANT
+  par resizewmin: current=-10000.0, default=5.0, mode=CONSTANT
+  par resizewmax: current=10000.0, default=400.0, mode=CONSTANT
+  par resizehmin: current=-10000.0, default=5.0, mode=CONSTANT
+  par resizehmax: current=10000.0, default=400.0, mode=CONSTANT
+  par repocomp: current=None, default='.', mode=CONSTANT
+  par repositionxmin: current=-10000.0, default=0.0, mode=CONSTANT
+  par repositionxmax: current=10000.0, default=100.0, mode=CONSTANT
+  par repositionymin: current=-10000.0, default=0.0, mode=CONSTANT
+  par repositionymax: current=10000.0, default=100.0, mode=CONSTANT
+  par topfill: current='vertical', default='off', mode=CONSTANT
+  par borderar: current=0.498039, default=1.0, mode=CONSTANT
+  par borderag: current=0.866667, default=1.0, mode=CONSTANT
+  par borderover: current=False, default=True, mode=CONSTANT
+  refs:
+    callbacks -> /project1/Sweet16MathCHOP/annotate52/annotation/title/titleText_callbacks
+    dragscript -> /sys/drag
+    dropscript -> /sys/drop
+    fieldfocus -> /project1/Sweet16MathCHOP/annotate52/annotation/focusOrder
+    h -> ./text
+    leftoffset -> buttons
+
+/project1/Sweet16MathCHOP/annotate52/annotation/title/textSpacer [Field COMP]
+  input_slots: (none)
+  outputs: (none)
+  par fieldmultiline: current=False, default=True, mode=CONSTANT
+  par fieldfocus: current=type:tableDAT path:/project1/Sweet16MathCHOP/annotate52/annotation/focusOrder, default='', mode=CONSTANT
+  par x: current=10, default=0, mode=CONSTANT
+  par y: current=10, default=0, mode=CONSTANT
+  par h: current=30, default=300, mode=EXPRESSION | expr="op('./text').par.fontsizex * 1.1"
+  par hmode: current='fill', default='fixed', mode=CONSTANT
+  par vmode: current='fill', default='fixed', mode=CONSTANT
+  par bottomanchor: current=1.0, default=0.0, mode=CONSTANT
+  par vorigin: current=1.0, default=0.0, mode=CONSTANT
+  par allowuishortcuts: current=True, default=False, mode=CONSTANT
+  par resizecomp: current=None, default='.', mode=CONSTANT
+  par resizewmin: current=-10000.0, default=5.0, mode=CONSTANT
+  par resizewmax: current=10000.0, default=400.0, mode=CONSTANT
+  par resizehmin: current=-10000.0, default=5.0, mode=CONSTANT
+  par resizehmax: current=10000.0, default=400.0, mode=CONSTANT
+  par repocomp: current=None, default='.', mode=CONSTANT
+  par repositionxmin: current=-10000.0, default=0.0, mode=CONSTANT
+  par repositionxmax: current=10000.0, default=100.0, mode=CONSTANT
+  par repositionymin: current=-10000.0, default=0.0, mode=CONSTANT
+  par repositionymax: current=10000.0, default=100.0, mode=CONSTANT
+  par bgcolorr: current=1.0, default=0.0, mode=CONSTANT
+  par topfill: current='vertical', default='off', mode=CONSTANT
+  par borderar: current=0.498039, default=1.0, mode=CONSTANT
+  par borderag: current=0.866667, default=1.0, mode=CONSTANT
+  par borderover: current=False, default=True, mode=CONSTANT
+  par justifyh: current='right', default='off', mode=CONSTANT
+  refs:
+    dragscript -> /sys/drag
+    dropscript -> /sys/drop
+    fieldfocus -> /project1/Sweet16MathCHOP/annotate52/annotation/focusOrder
+    h -> ./text
+
+/project1/Sweet16MathCHOP/annotate52/annotation/title/titleText_callbacks [Text DAT]
+  input_slots: (none)
+  outputs: (none)
+  par language: current='python', default='input', mode=CONSTANT
+
+/project1/Sweet16MathCHOP/annotate52/annotation/opview [Container COMP]
+  input_slots: (none)
+  outputs: (none)
+  par h: current=645, default=300, mode=EXPRESSION | expr='parent().height - (1-parent(2).par.Opviewerfillbodytitle) * parent.Annotate.par.Titleheight'
+  par layer: current=-1.0, default=0.0, mode=CONSTANT
+  par hmode: current='fill', default='fixed', mode=CONSTANT
+  par alignallow: current='ignoremargin', default='allow', mode=CONSTANT
+  par display: current=True, default=True, mode=EXPRESSION | expr="parent.Annotate.par.Opviewerdisplay and parent.Annotate.par.Opviewer and parent.Annotate.par.Mode == 'annotate'"
+  par clickthrough: current=True, default=False, mode=CONSTANT
+  par borderover: current=False, default=True, mode=CONSTANT
+  par crop: current='on', default='off', mode=CONSTANT
+  refs:
+    dragscript -> /sys/drag
+    dropscript -> /sys/drop
+
+/project1/Sweet16MathCHOP/annotate52/annotation/opview/opviewer [OP Viewer COMP]
+  input_slots: (none)
+  outputs: (none)
+  par opviewer: current=None, default='./out1', mode=BIND | expr='parent.Annotate.par.Opviewer'
+  par interactive: current=False, default=True, mode=EXPRESSION | expr='parent.Annotate.par.Opviewerinteractive '
+  par opcenterx: current=0.0, default=0.0, mode=BIND | expr='parent.Annotate.par.Opvieweroffsetx'
+  par opcentery: current=0.0, default=0.0, mode=BIND | expr='parent.Annotate.par.Opvieweroffsety'
+  par opcenterunit: current='relfract', default='fract', mode=CONSTANT
+  par opscale: current=1.0, default=1.0, mode=EXPRESSION | expr='parent.Annotate.par.Opviewerzoom * [1., me.par.Topautofitzoom][me.par.Applyzoom]'
+  par w: current=1280, default=400, mode=EXPRESSION | expr='me.par.Opviewersizew'
+  par h: current=720, default=300, mode=EXPRESSION | expr='me.par.Opviewersizeh'
+  par leftanchor: current=0.5, default=0.0, mode=EXPRESSION | expr='(parent.Annotate.par.Opviewerjustifyx+1.) / 2.'
+  par horigin: current=0.5, default=0.0, mode=EXPRESSION | expr='(parent.Annotate.par.Opviewerjustifyx+1.) / 2.'
+  par bottomanchor: current=0.5, default=0.0, mode=EXPRESSION | expr='(parent.Annotate.par.Opviewerjustifyy+1.) / 2.'
+  par vorigin: current=0.5, default=0.0, mode=EXPRESSION | expr='(parent.Annotate.par.Opviewerjustifyy+1.) / 2.'
+  par display: current=False, default=True, mode=CONSTANT
+  par clickthrough: current=True, default=False, mode=EXPRESSION | expr='parent.Annotate.Editing or not parent.Annotate.par.Opviewerinteractive'
+  par bgalpha: current=1.0, default=0.0, mode=EXPRESSION | expr='parent.Annotate.par.Opviewerfillalpha.eval()'
+  par borderover: current=False, default=True, mode=CONSTANT
+  par Defaultviewersizew: current=1280.0, default=1280.0, mode=EXPRESSION | expr='tdu.tryExcept(lambda: me.par.opviewer.eval().width, 1280)'
+  par Defaultviewersizeh: current=720.0, default=720.0, mode=EXPRESSION | expr='tdu.tryExcept(lambda: me.par.opviewer.eval().height, 720)'
+  par Opviewersizew: current=1280.0, default=0.0, mode=EXPRESSION | expr='[me.par.Defaultviewersizew, parent.Annotate.par.Opviewersizew, parent.Annotate.par.Opviewersizew][parent.Annotate.par.Opvieweroversize]'
+  par Opviewersizeh: current=720.0, default=0.0, mode=EXPRESSION | expr='[me.par.Defaultviewersizeh, parent.Annotate.par.Opviewersizeh, parent.Annotate.par.Opviewersizew*parent().height/parent().width][parent.Annotate.par.Opvieweroversize]'
+  par Aspectviewer: current=1.7777777777777777, default=1.0, mode=EXPRESSION | expr='me.par.Opviewersizew/me.par.Opviewersizeh'
+  par Viewerisatop: current=False, default=False, mode=EXPRESSION | expr="tdu.tryExcept(lambda: me.par.opviewer.eval().family == 'TOP', 0)"
+  par Applyzoom: current=False, default=False, mode=EXPRESSION | expr="me.par.Viewerisatop and parent.Annotate.par.Opvieweroversize=='autofit'"
+  par Topviewerratio: current=1.0, default=0.0, mode=EXPRESSION | expr='me.par.Aspectviewer * me.par.Defaultviewersizeh/me.par.Defaultviewersizew'
+  par Topautofitzoom: current=1.0, default=1.0, mode=EXPRESSION | expr='max(me.par.Topviewerratio, 1./me.par.Topviewerratio)'
+  refs:
+    dragscript -> /sys/drag
+    dropscript -> /sys/drop
+
+/project1/Sweet16MathCHOP/annotate52/annotation/opview/select_opviewer [Select COMP]
+  input_slots: (none)
+  outputs: (none)
+  par selectpanel: current=type:opviewerCOMP path:/project1/Sweet16MathCHOP/annotate52/annotation/opview/opviewer, default='', mode=CONSTANT
+  par w: current=1147, default=400, mode=EXPRESSION | expr='max(1, me.par.Opw)'
+  par h: current=645, default=300, mode=EXPRESSION | expr='max(1, me.par.Oph)'
+  par leftanchor: current=0.5, default=0.0, mode=EXPRESSION | expr='(parent.Annotate.par.Opviewerjustifyx+1.) / 2.'
+  par horigin: current=0.5, default=0.0, mode=EXPRESSION | expr='(parent.Annotate.par.Opviewerjustifyx+1.) / 2.'
+  par bottomanchor: current=0.5, default=0.0, mode=EXPRESSION | expr='(parent.Annotate.par.Opviewerjustifyy+1.) / 2.'
+  par vorigin: current=0.5, default=0.0, mode=EXPRESSION | expr='(parent.Annotate.par.Opviewerjustifyy+1.) / 2.'
+  par display: current=False, default=True, mode=EXPRESSION | expr='parent.Annotate.par.Opviewer.eval() != None'
+  par clickthrough: current=True, default=False, mode=EXPRESSION | expr='parent.Annotate.Editing or not parent.Annotate.par.Opviewerinteractive'
+  par bgalpha: current=1.0, default=0.0, mode=EXPRESSION | expr='parent.Annotate.par.Opviewerfillalpha.eval()'
+  par borderar: current=0.3, default=1.0, mode=CONSTANT
+  par borderag: current=0.3, default=1.0, mode=CONSTANT
+  par borderab: current=0.3, default=1.0, mode=CONSTANT
+  par borderaalpha: current=0.0, default=1.0, mode=EXPRESSION | expr='me.panel.inside'
+  par leftborder: current='bordera', default='off', mode=CONSTANT
+  par rightborder: current='bordera', default='off', mode=CONSTANT
+  par bottomborder: current='bordera', default='off', mode=CONSTANT
+  par topborder: current='bordera', default='off', mode=CONSTANT
+  par opviewer: current=None, default='./out1', mode=BIND | expr='parent.Annotate.par.Opviewer'
+  par align: current='gridrows', default='none', mode=CONSTANT
+  par crop: current='on', default='off', mode=CONSTANT
+  par Aspectviewer: current=1.7777777777777777, default=1.0, mode=EXPRESSION | expr="op('opviewer').par.Opviewersizew/op('opviewer').par.Opviewersizeh"
+  par Aspectpanel: current=1.8604651162790697, default=1.0, mode=EXPRESSION | expr='parent().width/parent().height if parent().height else 0'
+  par Opisnarrower: current=True, default=False, mode=EXPRESSION | expr='me.par.Aspectviewer < me.par.Aspectpanel'
+  par Opw: current=1146.6666666666665, default=0.0, mode=EXPRESSION | expr='[parent().width, parent().height*me.par.Aspectviewer][me.par.Opisnarrower] * parent.Annotate.par.Opviewerscale'
+  par Oph: current=645.0, default=0.0, mode=EXPRESSION | expr='[parent().width/me.par.Aspectviewer, parent().height][me.par.Opisnarrower] * parent.Annotate.par.Opviewerscale'
+  refs:
+    Aspectviewer -> opviewer
+    dragscript -> /sys/drag
+    dropscript -> /sys/drop
+    selectpanel -> /project1/Sweet16MathCHOP/annotate52/annotation/opview/opviewer
+
+/project1/Sweet16MathCHOP/annotate52/annotation/parexec1 [Parameter Execute DAT]
+  input_slots: (none)
+  outputs: (none)
+  par op: current=type:annotateCOMP path:/project1/Sweet16MathCHOP/annotate52, default='', mode=EXPRESSION | expr='parent.Annotate'
+  par pars: current='Mode Help', default='', mode=CONSTANT
+  par builtin: current=False, default=True, mode=CONSTANT
+  par language: current='python', default='input', mode=CONSTANT
+
+/project1/Sweet16MathCHOP/annotate52/annotation/focusOrder [Table DAT]
+  input_slots: (none)
+  outputs: (none)
+  par defaultreadencoding: current='cp1252', default='autodetect', mode=CONSTANT
+  par rows: current=2, default=3, mode=CONSTANT
+  par cols: current=1, default=4, mode=CONSTANT
+  par language: current='text', default='input', mode=CONSTANT
+
+/project1/Sweet16MathCHOP/annotate52/annotation/panelexec1 [Panel Execute DAT]
+  input_slots: (none)
+  outputs: (none)
+  par panels: current=[type:textCOMP path:/project1/Sweet16MathCHOP/annotate52/annotation/title/titleText, type:containerCOMP path:/project1/Sweet16MathCHOP/annotate52/annotation/title/dragger, type:textCOMP path:/project1/Sweet16MathCHOP/annotate52/annotation/body/bodyText, type:containerCOMP path:/project1/Sweet16MathCHOP/annotate52/annotation/body, type:containerCOMP path:/project1/Sweet16MathCHOP/annotate52/annotation/body/bodyDragger, type:textCOMP path:/project1/Sweet16MathCHOP/annotate52/annotation/title/buttons/edit, type:containerCOMP path:/project1/Sweet16MathCHOP/annotate52/annotation], default='..', mode=CONSTANT
+  par panelvalue: current='rselect lselect field focusselect', default='select', mode=CONSTANT
+  par offtoon: current=False, default=True, mode=CONSTANT
+  par valuechange: current=True, default=False, mode=CONSTANT
+  par defaultreadencoding: current='cp1252', default='autodetect', mode=CONSTANT
+  par language: current='python', default='input', mode=CONSTANT
+
+/project1/Sweet16MathCHOP/constant10 [Constant CHOP]
+  input_slots: (none)
+  outputs: /project1/Sweet16MathCHOP/Subtract [Math CHOP], /project1/Sweet16MathCHOP/Multiply [Math CHOP], /project1/Sweet16MathCHOP/Average [Math CHOP], /project1/Sweet16MathCHOP/Divide [Math CHOP], /project1/Sweet16MathCHOP/Add [Math CHOP]
+  par const0value: current=1.0, default=0.0, mode=CONSTANT
+  par autoexportroot: current=type:containerCOMP path:/project1/Sweet16MathCHOP, default='..', mode=EXPRESSION | expr='me.parent()'
+
+/project1/Sweet16MathCHOP/constant11 [Constant CHOP]
+  input_slots: (none)
+  outputs: /project1/Sweet16MathCHOP/Subtract [Math CHOP], /project1/Sweet16MathCHOP/Multiply [Math CHOP], /project1/Sweet16MathCHOP/Average [Math CHOP], /project1/Sweet16MathCHOP/Divide [Math CHOP], /project1/Sweet16MathCHOP/Add [Math CHOP]
+  par const0value: current=2.0, default=0.0, mode=CONSTANT
+  par autoexportroot: current=type:containerCOMP path:/project1/Sweet16MathCHOP, default='..', mode=EXPRESSION | expr='me.parent()'
+
+/project1/Sweet16MathCHOP/constant12 [Constant CHOP]
+  input_slots: (none)
+  outputs: /project1/Sweet16MathCHOP/Add_Channels [Math CHOP], /project1/Sweet16MathCHOP/Negate [Math CHOP], /project1/Sweet16MathCHOP/Round [Math CHOP]
+  par const0value: current=0.42, default=0.0, mode=CONSTANT
+  par autoexportroot: current=type:containerCOMP path:/project1/Sweet16MathCHOP, default='..', mode=EXPRESSION | expr='me.parent()'
+  par const1name: current='chan2', default='chan1', mode=CONSTANT
+  par const1value: current=0.65, default=0.0, mode=CONSTANT
+  par const2name: current='chan3', default='chan1', mode=CONSTANT
+  par const2value: current=0.92, default=0.0, mode=CONSTANT
+  par const3name: current='chan4', default='chan1', mode=CONSTANT
+  par const3value: current=0.44, default=0.0, mode=CONSTANT
+
+/project1/Sweet16MathCHOP/docsHelper [Container COMP]
+  input_slots: (none)
+  outputs: (none)
+  par w: current=32, default=400, mode=CONSTANT
+  par h: current=32, default=300, mode=CONSTANT
+  par layer: current=1.0, default=0.0, mode=CONSTANT
+  par display: current=False, default=True, mode=CONSTANT
+  par topsmoothness: current='mipmap', default='linear', mode=CONSTANT
+  par borderover: current=False, default=True, mode=CONSTANT
+  par ext0object: current="op('./DocsHelper').module.DocsHelper(me)", default='', mode=CONSTANT
+  par ext0promote: current=True, default=False, mode=CONSTANT
+  par parentshortcut: current='DocsHelper', default='', mode=CONSTANT
+  par clone: current=type:containerCOMP path:/sys/TDResources/docsHelper, default='', mode=EXPRESSION | expr="op.TDResources.op('docsHelper')"
+  par Palettecomp: current=type:containerCOMP path:/project1/Sweet16MathCHOP, default='', mode=EXPRESSION | expr='parent()'
+  par Helpcommand: current="ui.viewFile('https://www.derivative.ca')", default='', mode=EXPRESSION | expr='ext.DocsHelper.HelpCommand'
+  par Mode: current='URL', default='Palette', mode=CONSTANT
+  par Palettename: current='audioAnalysis', default='', mode=CONSTANT
+  par Experimental: current=False, default=False, mode=EXPRESSION | expr='app.experimental'
+  par Version: current='1.3', default='1.4', mode=CONSTANT
+  refs:
+    clone -> docsHelper
+    dragscript -> /sys/drag
+    dropscript -> /sys/drop
+
+/project1/Sweet16MathCHOP/docsHelper/parexec1 [Parameter Execute DAT]
+  input_slots: (none)
+  outputs: (none)
+  par op: current=type:containerCOMP path:/project1/Sweet16MathCHOP/docsHelper, default='', mode=CONSTANT
+  par pars: current='*', default='', mode=CONSTANT
+  par defaultreadencoding: current='cp1252', default='autodetect', mode=CONSTANT
+  par loadonstart: current=True, default=False, mode=CONSTANT
+  par language: current='python', default='input', mode=CONSTANT
+  refs:
+    op -> /project1/Sweet16MathCHOP/docsHelper
+
+/project1/Sweet16MathCHOP/docsHelper/DocsHelper [Text DAT]
+  input_slots: (none)
+  outputs: (none)
+  par defaultreadencoding: current='cp1252', default='autodetect', mode=CONSTANT
+  par loadonstart: current=True, default=False, mode=CONSTANT
+  par language: current='python', default='input', mode=CONSTANT
+
+/project1/Sweet16MathCHOP/docsHelper/parexec_PaletteComp [Parameter Execute DAT]
+  input_slots: (none)
+  outputs: (none)
+  par op: current=type:containerCOMP path:/project1/Sweet16MathCHOP, default='', mode=EXPRESSION | expr='parent.DocsHelper.par.Palettecomp.eval()'
+  par pars: current='Help', default='', mode=CONSTANT
+  par valuechange: current=False, default=True, mode=CONSTANT
+  par builtin: current=False, default=True, mode=CONSTANT
+  par defaultreadencoding: current='cp1252', default='autodetect', mode=CONSTANT
+  par loadonstart: current=True, default=False, mode=CONSTANT
+  par language: current='python', default='input', mode=CONSTANT
+
+/project1/Sweet16MathCHOP/base_assets [Base COMP]
+  input_slots: (none)
+  outputs: (none)
+  par (no changed parameters found)
+
+/project1/Sweet16MathCHOP/Add_Channels [Math CHOP]
+  input_slots:
+    [0] /project1/Sweet16MathCHOP/constant12
+  outputs: (none)
+  par chanop: current='add', default='off', mode=CONSTANT
+  par autoexportroot: current=type:containerCOMP path:/project1/Sweet16MathCHOP, default='..', mode=EXPRESSION | expr='me.parent()'
+
+/project1/Sweet16MathCHOP/base_annotateHelper [Base COMP]
+  input_slots: (none)
+  outputs: (none)
+  par opviewer: current=type:textCOMP path:/project1/Sweet16MathCHOP/base_annotateHelper/text_label, default='./out1', mode=CONSTANT
+  par clone: current=None, default='', mode=EXPRESSION | expr="op.ExampleResources.op('base_annotateHelper') if hasattr(op, 'ExampleResources') else ''"
+  refs:
+    clone -> base_annotateHelper
+    opviewer -> /project1/Sweet16MathCHOP/base_annotateHelper/text_label
+
+/project1/Sweet16MathCHOP/base_annotateHelper/text_label [Text COMP]
+  input_slots: (none)
+  outputs: (none)
+  par text: current='annotateHelper', default='Derivative', mode=CONSTANT
+  par callbacks: current=type:textDAT path:/project1/Sweet16MathCHOP/base_annotateHelper/text1_callbacks, default='', mode=CONSTANT
+  par legacyfontselection: current=True, default=False, mode=CONSTANT
+  par font: current='Open Sans', default='Verdana', mode=CONSTANT
+  par fontcolorr: current=0.7, default=1.0, mode=CONSTANT
+  par fontcolorg: current=0.7, default=1.0, mode=CONSTANT
+  par fontcolorb: current=0.7, default=1.0, mode=CONSTANT
+  par w: current=160, default=400, mode=EXPRESSION | expr='parent().nodeWidth'
+  par h: current=130, default=300, mode=EXPRESSION | expr='parent().nodeHeight'
+  par borderover: current=False, default=True, mode=CONSTANT
+  refs:
+    callbacks -> /project1/Sweet16MathCHOP/base_annotateHelper/text1_callbacks
+    dragscript -> /sys/drag
+    dropscript -> /sys/drop
+
+/project1/Sweet16MathCHOP/base_annotateHelper/annotateEXT [Text DAT]
+  input_slots: (none)
+  outputs: (none)
+  par language: current='python', default='input', mode=CONSTANT
+
+/project1/Sweet16MathCHOP/base_annotateHelper/text1_callbacks [Text DAT]
+  input_slots: (none)
+  outputs: (none)
+  par language: current='python', default='input', mode=CONSTANT
+
+/project1/Sweet16MathCHOP/annotate_networkLabel [Annotate COMP]
+  input_slots: (none)
+  outputs: (none)
+  par opviewer: current=type:containerCOMP path:/project1/Sweet16MathCHOP/annotate_networkLabel/annotation, default='./out1', mode=CONSTANT
+  par encloseops: current=True, default=True, mode=EXPRESSION | expr="me.EncloseOPs if hasattr(me, 'EncloseOPs') else True"
+  par includeinorder: current=True, default=False, mode=CONSTANT
+  par layerzone: current='belowgrid', default='belowgrid', mode=EXPRESSION | expr="0 if hasattr(me, 'EncloseOPs') and me.EncloseOPs else 1"
+  par ext0object: current='op.TDAnnotate.mod.AnnotateExt.AnnotateExt(me)', default='', mode=CONSTANT
+  par ext0promote: current=True, default=False, mode=CONSTANT
+  par parentshortcut: current='Annotate', default='', mode=CONSTANT
+  par clone: current=type:annotateCOMP path:/sys/TDTox/TDAnnotate/annotate, default='', mode=EXPRESSION | expr="op.TDAnnotate.op('annotate', includeUtility=True)"
+  par Titletext: current='CHOP', default='Annotate', mode=EXPRESSION | expr='parent().par.Family'
+  par Bodytext: current='Math', default='', mode=EXPRESSION | expr="f'{parent().par.Operator}'"
+  par Mode: current='annotate', default='comment', mode=CONSTANT
+  par Backcolorr: current=0.38499999046325684, default=1.0, mode=EXPRESSION | expr='ui.colors[parent().par.Family.eval()][0]'
+  par Backcolorg: current=0.550000011920929, default=0.0, mode=EXPRESSION | expr='ui.colors[parent().par.Family.eval()][1]'
+  par Backcolorb: current=0.2750000059604645, default=0.0, mode=EXPRESSION | expr='ui.colors[parent().par.Family.eval()][2]'
+  par Opviewerdisplay: current=True, default=False, mode=CONSTANT
+  refs:
+    opviewer -> /project1/Sweet16MathCHOP/annotate_networkLabel/annotation
+
+/project1/Sweet16MathCHOP/annotate_networkLabel/annotation [Container COMP]
+  input_slots: (none)
+  outputs: (none)
+  par w: current=600, default=400, mode=CONSTANT
+  par h: current=600, default=300, mode=CONSTANT
+  par hmode: current='fill', default='fixed', mode=CONSTANT
+  par vmode: current='fill', default='fixed', mode=CONSTANT
+  par clickthrough: current=True, default=False, mode=CONSTANT
+  par allowuishortcuts: current=True, default=False, mode=CONSTANT
+  par resizecomp: current=type:annotateCOMP path:/project1/Sweet16MathCHOP/annotate_networkLabel, default='.', mode=EXPRESSION | expr='parent.Annotate'
+  par resizewmin: current=-10000.0, default=5.0, mode=CONSTANT
+  par resizewmax: current=10000.0, default=400.0, mode=CONSTANT
+  par resizehmin: current=-10000.0, default=5.0, mode=CONSTANT
+  par resizehmax: current=10000.0, default=400.0, mode=CONSTANT
+  par reposition: current='component', default='off', mode=CONSTANT
+  par borderaalpha: current=0.0, default=1.0, mode=CONSTANT
+  par leftborder: current='bordera', default='off', mode=CONSTANT
+  par rightborder: current='bordera', default='off', mode=CONSTANT
+  par bottomborder: current='bordera', default='off', mode=CONSTANT
+  par topborder: current='bordera', default='off', mode=CONSTANT
+  par opacity: current=1.0, default=1.0, mode=EXPRESSION | expr='parent.Annotate.par.Opacity'
+  par align: current='verttb', default='none', mode=CONSTANT
+  par enablecloning: current=False, default=True, mode=CONSTANT
+  refs:
+    dragscript -> /sys/drag
+    dropscript -> /sys/drop
+
+/project1/Sweet16MathCHOP/annotate_networkLabel/annotation/back [Container COMP]
+  input_slots: (none)
+  outputs: (none)
+  par layer: current=-2.0, default=0.0, mode=CONSTANT
+  par hmode: current='fill', default='fixed', mode=CONSTANT
+  par vmode: current='fill', default='fixed', mode=CONSTANT
+  par alignallow: current='ignore', default='allow', mode=CONSTANT
+  par enable: current=False, default=True, mode=CONSTANT
+  par clickthrough: current=True, default=False, mode=CONSTANT
+  par allowuishortcuts: current=True, default=False, mode=CONSTANT
+  par borderar: current=0.4690000009970231, default=1.0, mode=EXPRESSION | expr='parent.Annotate.TitleColor[0] + 0.1'
+  par borderag: current=0.550000011920929, default=1.0, mode=EXPRESSION | expr='parent.Annotate.TitleColor[1] + 0.1'
+  par borderab: current=0.41500000834465023, default=1.0, mode=EXPRESSION | expr='parent.Annotate.TitleColor[2] + 0.1'
+  par borderaalpha: current=0.0, default=1.0, mode=EXPRESSION | expr='parent.Annotate.Editing'
+  par leftborder: current='bordera', default='off', mode=CONSTANT
+  par leftborderi: current='bordera', default='off', mode=CONSTANT
+  par rightborder: current='bordera', default='off', mode=CONSTANT
+  par rightborderi: current='bordera', default='off', mode=CONSTANT
+  par bottomborder: current='bordera', default='off', mode=CONSTANT
+  par bottomborderi: current='bordera', default='off', mode=CONSTANT
+  par topborder: current='bordera', default='off', mode=CONSTANT
+  par topborderi: current='bordera', default='off', mode=CONSTANT
+  par align: current='verttb', default='none', mode=CONSTANT
+  refs:
+    dragscript -> /sys/drag
+    dropscript -> /sys/drop
+
+/project1/Sweet16MathCHOP/annotate_networkLabel/annotation/back/bodyBack [Container COMP]
+  input_slots: (none)
+  outputs: (none)
+  par hmode: current='fill', default='fixed', mode=CONSTANT
+  par vmode: current='fill', default='fixed', mode=CONSTANT
+  par alignorder: current=1.0, default=0.0, mode=CONSTANT
+  par clickthrough: current=True, default=False, mode=CONSTANT
+  par bgcolorr: current=0.25000001192092897, default=0.0, mode=EXPRESSION | expr='parent.Annotate.BodyColor[0]'
+  par bgcolorg: current=0.25000001192092897, default=0.0, mode=EXPRESSION | expr='parent.Annotate.BodyColor[1]'
+  par bgcolorb: current=0.25000001192092897, default=0.0, mode=EXPRESSION | expr='parent.Annotate.BodyColor[2]'
+  par bgalpha: current=1.0, default=0.0, mode=EXPRESSION | expr='parent.Annotate.par.Backcoloralpha'
+  par borderover: current=False, default=True, mode=CONSTANT
+  refs:
+    dragscript -> /sys/drag
+    dropscript -> /sys/drop
+
+/project1/Sweet16MathCHOP/annotate_networkLabel/annotation/back/titleBack [Container COMP]
+  input_slots: (none)
+  outputs: (none)
+  par h: current=30, default=300, mode=EXPRESSION | expr="op('../title').height"
+  par hmode: current='fill', default='fixed', mode=CONSTANT
+  par display: current=True, default=True, mode=EXPRESSION | expr="parent.Annotate.par.Mode in ['annotate', 'networkbox']"
+  par clickthrough: current=True, default=False, mode=CONSTANT
+  par bgcolorr: current=0.3690000009970231, default=0.0, mode=EXPRESSION | expr='parent.Annotate.TitleColor[0]'
+  par bgcolorg: current=0.450000011920929, default=0.0, mode=EXPRESSION | expr='parent.Annotate.TitleColor[1]'
+  par bgcolorb: current=0.31500000834465025, default=0.0, mode=EXPRESSION | expr='parent.Annotate.TitleColor[2]'
+  par bgalpha: current=1.0, default=0.0, mode=EXPRESSION | expr='parent.Annotate.par.Backcoloralpha'
+  par borderover: current=False, default=True, mode=CONSTANT
+  refs:
+    dragscript -> /sys/drag
+    dropscript -> /sys/drop
+    h -> ../title
+
+/project1/Sweet16MathCHOP/annotate_networkLabel/annotation/body [Container COMP]
+  input_slots: (none)
+  outputs: (none)
+  par x: current=10, default=0, mode=CONSTANT
+  par y: current=-10, default=0, mode=CONSTANT
+  par w: current=400, default=400, mode=EXPRESSION | expr='min(parent().width, 1000)'
+  par h: current=70, default=300, mode=EXPRESSION | expr="min(parent().height - op('title').height, 500)"
+  par hmode: current='fill', default='fixed', mode=CONSTANT
+  par vmode: current='fill', default='fixed', mode=CONSTANT
+  par bottomanchor: current=1.0, default=0.0, mode=CONSTANT
+  par vorigin: current=1.0, default=0.0, mode=CONSTANT
+  par alignorder: current=1.0, default=0.0, mode=CONSTANT
+  par display: current=True, default=True, mode=EXPRESSION | expr="parent.Annotate.par.Mode in ['annotate', 'comment']"
+  par clickthrough: current=True, default=False, mode=EXPRESSION | expr='not parent.Annotate.Editing'
+  par allowuishortcuts: current=True, default=False, mode=CONSTANT
+  par resizecomp: current=None, default='.', mode=CONSTANT
+  par resizewmin: current=-4000.0, default=5.0, mode=CONSTANT
+  par resizewmax: current=4000.0, default=400.0, mode=CONSTANT
+  par resizehmin: current=-4000.0, default=5.0, mode=CONSTANT
+  par resizehmax: current=4000.0, default=400.0, mode=CONSTANT
+  par repocomp: current=None, default='.', mode=CONSTANT
+  par borderar: current=0.3690000009970231, default=1.0, mode=EXPRESSION | expr='parent.Annotate.TitleColor[0]'
+  par borderag: current=0.450000011920929, default=1.0, mode=EXPRESSION | expr='parent.Annotate.TitleColor[1]'
+  par borderab: current=0.31500000834465025, default=1.0, mode=EXPRESSION | expr='parent.Annotate.TitleColor[2]'
+  par borderbalpha: current=0.0, default=1.0, mode=CONSTANT
+  par borderover: current=False, default=True, mode=CONSTANT
+  par justifyh: current='left', default='off', mode=CONSTANT
+  par scrollbarthickness: current=79, default=10, mode=CONSTANT
+  refs:
+    dragscript -> /sys/drag
+    dropscript -> /sys/drop
+    h -> title
+
+/project1/Sweet16MathCHOP/annotate_networkLabel/annotation/body/bodyText [Text COMP]
+  input_slots: (none)
+  outputs: (none)
+  par text: current='Math', default='Derivative', mode=BIND | expr='parent.Annotate.par.Bodytext'
+  par type: current='multiline', default='string', mode=CONSTANT
+  par formatcodes: current=True, default=False, mode=CONSTANT
+  par smartpunct: current=False, default=False, mode=EXPRESSION | expr='parent.Annotate.par.Smartquote'
+  par wordwrap: current=True, default=False, mode=BIND | expr='parent.Annotate.par.Bodywordwrap'
+  par editmode: current='locked', default='locked', mode=EXPRESSION | expr="'editable' if parent.Annotate.Editing else 'locked'"
+  par fieldfocus: current=type:tableDAT path:/project1/Sweet16MathCHOP/annotate_networkLabel/annotation/focusOrder, default='', mode=CONSTANT
+  par dragdropmode: current='panel', default='textinsert', mode=CONSTANT
+  par legacyfontselection: current=True, default=False, mode=CONSTANT
+  par font: current='Open Sans', default='Verdana', mode=CONSTANT
+  par fontsize: current=10.0, default=20.0, mode=EXPRESSION | expr='parent.Annotate.par.Bodyfontsize'
+  par fontsizeunits: current='points', default='panelunits', mode=CONSTANT
+  par linespacing: current=1.1, default=1.0, mode=CONSTANT
+  par fontcolorr: current=0.950000011920929, default=1.0, mode=EXPRESSION | expr='parent.Annotate.BodyFontColor[0]'
+  par fontcolorg: current=0.950000011920929, default=1.0, mode=EXPRESSION | expr='parent.Annotate.BodyFontColor[1]'
+  par fontcolorb: current=0.950000011920929, default=1.0, mode=EXPRESSION | expr='parent.Annotate.BodyFontColor[2]'
+  par customselectcolor: current=True, default=False, mode=CONSTANT
+  par selectcolorr: current=0.4500000119209289, default=0.0, mode=EXPRESSION | expr='parent.Annotate.BodySelectColor[0]'
+  par selectcolorg: current=0.450000011920929, default=0.25, mode=EXPRESSION | expr='parent.Annotate.BodySelectColor[1]'
+  par selectcolorb: current=0.4500000119209289, default=0.35, mode=EXPRESSION | expr='parent.Annotate.BodySelectColor[2]'
+  par textpaddingl: current=8.0, default=0.0, mode=CONSTANT
+  par textpaddingt: current=10.0, default=0.0, mode=CONSTANT
+  par alignx: current='left', default='center', mode=CONSTANT
+  par aligny: current='top', default='center', mode=CONSTANT
+  par w: current=400, default=400, mode=EXPRESSION | expr='min(parent().width, parent.Annotate.par.Bodymaxwidth.eval()) if parent.Annotate.par.Bodylimitwidth.eval() else parent().width '
+  par h: current=70, default=300, mode=EXPRESSION | expr='parent().height'
+  par cursor: current='ibeam', default='pointer', mode=CONSTANT
+  par clickthrough: current=True, default=False, mode=EXPRESSION | expr='not parent.Annotate.Editing and not (me.panel.focus or ext.AnnotateExt.titleText.panel.focus)'
+  par topfill: current='best', default='off', mode=CONSTANT
+  par borderover: current=False, default=True, mode=CONSTANT
+  refs:
+    dragscript -> /sys/drag
+    dropscript -> /sys/drop
+    fieldfocus -> /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/focusOrder
+
+/project1/Sweet16MathCHOP/annotate_networkLabel/annotation/body/bodyDragger [Container COMP]
+  input_slots: (none)
+  outputs: (none)
+  par layer: current=1.0, default=0.0, mode=CONSTANT
+  par hmode: current='fill', default='fixed', mode=CONSTANT
+  par vmode: current='fill', default='fixed', mode=CONSTANT
+  par alignallow: current='ignoremargin', default='allow', mode=CONSTANT
+  par display: current=False, default=True, mode=EXPRESSION | expr="parent.Annotate.par.Mode in ['comment'] and not parent.Annotate.Editing"
+  par helpdat: current=type:textDAT path:/project1/Sweet16MathCHOP/annotate_networkLabel/annotation/title/dragger/help, default='./help', mode=EXPRESSION | expr="parent.Annotate.op('annotation/title/dragger/help')"
+  par cursor: current='arrowAll', default='pointer', mode=CONSTANT
+  par clickthrough: current=False, default=False, mode=EXPRESSION | expr="op('bodyText').panel.focus or op('../title/titleText').panel.focus"
+  par allowuishortcuts: current=True, default=False, mode=CONSTANT
+  par resizecomp: current=type:annotateCOMP path:/project1/Sweet16MathCHOP/annotate_networkLabel, default='.', mode=EXPRESSION | expr='parent.Annotate'
+  par resizewmin: current=-100000.0, default=5.0, mode=CONSTANT
+  par resizewmax: current=100000.0, default=400.0, mode=CONSTANT
+  par resizehmin: current=-100000.0, default=5.0, mode=CONSTANT
+  par resizehmax: current=100000.0, default=400.0, mode=CONSTANT
+  par reposition: current='component', default='off', mode=EXPRESSION | expr='2 if me.panel.click <= 1 else 0'
+  par repocomp: current=type:annotateCOMP path:/project1/Sweet16MathCHOP/annotate_networkLabel, default='.', mode=EXPRESSION | expr='parent.Annotate'
+  par repositionxmin: current=-2000000.0, default=0.0, mode=CONSTANT
+  par repositionxmax: current=2000000.0, default=100.0, mode=CONSTANT
+  par repositionymin: current=-2000000.0, default=0.0, mode=CONSTANT
+  par repositionymax: current=2000000.0, default=100.0, mode=CONSTANT
+  par borderover: current=False, default=True, mode=CONSTANT
+  par Coveredop: current=type:textCOMP path:/project1/Sweet16MathCHOP/annotate_networkLabel/annotation/body/bodyText, default='', mode=CONSTANT
+  refs:
+    Coveredop -> /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/body/bodyText
+    clickthrough -> ../title/titleText
+    clickthrough -> bodyText
+    dragscript -> /sys/drag
+    dropscript -> /sys/drop
+    helpdat -> annotation/title/dragger/help
+
+/project1/Sweet16MathCHOP/annotate_networkLabel/annotation/title [Container COMP]
+  input_slots: (none)
+  outputs: (none)
+  par x: current=10, default=0, mode=CONSTANT
+  par h: current=30, default=300, mode=EXPRESSION | expr='parent.Annotate.par.Titleheight'
+  par hmode: current='fill', default='fixed', mode=CONSTANT
+  par bottomanchor: current=1.0, default=0.0, mode=CONSTANT
+  par vorigin: current=1.0, default=0.0, mode=CONSTANT
+  par display: current=True, default=True, mode=EXPRESSION | expr="parent.Annotate.par.Mode in ['annotate', 'networkbox']"
+  par allowuishortcuts: current=True, default=False, mode=CONSTANT
+  par resizecomp: current=type:containerCOMP path:/project1/Sweet16MathCHOP/annotate_networkLabel/annotation/title, default='.', mode=CONSTANT
+  par resizewmin: current=-10000.0, default=5.0, mode=CONSTANT
+  par resizewmax: current=10000.0, default=400.0, mode=CONSTANT
+  par resizehmin: current=10.0, default=5.0, mode=CONSTANT
+  par resizehmax: current=10000.0, default=400.0, mode=CONSTANT
+  par repocomp: current=None, default='.', mode=CONSTANT
+  par repositionxmin: current=-10000.0, default=0.0, mode=CONSTANT
+  par repositionxmax: current=10000.0, default=100.0, mode=CONSTANT
+  par repositionymin: current=-10000.0, default=0.0, mode=CONSTANT
+  par repositionymax: current=10000.0, default=100.0, mode=CONSTANT
+  par topfill: current='vertical', default='off', mode=CONSTANT
+  par borderar: current=0.498039, default=1.0, mode=CONSTANT
+  par borderag: current=0.866667, default=1.0, mode=CONSTANT
+  par borderover: current=False, default=True, mode=CONSTANT
+  par align: current='horizlr', default='none', mode=CONSTANT
+  par justifyv: current='center', default='off', mode=CONSTANT
+  refs:
+    dragscript -> /sys/drag
+    dropscript -> /sys/drop
+    resizecomp -> /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/title
+
+/project1/Sweet16MathCHOP/annotate_networkLabel/annotation/title/buttons [Container COMP]
+  input_slots: (none)
+  outputs: (none)
+  par w: current=30, default=400, mode=EXPRESSION | expr='me.height + me.par.marginl * 2'
+  par h: current=30, default=300, mode=EXPRESSION | expr='parent().height '
+  par fixedaspect: current='vertical', default='off', mode=CONSTANT
+  par vmode: current='fill', default='fixed', mode=CONSTANT
+  par bottomanchor: current=0.1, default=0.0, mode=CONSTANT
+  par topanchor: current=0.9, default=1.0, mode=CONSTANT
+  par alignorder: current=1.0, default=0.0, mode=EXPRESSION | expr="1 if parent.Annotate.par.Titlealign != 'right' else - 1"
+  par allowuishortcuts: current=True, default=False, mode=CONSTANT
+  par bgcolorr: current=1.0, default=0.0, mode=CONSTANT
+  par bgcolorg: current=1.0, default=0.0, mode=CONSTANT
+  par bgcolorb: current=1.0, default=0.0, mode=CONSTANT
+  par borderover: current=False, default=True, mode=CONSTANT
+  par composite: current='add', default='over', mode=CONSTANT
+  par align: current='verttb', default='none', mode=CONSTANT
+  par justifyh: current='center', default='off', mode=CONSTANT
+  par justifyv: current='center', default='off', mode=CONSTANT
+  refs:
+    dragscript -> /sys/drag
+    dropscript -> /sys/drop
+
+/project1/Sweet16MathCHOP/annotate_networkLabel/annotation/title/buttons/edit [Text COMP]
+  input_slots: (none)
+  outputs: (none)
+  par text: current='\U000f1781', default='Derivative', mode=EXPRESSION | expr='chr(0xf1781) '
+  par callbacks: current=type:textDAT path:/project1/Sweet16MathCHOP/annotate_networkLabel/annotation/title/buttons/text1_callbacks, default='', mode=CONSTANT
+  par legacyfontselection: current=True, default=False, mode=CONSTANT
+  par font: current='Material Design Icons', default='Verdana', mode=CONSTANT
+  par fontsize: current=15.0, default=20.0, mode=EXPRESSION | expr='parent().height*.5'
+  par fontcolorr: current=0.5690000009970231, default=1.0, mode=EXPRESSION | expr='parent.Annotate.TitleColor[0] + (0.35 if me.panel.inside else 0.2) + (0.2 if parent.Annotate.Editing else 0)'
+  par fontcolorg: current=0.650000011920929, default=1.0, mode=EXPRESSION | expr='parent.Annotate.TitleColor[1] + (0.35 if me.panel.inside else 0.2) + (0.2 if parent.Annotate.Editing else 0)'
+  par fontcolorb: current=0.5150000083446502, default=1.0, mode=EXPRESSION | expr='parent.Annotate.TitleColor[2] + (0.35 if me.panel.inside else 0.2) + (0.2 if parent.Annotate.Editing else 0)'
+  par textpaddingb: current=0.25, default=0.0, mode=CONSTANT
+  par textpaddingt: current=0.25, default=0.0, mode=CONSTANT
+  par textpaddingunits: current='fract', default='panelunits', mode=CONSTANT
+  par alignxmode: current='bbox', default='metrics', mode=CONSTANT
+  par alignymode: current='bbox', default='metrics', mode=CONSTANT
+  par w: current=30, default=400, mode=CONSTANT
+  par fixedaspect: current='vertical', default='off', mode=CONSTANT
+  par vmode: current='fill', default='fixed', mode=CONSTANT
+  par display: current=False, default=True, mode=EXPRESSION | expr='parent(3).panel.inside or parent.Annotate.Editing'
+  par allowuishortcuts: current=True, default=False, mode=CONSTANT
+  par bgcolorr: current=1.0, default=0.0, mode=CONSTANT
+  par bgcolorg: current=1.0, default=0.0, mode=CONSTANT
+  par bgcolorb: current=1.0, default=0.0, mode=CONSTANT
+  par borderover: current=False, default=True, mode=CONSTANT
+  par composite: current='add', default='over', mode=CONSTANT
+  refs:
+    callbacks -> /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/title/buttons/text1_callbacks
+    dragscript -> /sys/drag
+    dropscript -> /sys/drop
+    helpdat -> /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/title/buttons/edit/help
+
+/project1/Sweet16MathCHOP/annotate_networkLabel/annotation/title/buttons/edit/help [Evaluate DAT]
+  input_slots: (none)
+  outputs: (none)
+  par expr: current="'Text Editable' if parent.Annotate.Editing else 'Click to make text editable'", default='', mode=CONSTANT
+  par language: current='text', default='input', mode=CONSTANT
+
+/project1/Sweet16MathCHOP/annotate_networkLabel/annotation/title/buttons/text1_callbacks [Text DAT]
+  input_slots: (none)
+  outputs: (none)
+  par language: current='python', default='input', mode=CONSTANT
+
+/project1/Sweet16MathCHOP/annotate_networkLabel/annotation/title/dragger [Container COMP]
+  input_slots: (none)
+  outputs: (none)
+  par layer: current=1.0, default=0.0, mode=CONSTANT
+  par hmode: current='fill', default='fixed', mode=CONSTANT
+  par vmode: current='fill', default='fixed', mode=CONSTANT
+  par alignallow: current='ignoremargin', default='allow', mode=CONSTANT
+  par display: current=True, default=True, mode=EXPRESSION | expr='not parent.Annotate.Editing'
+  par cursor: current='arrowAll', default='pointer', mode=CONSTANT
+  par clickthrough: current=False, default=False, mode=EXPRESSION | expr="op('titleText').panel.focus or op('../body/bodyText').panel.focus"
+  par allowuishortcuts: current=True, default=False, mode=CONSTANT
+  par resizecomp: current=type:annotateCOMP path:/project1/Sweet16MathCHOP/annotate_networkLabel, default='.', mode=EXPRESSION | expr='parent.Annotate'
+  par resizewmin: current=-100000.0, default=5.0, mode=CONSTANT
+  par resizewmax: current=100000.0, default=400.0, mode=CONSTANT
+  par resizehmin: current=-100000.0, default=5.0, mode=CONSTANT
+  par resizehmax: current=100000.0, default=400.0, mode=CONSTANT
+  par reposition: current='component', default='off', mode=EXPRESSION | expr='2 if not parent.Annotate.Editing else 0'
+  par repocomp: current=type:annotateCOMP path:/project1/Sweet16MathCHOP/annotate_networkLabel, default='.', mode=EXPRESSION | expr='parent.Annotate'
+  par repositionxmin: current=-2000000.0, default=0.0, mode=CONSTANT
+  par repositionxmax: current=2000000.0, default=100.0, mode=CONSTANT
+  par repositionymin: current=-2000000.0, default=0.0, mode=CONSTANT
+  par repositionymax: current=2000000.0, default=100.0, mode=CONSTANT
+  par borderover: current=False, default=True, mode=CONSTANT
+  par Coveredop: current=type:textCOMP path:/project1/Sweet16MathCHOP/annotate_networkLabel/annotation/title/titleText, default='', mode=CONSTANT
+  refs:
+    Coveredop -> /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/title/titleText
+    clickthrough -> ../body/bodyText
+    clickthrough -> titleText
+    dragscript -> /sys/drag
+    dropscript -> /sys/drop
+    helpdat -> /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/title/dragger/help
+
+/project1/Sweet16MathCHOP/annotate_networkLabel/annotation/title/dragger/help [Text DAT]
+  input_slots: (none)
+  outputs: (none)
+  par language: current='text', default='input', mode=CONSTANT
+
+/project1/Sweet16MathCHOP/annotate_networkLabel/annotation/title/titleText [Text COMP]
+  input_slots: (none)
+  outputs: (none)
+  par text: current='CHOP', default='Derivative', mode=BIND | expr='parent.Annotate.par.Titletext'
+  par smartpunct: current=False, default=False, mode=EXPRESSION | expr='parent.Annotate.par.Smartquote'
+  par editmode: current='editable', default='locked', mode=CONSTANT
+  par fieldfocus: current=type:tableDAT path:/project1/Sweet16MathCHOP/annotate_networkLabel/annotation/focusOrder, default='', mode=CONSTANT
+  par dragdropmode: current='panel', default='textinsert', mode=CONSTANT
+  par callbacks: current=type:textDAT path:/project1/Sweet16MathCHOP/annotate_networkLabel/annotation/title/titleText_callbacks, default='', mode=CONSTANT
+  par legacyfontselection: current=True, default=False, mode=CONSTANT
+  par font: current='Open Sans', default='Verdana', mode=CONSTANT
+  par bold: current=True, default=False, mode=CONSTANT
+  par scaletofit: current='onlyshrink', default='never', mode=CONSTANT
+  par fontsize: current=18.0, default=20.0, mode=EXPRESSION | expr='me.height*0.6'
+  par linespacing: current=1.43, default=1.0, mode=CONSTANT
+  par fontcolorr: current=0.950000011920929, default=1.0, mode=EXPRESSION | expr='parent.Annotate.TitleFontColor[0]'
+  par fontcolorg: current=0.950000011920929, default=1.0, mode=EXPRESSION | expr='parent.Annotate.TitleFontColor[1]'
+  par fontcolorb: current=0.950000011920929, default=1.0, mode=EXPRESSION | expr='parent.Annotate.TitleFontColor[2]'
+  par customselectcolor: current=True, default=False, mode=CONSTANT
+  par selectcolorr: current=0.25000001192092897, default=0.0, mode=EXPRESSION | expr='parent.Annotate.TitleSelectColor[0]'
+  par selectcolorg: current=0.25000001192092897, default=0.25, mode=EXPRESSION | expr='parent.Annotate.TitleSelectColor[1]'
+  par selectcolorb: current=0.25000001192092897, default=0.35, mode=EXPRESSION | expr='parent.Annotate.TitleSelectColor[2]'
+  par textpaddingl: current=8.0, default=0.0, mode=EXPRESSION | expr='2 + me.height/5 '
+  par textpaddingr: current=8.0, default=0.0, mode=EXPRESSION | expr='me.par.textpaddingl'
+  par textpaddingb: current=6.0, default=0.0, mode=EXPRESSION | expr='me.height / 5'
+  par textpaddingt: current=6.0, default=0.0, mode=EXPRESSION | expr='me.height / 5'
+  par alignx: current='left', default='center', mode=EXPRESSION | expr='parent.Annotate.par.Titlealign'
+  par x: current=10, default=0, mode=CONSTANT
+  par y: current=10, default=0, mode=CONSTANT
+  par h: current=30, default=300, mode=EXPRESSION | expr="op('./text').par.fontsizex * 1.1"
+  par hmode: current='anchors', default='fixed', mode=CONSTANT
+  par leftoffset: current=0.0, default=0.0, mode=EXPRESSION | expr="op('buttons').width if parent.Annotate.par.Titlealign == 'center' else 0"
+  par vmode: current='fill', default='fixed', mode=CONSTANT
+  par bottomanchor: current=1.0, default=0.0, mode=CONSTANT
+  par vorigin: current=1.0, default=0.0, mode=CONSTANT
+  par cursor: current='ibeam', default='pointer', mode=CONSTANT
+  par resizecomp: current=None, default='.', mode=CONSTANT
+  par resizewmin: current=-10000.0, default=5.0, mode=CONSTANT
+  par resizewmax: current=10000.0, default=400.0, mode=CONSTANT
+  par resizehmin: current=-10000.0, default=5.0, mode=CONSTANT
+  par resizehmax: current=10000.0, default=400.0, mode=CONSTANT
+  par repocomp: current=None, default='.', mode=CONSTANT
+  par repositionxmin: current=-10000.0, default=0.0, mode=CONSTANT
+  par repositionxmax: current=10000.0, default=100.0, mode=CONSTANT
+  par repositionymin: current=-10000.0, default=0.0, mode=CONSTANT
+  par repositionymax: current=10000.0, default=100.0, mode=CONSTANT
+  par topfill: current='vertical', default='off', mode=CONSTANT
+  par borderar: current=0.498039, default=1.0, mode=CONSTANT
+  par borderag: current=0.866667, default=1.0, mode=CONSTANT
+  par borderover: current=False, default=True, mode=CONSTANT
+  refs:
+    callbacks -> /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/title/titleText_callbacks
+    dragscript -> /sys/drag
+    dropscript -> /sys/drop
+    fieldfocus -> /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/focusOrder
+    h -> ./text
+    leftoffset -> buttons
+
+/project1/Sweet16MathCHOP/annotate_networkLabel/annotation/title/textSpacer [Field COMP]
+  input_slots: (none)
+  outputs: (none)
+  par fieldmultiline: current=False, default=True, mode=CONSTANT
+  par fieldfocus: current=type:tableDAT path:/project1/Sweet16MathCHOP/annotate_networkLabel/annotation/focusOrder, default='', mode=CONSTANT
+  par x: current=10, default=0, mode=CONSTANT
+  par y: current=10, default=0, mode=CONSTANT
+  par h: current=30, default=300, mode=EXPRESSION | expr="op('./text').par.fontsizex * 1.1"
+  par hmode: current='fill', default='fixed', mode=CONSTANT
+  par vmode: current='fill', default='fixed', mode=CONSTANT
+  par bottomanchor: current=1.0, default=0.0, mode=CONSTANT
+  par vorigin: current=1.0, default=0.0, mode=CONSTANT
+  par allowuishortcuts: current=True, default=False, mode=CONSTANT
+  par resizecomp: current=None, default='.', mode=CONSTANT
+  par resizewmin: current=-10000.0, default=5.0, mode=CONSTANT
+  par resizewmax: current=10000.0, default=400.0, mode=CONSTANT
+  par resizehmin: current=-10000.0, default=5.0, mode=CONSTANT
+  par resizehmax: current=10000.0, default=400.0, mode=CONSTANT
+  par repocomp: current=None, default='.', mode=CONSTANT
+  par repositionxmin: current=-10000.0, default=0.0, mode=CONSTANT
+  par repositionxmax: current=10000.0, default=100.0, mode=CONSTANT
+  par repositionymin: current=-10000.0, default=0.0, mode=CONSTANT
+  par repositionymax: current=10000.0, default=100.0, mode=CONSTANT
+  par bgcolorr: current=1.0, default=0.0, mode=CONSTANT
+  par topfill: current='vertical', default='off', mode=CONSTANT
+  par borderar: current=0.498039, default=1.0, mode=CONSTANT
+  par borderag: current=0.866667, default=1.0, mode=CONSTANT
+  par borderover: current=False, default=True, mode=CONSTANT
+  par justifyh: current='right', default='off', mode=CONSTANT
+  refs:
+    dragscript -> /sys/drag
+    dropscript -> /sys/drop
+    fieldfocus -> /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/focusOrder
+    h -> ./text
+
+/project1/Sweet16MathCHOP/annotate_networkLabel/annotation/title/titleText_callbacks [Text DAT]
+  input_slots: (none)
+  outputs: (none)
+  par language: current='python', default='input', mode=CONSTANT
+
+/project1/Sweet16MathCHOP/annotate_networkLabel/annotation/opview [Container COMP]
+  input_slots: (none)
+  outputs: (none)
+  par h: current=70, default=300, mode=EXPRESSION | expr='parent().height - (1-parent(2).par.Opviewerfillbodytitle) * parent.Annotate.par.Titleheight'
+  par layer: current=-1.0, default=0.0, mode=CONSTANT
+  par hmode: current='fill', default='fixed', mode=CONSTANT
+  par alignallow: current='ignoremargin', default='allow', mode=CONSTANT
+  par display: current=True, default=True, mode=EXPRESSION | expr="parent.Annotate.par.Opviewerdisplay and parent.Annotate.par.Opviewer and parent.Annotate.par.Mode == 'annotate'"
+  par clickthrough: current=True, default=False, mode=CONSTANT
+  par borderover: current=False, default=True, mode=CONSTANT
+  par crop: current='on', default='off', mode=CONSTANT
+  refs:
+    dragscript -> /sys/drag
+    dropscript -> /sys/drop
+
+/project1/Sweet16MathCHOP/annotate_networkLabel/annotation/opview/opviewer [OP Viewer COMP]
+  input_slots: (none)
+  outputs: (none)
+  par opviewer: current=None, default='./out1', mode=BIND | expr='parent.Annotate.par.Opviewer'
+  par interactive: current=False, default=True, mode=EXPRESSION | expr='parent.Annotate.par.Opviewerinteractive '
+  par opcenterx: current=0.0, default=0.0, mode=BIND | expr='parent.Annotate.par.Opvieweroffsetx'
+  par opcentery: current=0.0, default=0.0, mode=BIND | expr='parent.Annotate.par.Opvieweroffsety'
+  par opcenterunit: current='relfract', default='fract', mode=CONSTANT
+  par opscale: current=1.0, default=1.0, mode=EXPRESSION | expr='parent.Annotate.par.Opviewerzoom * [1., me.par.Topautofitzoom][me.par.Applyzoom]'
+  par w: current=1280, default=400, mode=EXPRESSION | expr='me.par.Opviewersizew'
+  par h: current=720, default=300, mode=EXPRESSION | expr='me.par.Opviewersizeh'
+  par leftanchor: current=0.5, default=0.0, mode=EXPRESSION | expr='(parent.Annotate.par.Opviewerjustifyx+1.) / 2.'
+  par horigin: current=0.5, default=0.0, mode=EXPRESSION | expr='(parent.Annotate.par.Opviewerjustifyx+1.) / 2.'
+  par bottomanchor: current=0.5, default=0.0, mode=EXPRESSION | expr='(parent.Annotate.par.Opviewerjustifyy+1.) / 2.'
+  par vorigin: current=0.5, default=0.0, mode=EXPRESSION | expr='(parent.Annotate.par.Opviewerjustifyy+1.) / 2.'
+  par display: current=False, default=True, mode=CONSTANT
+  par clickthrough: current=True, default=False, mode=EXPRESSION | expr='parent.Annotate.Editing or not parent.Annotate.par.Opviewerinteractive'
+  par bgalpha: current=1.0, default=0.0, mode=EXPRESSION | expr='parent.Annotate.par.Opviewerfillalpha.eval()'
+  par borderover: current=False, default=True, mode=CONSTANT
+  par Defaultviewersizew: current=1280.0, default=1280.0, mode=EXPRESSION | expr='tdu.tryExcept(lambda: me.par.opviewer.eval().width, 1280)'
+  par Defaultviewersizeh: current=720.0, default=720.0, mode=EXPRESSION | expr='tdu.tryExcept(lambda: me.par.opviewer.eval().height, 720)'
+  par Opviewersizew: current=1280.0, default=0.0, mode=EXPRESSION | expr='[me.par.Defaultviewersizew, parent.Annotate.par.Opviewersizew, parent.Annotate.par.Opviewersizew][parent.Annotate.par.Opvieweroversize]'
+  par Opviewersizeh: current=720.0, default=0.0, mode=EXPRESSION | expr='[me.par.Defaultviewersizeh, parent.Annotate.par.Opviewersizeh, parent.Annotate.par.Opviewersizew*parent().height/parent().width][parent.Annotate.par.Opvieweroversize]'
+  par Aspectviewer: current=1.7777777777777777, default=1.0, mode=EXPRESSION | expr='me.par.Opviewersizew/me.par.Opviewersizeh'
+  par Viewerisatop: current=False, default=False, mode=EXPRESSION | expr="tdu.tryExcept(lambda: me.par.opviewer.eval().family == 'TOP', 0)"
+  par Applyzoom: current=False, default=False, mode=EXPRESSION | expr="me.par.Viewerisatop and parent.Annotate.par.Opvieweroversize=='autofit'"
+  par Topviewerratio: current=1.0, default=0.0, mode=EXPRESSION | expr='me.par.Aspectviewer * me.par.Defaultviewersizeh/me.par.Defaultviewersizew'
+  par Topautofitzoom: current=1.0, default=1.0, mode=EXPRESSION | expr='max(me.par.Topviewerratio, 1./me.par.Topviewerratio)'
+  refs:
+    dragscript -> /sys/drag
+    dropscript -> /sys/drop
+
+/project1/Sweet16MathCHOP/annotate_networkLabel/annotation/opview/select_opviewer [Select COMP]
+  input_slots: (none)
+  outputs: (none)
+  par selectpanel: current=type:opviewerCOMP path:/project1/Sweet16MathCHOP/annotate_networkLabel/annotation/opview/opviewer, default='', mode=CONSTANT
+  par w: current=124, default=400, mode=EXPRESSION | expr='max(1, me.par.Opw)'
+  par h: current=70, default=300, mode=EXPRESSION | expr='max(1, me.par.Oph)'
+  par leftanchor: current=0.5, default=0.0, mode=EXPRESSION | expr='(parent.Annotate.par.Opviewerjustifyx+1.) / 2.'
+  par horigin: current=0.5, default=0.0, mode=EXPRESSION | expr='(parent.Annotate.par.Opviewerjustifyx+1.) / 2.'
+  par bottomanchor: current=0.5, default=0.0, mode=EXPRESSION | expr='(parent.Annotate.par.Opviewerjustifyy+1.) / 2.'
+  par vorigin: current=0.5, default=0.0, mode=EXPRESSION | expr='(parent.Annotate.par.Opviewerjustifyy+1.) / 2.'
+  par display: current=False, default=True, mode=EXPRESSION | expr='parent.Annotate.par.Opviewer.eval() != None'
+  par clickthrough: current=True, default=False, mode=EXPRESSION | expr='parent.Annotate.Editing or not parent.Annotate.par.Opviewerinteractive'
+  par bgalpha: current=1.0, default=0.0, mode=EXPRESSION | expr='parent.Annotate.par.Opviewerfillalpha.eval()'
+  par borderar: current=0.3, default=1.0, mode=CONSTANT
+  par borderag: current=0.3, default=1.0, mode=CONSTANT
+  par borderab: current=0.3, default=1.0, mode=CONSTANT
+  par borderaalpha: current=0.0, default=1.0, mode=EXPRESSION | expr='me.panel.inside'
+  par leftborder: current='bordera', default='off', mode=CONSTANT
+  par rightborder: current='bordera', default='off', mode=CONSTANT
+  par bottomborder: current='bordera', default='off', mode=CONSTANT
+  par topborder: current='bordera', default='off', mode=CONSTANT
+  par opviewer: current=None, default='./out1', mode=BIND | expr='parent.Annotate.par.Opviewer'
+  par align: current='gridrows', default='none', mode=CONSTANT
+  par crop: current='on', default='off', mode=CONSTANT
+  par Aspectviewer: current=1.7777777777777777, default=1.0, mode=EXPRESSION | expr="op('opviewer').par.Opviewersizew/op('opviewer').par.Opviewersizeh"
+  par Aspectpanel: current=5.714285714285714, default=1.0, mode=EXPRESSION | expr='parent().width/parent().height if parent().height else 0'
+  par Opisnarrower: current=True, default=False, mode=EXPRESSION | expr='me.par.Aspectviewer < me.par.Aspectpanel'
+  par Opw: current=124.44444444444444, default=0.0, mode=EXPRESSION | expr='[parent().width, parent().height*me.par.Aspectviewer][me.par.Opisnarrower] * parent.Annotate.par.Opviewerscale'
+  par Oph: current=70.0, default=0.0, mode=EXPRESSION | expr='[parent().width/me.par.Aspectviewer, parent().height][me.par.Opisnarrower] * parent.Annotate.par.Opviewerscale'
+  refs:
+    Aspectviewer -> opviewer
+    dragscript -> /sys/drag
+    dropscript -> /sys/drop
+    selectpanel -> /project1/Sweet16MathCHOP/annotate_networkLabel/annotation/opview/opviewer
+
+/project1/Sweet16MathCHOP/annotate_networkLabel/annotation/parexec1 [Parameter Execute DAT]
+  input_slots: (none)
+  outputs: (none)
+  par op: current=type:annotateCOMP path:/project1/Sweet16MathCHOP/annotate_networkLabel, default='', mode=EXPRESSION | expr='parent.Annotate'
+  par pars: current='Mode Help', default='', mode=CONSTANT
+  par builtin: current=False, default=True, mode=CONSTANT
+  par language: current='python', default='input', mode=CONSTANT
+
+/project1/Sweet16MathCHOP/annotate_networkLabel/annotation/focusOrder [Table DAT]
+  input_slots: (none)
+  outputs: (none)
+  par defaultreadencoding: current='cp1252', default='autodetect', mode=CONSTANT
+  par rows: current=2, default=3, mode=CONSTANT
+  par cols: current=1, default=4, mode=CONSTANT
+  par language: current='text', default='input', mode=CONSTANT
+
+/project1/Sweet16MathCHOP/annotate_networkLabel/annotation/panelexec1 [Panel Execute DAT]
+  input_slots: (none)
+  outputs: (none)
+  par panels: current=[type:textCOMP path:/project1/Sweet16MathCHOP/annotate_networkLabel/annotation/title/titleText, type:containerCOMP path:/project1/Sweet16MathCHOP/annotate_networkLabel/annotation/title/dragger, type:textCOMP path:/project1/Sweet16MathCHOP/annotate_networkLabel/annotation/body/bodyText, type:containerCOMP path:/project1/Sweet16MathCHOP/annotate_networkLabel/annotation/body, type:containerCOMP path:/project1/Sweet16MathCHOP/annotate_networkLabel/annotation/body/bodyDragger, type:textCOMP path:/project1/Sweet16MathCHOP/annotate_networkLabel/annotation/title/buttons/edit, type:containerCOMP path:/project1/Sweet16MathCHOP/annotate_networkLabel/annotation], default='..', mode=CONSTANT
+  par panelvalue: current='rselect lselect field focusselect', default='select', mode=CONSTANT
+  par offtoon: current=False, default=True, mode=CONSTANT
+  par valuechange: current=True, default=False, mode=CONSTANT
+  par defaultreadencoding: current='cp1252', default='autodetect', mode=CONSTANT
+  par language: current='python', default='input', mode=CONSTANT
+
+/project1/Sweet16MathCHOP/container_sweet16TopicLabel [Container COMP]
+  input_slots: (none)
+  outputs: (none)
+  par hmode: current='fill', default='fixed', mode=EXPRESSION | expr="0 if parent().type == 'base' else 1"
+  par vmode: current='fill', default='fixed', mode=EXPRESSION | expr="0 if parent().type == 'base' else 1"
+  par borderover: current=False, default=True, mode=CONSTANT
+  par align: current='verttb', default='none', mode=CONSTANT
+  par clone: current=None, default='', mode=EXPRESSION | expr="op.ExampleResources.op('container_sweet16TopicLabel') if hasattr(op, 'ExampleResources') else ''"
+  par Header: current='CHOP Sweet 16', default='', mode=EXPRESSION | expr="f'{parent().par.Family} Sweet 16' if hasattr(parent().par, 'Operator') else 'Header'"
+  par Body: current='Math', default='', mode=EXPRESSION | expr="f'{parent().par.Operator}' if hasattr(parent().par, 'Operator') else 'Body'"
+  par Colorr: current=0.38499999046325684, default=0.0, mode=EXPRESSION | expr="op('annotate_networkLabel').par.Backcolorr if parent().op('annotate_networkLabel') else 0.5"
+  par Colorg: current=0.550000011920929, default=0.0, mode=EXPRESSION | expr="op('annotate_networkLabel').par.Backcolorg if parent().op('annotate_networkLabel') else 0.5"
+  par Colorb: current=0.2750000059604645, default=0.0, mode=EXPRESSION | expr="op('annotate_networkLabel').par.Backcolorb if parent().op('annotate_networkLabel') else 0.5"
+  par Alpha: current=1.0, default=0.0, mode=CONSTANT
+  refs:
+    Colorb -> annotate_networkLabel
+    Colorg -> annotate_networkLabel
+    Colorr -> annotate_networkLabel
+    clone -> container_sweet16TopicLabel
+    dragscript -> /sys/drag
+    dropscript -> /sys/drop
+
+/project1/Sweet16MathCHOP/container_sweet16TopicLabel/text_body [Text COMP]
+  input_slots: (none)
+  outputs: (none)
+  par text: current='Math', default='Derivative', mode=EXPRESSION | expr='parent().par.Body'
+  par type: current='multiline', default='string', mode=CONSTANT
+  par wordwrap: current=True, default=False, mode=CONSTANT
+  par callbacks: current=type:textDAT path:/project1/Sweet16MathCHOP/container_sweet16TopicLabel/text2_callbacks, default='', mode=CONSTANT
+  par legacyfontselection: current=True, default=False, mode=CONSTANT
+  par font: current='Open Sans', default='Verdana', mode=CONSTANT
+  par bold: current=True, default=False, mode=CONSTANT
+  par scaletofit: current='onlyshrink', default='never', mode=CONSTANT
+  par fontsize: current=0.3, default=20.0, mode=CONSTANT
+  par fontsizeunits: current='fract', default='panelunits', mode=CONSTANT
+  par fontcolorr: current=0.7, default=1.0, mode=CONSTANT
+  par fontcolorg: current=0.7, default=1.0, mode=CONSTANT
+  par fontcolorb: current=0.7, default=1.0, mode=CONSTANT
+  par textoffsety: current=20.0, default=0.0, mode=CONSTANT
+  par textpaddingl: current=20.0, default=0.0, mode=CONSTANT
+  par textpaddingr: current=20.0, default=0.0, mode=CONSTANT
+  par hmode: current='fill', default='fixed', mode=CONSTANT
+  par vmode: current='fill', default='fixed', mode=CONSTANT
+  par alignorder: current=1.0, default=0.0, mode=CONSTANT
+  par bgcolorr: current=0.38499999046325684, default=0.0, mode=EXPRESSION | expr='parent().par.Colorr'
+  par bgcolorg: current=0.550000011920929, default=0.0, mode=EXPRESSION | expr='parent().par.Colorg'
+  par bgcolorb: current=0.2750000059604645, default=0.0, mode=EXPRESSION | expr='parent().par.Colorb'
+  par bgalpha: current=0.5, default=0.0, mode=CONSTANT
+  par borderover: current=False, default=True, mode=CONSTANT
+  refs:
+    callbacks -> /project1/Sweet16MathCHOP/container_sweet16TopicLabel/text2_callbacks
+    dragscript -> /sys/drag
+    dropscript -> /sys/drop
+
+/project1/Sweet16MathCHOP/container_sweet16TopicLabel/text_header [Text COMP]
+  input_slots: (none)
+  outputs: (none)
+  par text: current='CHOP Sweet 16', default='Derivative', mode=EXPRESSION | expr='parent().par.Header'
+  par type: current='multiline', default='string', mode=CONSTANT
+  par wordwrap: current=True, default=False, mode=CONSTANT
+  par callbacks: current=type:textDAT path:/project1/Sweet16MathCHOP/container_sweet16TopicLabel/text1_callbacks, default='', mode=CONSTANT
+  par legacyfontselection: current=True, default=False, mode=CONSTANT
+  par font: current='Open Sans', default='Verdana', mode=CONSTANT
+  par bold: current=True, default=False, mode=CONSTANT
+  par scaletofit: current='always', default='never', mode=CONSTANT
+  par fontsize: current=32.0, default=20.0, mode=CONSTANT
+  par fontcolorr: current=0.7, default=1.0, mode=CONSTANT
+  par fontcolorg: current=0.7, default=1.0, mode=CONSTANT
+  par fontcolorb: current=0.7, default=1.0, mode=CONSTANT
+  par textpaddingl: current=20.0, default=0.0, mode=CONSTANT
+  par textpaddingr: current=20.0, default=0.0, mode=CONSTANT
+  par h: current=103, default=300, mode=CONSTANT
+  par hmode: current='fill', default='fixed', mode=CONSTANT
+  par vmode: current='anchors', default='fixed', mode=CONSTANT
+  par topanchor: current=0.283, default=1.0, mode=CONSTANT
+  par bgcolorr: current=0.38499999046325684, default=0.0, mode=EXPRESSION | expr='parent().par.Colorr'
+  par bgcolorg: current=0.550000011920929, default=0.0, mode=EXPRESSION | expr='parent().par.Colorg'
+  par bgcolorb: current=0.2750000059604645, default=0.0, mode=EXPRESSION | expr='parent().par.Colorb'
+  par bgalpha: current=1.0, default=0.0, mode=EXPRESSION | expr='parent().par.Alpha'
+  par borderover: current=False, default=True, mode=CONSTANT
+  refs:
+    callbacks -> /project1/Sweet16MathCHOP/container_sweet16TopicLabel/text1_callbacks
+    dragscript -> /sys/drag
+    dropscript -> /sys/drop
+
+/project1/Sweet16MathCHOP/container_sweet16TopicLabel/text1_callbacks [Text DAT]
+  input_slots: (none)
+  outputs: (none)
+  par language: current='python', default='input', mode=CONSTANT
+
+/project1/Sweet16MathCHOP/container_sweet16TopicLabel/text2_callbacks [Text DAT]
+  input_slots: (none)
+  outputs: (none)
+  par language: current='python', default='input', mode=CONSTANT
