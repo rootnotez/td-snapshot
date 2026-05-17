@@ -91,17 +91,23 @@ scaletofit 49 onlyshrink "parent().par[me.curPar.name] or me.curPar.val"
 - `?` lines bracket each parameter page. Only changed-from-default parameters appear between them.
 - Each parameter row: `<name> <mode> <value> [<expr>]`
   - `<name>` — parameter internal name.
-  - `<mode>` — integer bitfield encoding parameter mode. Observed values and inferred bits:
-    - `0` — CONSTANT (literal value follows).
-    - `17` — EXPRESSION (`16` = expression mode + `1` = ?). Value field is empty `""`, expression text follows.
-    - `32` — BIND (value follows, no expression text).
-    - `48` — EXPRESSION + something (`16|32`); seen with value `""` plus expression text (e.g. `f'scripts/{me.name}.py'`).
-    - `49` — `48|1`; both a literal value (`onlyshrink`, `10`, `1`, …) and an expression string follow.
+  - `<mode>` — integer bitfield. Observed values across the full td_snapshot expansion (counts in parens):
 
-    Bit layout (working hypothesis):
-    - `1` (0x01): "literal value is meaningful" flag.
-    - `16` (0x10): has expression text.
-    - `32` (0x20): bound/exported.
+    | mode | example | value | expr present | notes |
+    |------|---------|-------|--------------|-------|
+    | 0 (×84) | `label 0 "> Clipboard"` | real | no | plain constant |
+    | 16 (×2) | `panels 16 copy_btn parent()` | real | yes | constant value, expression text *also* saved |
+    | 17 (×4) | `clone 17 "" op.TDTox.op('defaultCOMPs/button')` | empty `""` | yes | active expression mode |
+    | 32 (×1) | `y 32 200` | real | no | constant-shaped but distinct from 0 — observed only on a `y` position parameter; semantics unclear |
+    | 48 (×4) | `file 48 "" f'scripts/{me.name}.py'` | empty `""` | yes | another expression-bearing mode |
+    | 49 (×32) | `scaletofit 49 onlyshrink "parent()..."` | real | yes | both literal and expression present |
+
+    Working hypothesis for the bit layout (still tentative — needs more fixtures to confirm):
+    - low bits select active mode (TD's ParMode: CONSTANT/EXPRESSION/EXPORT/BIND).
+    - bit 4 (0x10): expression text is stored on the parameter (whether or not active).
+    - bit 5 (0x20): some additional flag — possibly "bind expression stored" or "value differs from operator default in a way that needs explicit serialization". `y 32 200` doesn't carry trailing expression text, which breaks the simple "bit 5 = bind stored" reading.
+
+    No EXPORT-mode (TD bit unknown) or pure-BIND parameters appeared in this snapshot.
   - `<value>` — literal value token. Strings are double-quoted when needed; numbers, on/off, and bareword tokens (e.g. `onlyshrink`, `multiline`, `cp1252`) are unquoted.
   - `<expr>` — Python expression as written by the user. May be quoted (`"..."`) or unquoted (bare Python, including f-strings). Present only when the mode bit indicates an expression.
 
