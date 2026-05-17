@@ -5,7 +5,7 @@
 # Captures the network containing this DAT (me.parent()) by default.
 # To target a different network: snapshot_patch('/project1/some/comp')
 
-# core.py v1.3.0 | sha256:1ea660efcc14a2f8fb76313d29e282804eb28e2bb8aca187b115fc67c796ac55
+# core.py v1.4.0 | sha256:4b42adbd027594d35dbc8b72e5217aab93f7a1a646110cb3b342e4a93033190c
 import re
 
 def op_display_type(o):
@@ -142,6 +142,14 @@ def walk_patch(root=None):
                 # (e.g. Feedback TOP's "top" parameter pointing to a comp by value).
                 local_refs.add((p.name, cur.path))
                 ref_edges.add((o.path, cur.path, p.name))
+            elif mode == 'CONSTANT' and isinstance(cur, (list, tuple)):
+                # Multi-OP-valued parameter: list of OP references.
+                # Composite TOP 'tops', Switch TOP, Select TOP 'chops', Merge CHOP
+                # family, Cross TOP, etc. Each OP-typed element gets its own ref edge.
+                for item in cur:
+                    if hasattr(item, 'path'):
+                        local_refs.add((p.name, item.path))
+                        ref_edges.add((o.path, item.path, p.name))
 
             if changed:
                 pars_out.append({
