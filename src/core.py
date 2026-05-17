@@ -1,4 +1,4 @@
-# core.py v1.1.2 | sha256:cd7a6f507c23b47c053cd584de6419043772ed5b0a05d2a76e0d1ed3ad9e627e
+# core.py v1.2.0 | sha256:d32216054b79ff555e6dfdf18cefc0f42033aa05d38c4687d1c71cad5b1f325b
 import re
 
 def op_display_type(o):
@@ -7,7 +7,7 @@ def op_display_type(o):
 def op_label(o):
     return '{} [{}]'.format(o.path, op_display_type(o))
 
-def snapshot_patch(root=None):
+def walk_patch(root=None):
     if root is None:
         root_op = me.parent()
     else:
@@ -32,7 +32,7 @@ def snapshot_patch(root=None):
 
     wire_edges = set()
     ref_edges = set()
-    node_blocks = []
+    nodes = []
 
     # Regex-scan an expression string for op('name') patterns and resolve each
     # to a full operator path. Tries owner-relative, then absolute resolution.
@@ -48,6 +48,7 @@ def snapshot_patch(root=None):
         input_slots = []
         outputs = []
         local_refs = set()
+        pars_out = []
 
         # Collect incoming wire connections with their slot indices.
         # Slot order matters for operators like Composite TOP.
@@ -79,19 +80,6 @@ def snapshot_patch(root=None):
             pass
 
         input_slots = sorted(set(input_slots), key=lambda x: (x[0], x[1]))
-
-        block = [op_label(o)]
-
-        if input_slots:
-            block.append('  input_slots:')
-            for idx, path in input_slots:
-                block.append('    [{}] {}'.format(idx, path))
-        else:
-            block.append('  input_slots: (none)')
-
-        block.append('  outputs: ' + (', '.join(outputs) if outputs else '(none)'))
-
-        found_any = False
 
         for p in o.pars():
             if p.name == 'pageindex':
@@ -145,28 +133,31 @@ def snapshot_patch(root=None):
             elif mode == 'CONSTANT' and hasattr(cur, 'path'):
                 # OP-typed value ref: parameter holds an operator object directly
                 # (e.g. Feedback TOP's "top" parameter pointing to a comp by value).
-                # Only record if the target is within the captured network.
                 local_refs.add((p.name, cur.path))
                 ref_edges.add((o.path, cur.path, p.name))
 
             if changed:
-                found_any = True
-                block.append(
-                    '  par {}: current={!r}, default={!r}, mode={}'.format(
-                        p.name, cur, default, mode
-                    ) + (' | expr={!r}'.format(expr_text) if expr_text else '')
-                )
+                pars_out.append({
+                    'name': p.name,
+                    'current': cur,
+                    'default': default,
+                    'mode': mode,
+                    'expr': expr_text,
+                })
 
-        if local_refs:
-            block.append('  refs:')
-            for par_name, ref_path in sorted(local_refs):
-                block.append('    {} -> {}'.format(par_name, ref_path))
+        nodes.append({
+            'path': o.path,
+            'label': op_label(o),
+            'input_slots': input_slots,
+            'outputs': outputs,
+            'pars': pars_out,
+            'refs': sorted(local_refs),
+        })
 
-        if not found_any:
-            block.append('  par (no changed parameters found)')
+    return nodes, wire_edges, ref_edges, op_by_path
 
-        node_blocks.append('\n'.join(block))
 
+def render_legacy(nodes, wire_edges, ref_edges, op_by_path):
     def fmt_wire(src_path, dst_path, in_idx, out_idx):
         src_o = op_by_path.get(src_path)
         dst_o = op_by_path.get(dst_path)
@@ -184,6 +175,37 @@ def snapshot_patch(root=None):
         src_label = op_label(src_o) if src_o else src_path
         dst_label = op_label(dst_o) if dst_o else dst_path
         return '  {} -[{}]-> {}'.format(src_label, par_name, dst_label)
+
+    node_blocks = []
+    for n in nodes:
+        block = [n['label']]
+
+        if n['input_slots']:
+            block.append('  input_slots:')
+            for idx, path in n['input_slots']:
+                block.append('    [{}] {}'.format(idx, path))
+        else:
+            block.append('  input_slots: (none)')
+
+        block.append('  outputs: ' + (', '.join(n['outputs']) if n['outputs'] else '(none)'))
+
+        for par in n['pars']:
+            line = '  par {}: current={!r}, default={!r}, mode={}'.format(
+                par['name'], par['current'], par['default'], par['mode']
+            )
+            if par['expr']:
+                line += ' | expr={!r}'.format(par['expr'])
+            block.append(line)
+
+        if n['refs']:
+            block.append('  refs:')
+            for par_name, ref_path in n['refs']:
+                block.append('    {} -> {}'.format(par_name, ref_path))
+
+        if not n['pars']:
+            block.append('  par (no changed parameters found)')
+
+        node_blocks.append('\n'.join(block))
 
     lines = []
     lines.append('WIRE EDGES')
@@ -205,3 +227,8 @@ def snapshot_patch(root=None):
     lines.extend(node_blocks)
 
     return '\n\n'.join(lines)
+
+
+def snapshot_patch(root=None):
+    nodes, wire_edges, ref_edges, op_by_path = walk_patch(root)
+    return render_legacy(nodes, wire_edges, ref_edges, op_by_path)
