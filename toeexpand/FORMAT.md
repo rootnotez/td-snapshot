@@ -1,6 +1,8 @@
 # toeexpand format notes
 
-`toeexpand` (TouchDesigner CLI tool at `/Applications/TouchDesigner.app/Contents/MacOS/toeexpand`) expands a `.toe`/`.tox` into a git-diffable directory tree plus a sibling `.toc` index file. These notes were derived by inspecting `2026-05-13_td_snapshot.tox.dir/` + `.toc`; they may not cover every operator family.
+`toeexpand` (TouchDesigner CLI tool at `/Applications/TouchDesigner.app/Contents/MacOS/toeexpand`) expands a `.toe`/`.tox` into a git-diffable directory tree plus a sibling `.toc` index file. These notes were derived primarily from `2026-05-13_td_snapshot.tox.dir/` (small, hand-built) and `2026-05-17__datlab-classified-v1/v1/classifier.tox.dir/` (larger, with custom parameters, COMP inputs, table/script DATs); they may not cover every operator family.
+
+Note: toeexpand accepts only `.toe`/`.tox` input. Pointing it at a `.zip` produces an empty `.toc` and no expansion — unzip first.
 
 ## Layout
 
@@ -10,16 +12,20 @@ For an input `td-snapshot.tox`, toeexpand produces:
 td-snapshot.tox.toc     # flat list of every artifact path
 td-snapshot.tox.dir/
   .build                # build metadata
-  <root>.n              # one .n per node
-  <root>.parm           # one .parm per node (if the node has params)
-  <root>.panel          # one .panel per node (panel-bearing nodes only)
-  <root>.text           # one .text per node (DAT contents only)
+  <root>.n              # node definition
+  <root>.parm           # parameter values
+  <root>.cparm          # custom-parameter definitions (only on COMPs with custom pars)
+  <root>.panel          # panel layout (panel-bearing COMPs only)
+  <root>.network        # external connector definitions (COMPs that expose in*/out* connectors)
+  <root>.text           # text-DAT body
+  <root>.table          # table-DAT body (binary)
+  <root>.script         # script-DAT / script-CHOP body
   <root>/               # subdir mirrors COMP children
     <child>.n
     ...
 ```
 
-The `<root>` name is the top-level COMP name from the .tox (e.g. `td_snapshot`). One file per (node, kind); a node may have any subset of `{.n, .parm, .panel, .text}` depending on what it carries.
+The `<root>` name is the top-level COMP name from the .tox (e.g. `td_snapshot`). One file per (node, kind); a node carries whichever subset of `{.n, .parm, .cparm, .panel, .network, .text, .table, .script}` applies to its type and configuration.
 
 ## `.toc` — table of contents
 
@@ -91,27 +97,118 @@ scaletofit 49 onlyshrink "parent().par[me.curPar.name] or me.curPar.val"
 - `?` lines bracket each parameter page. Only changed-from-default parameters appear between them.
 - Each parameter row: `<name> <mode> <value> [<expr>]`
   - `<name>` — parameter internal name.
-  - `<mode>` — integer bitfield. Observed values across the full td_snapshot expansion (counts in parens):
+  - `<mode>` — 32-bit integer bitfield. The width caught us off guard initially: the small `td_snapshot` only exercised the low byte (`0..49`), but `classifier.tox` parameter values use a wider range with bit 26 and bit 27 set.
 
-    | mode | example | value | expr present | notes |
-    |------|---------|-------|--------------|-------|
-    | 0 (×84) | `label 0 "> Clipboard"` | real | no | plain constant |
-    | 16 (×2) | `panels 16 copy_btn parent()` | real | yes | constant value, expression text *also* saved |
-    | 17 (×4) | `clone 17 "" op.TDTox.op('defaultCOMPs/button')` | empty `""` | yes | active expression mode |
-    | 32 (×1) | `y 32 200` | real | no | constant-shaped but distinct from 0 — observed only on a `y` position parameter; semantics unclear |
-    | 48 (×4) | `file 48 "" f'scripts/{me.name}.py'` | empty `""` | yes | another expression-bearing mode |
-    | 49 (×32) | `scaletofit 49 onlyshrink "parent()..."` | real | yes | both literal and expression present |
+    **Two-tier structure observed:**
+    - High bits — coarse category. Observed: `0x04000000` (bit 26) on most rows; `0x0C000000` (bits 26+27) on rows whose values are operators or contain expressions of a particular kind (e.g. `Emb0data ... op('./stats_table')[...]`). Likely flags like "custom-parameter-page" or "OP-typed value". The small `td_snapshot` had neither set, which is why its modes fit in a byte.
+    - Low byte — fine-grained flags. Observed values across both expansions: `0x00, 0x10, 0x11, 0x20, 0x30, 0x31, 0x40, 0x50, 0x51, 0x71, 0xC0` (when high byte is `0x04`) plus extras up to `0x1A3` when wider bits are set. The original small-file modes `0/16/17/32/48/49` are all low-byte-only values, and the same patterns reappear here combined with the high-byte category.
 
-    Working hypothesis for the bit layout (still tentative — needs more fixtures to confirm):
-    - low bits select active mode (TD's ParMode: CONSTANT/EXPRESSION/EXPORT/BIND).
-    - bit 4 (0x10): expression text is stored on the parameter (whether or not active).
-    - bit 5 (0x20): some additional flag — possibly "bind expression stored" or "value differs from operator default in a way that needs explicit serialization". `y 32 200` doesn't carry trailing expression text, which breaks the simple "bit 5 = bind stored" reading.
+    | mode (decimal) | hex | example | value | expr |
+    |---:|:---|:---|:---|:---|
+    | 0 | `0x00000000` | `label 0 "> Clipboard"` | real | no |
+    | 16 | `0x00000010` | `panels 16 copy_btn parent()` | real | yes |
+    | 17 | `0x00000011` | `clone 17 "" op.TDTox.op(...)` | empty | yes |
+    | 32 | `0x00000020` | `y 32 200` | real | no |
+    | 48 | `0x00000030` | `file 48 "" f'scripts/{me.name}.py'` | empty | yes |
+    | 49 | `0x00000031` | `scaletofit 49 onlyshrink "..."` | real | yes |
+    | 67108864 | `0x04000000` | `pageindex 67108864 3` | real | no |
+    | 67108928 | `0x04000040` | `Searchactive 67108928 on` | real | no |
+    | 67109184 | `0x04000140` | `Version 67109184 1.0.1` | real | no |
+    | 201326673 | `0x0C000051` | `Emb0data ... "" op('./stats_table')[...]` | empty | yes |
+    | 201326912 | `0x0C000140` | `Emb0active 201326912 off` | real | no |
 
-    No EXPORT-mode (TD bit unknown) or pure-BIND parameters appeared in this snapshot.
+    Open: tease apart what specific TD ParMode each low-byte pattern maps to (CONSTANT/EXPRESSION/EXPORT/BIND × stored-expr/stored-bind/changed-from-default). A targeted fixture with one parameter per mode is the cleanest way to nail this down.
   - `<value>` — literal value token. Strings are double-quoted when needed; numbers, on/off, and bareword tokens (e.g. `onlyshrink`, `multiline`, `cp1252`) are unquoted.
   - `<expr>` — Python expression as written by the user. May be quoted (`"..."`) or unquoted (bare Python, including f-strings). Present only when the mode bit indicates an expression.
 
 - The `pageindex` parameter (which page the param editor was last on) is captured here but is suppressed by the snapshot renderer ([src/core.py](../src/core.py)) because it tracks UI state, not user changes.
+
+## `.cparm` — custom parameter *definitions*
+
+Present on COMPs that expose custom parameters (the user-facing UI on `Base`/`Container`/etc.). Separate from `.parm`, which only holds the current *values*.
+
+```
+?
+pages 4 "Record (in1)" "Search (in2)" "Cache to File" About
+772804868 Emb:Emb0label Label 1 1 0 0 1 1 1 2 0 "" "" "Record (in1)" 1
+-1374678782 K "K Neighbors" 1 3 1 1 1 100 100 2 0 "" "" "Search (in2)" 2
+-1374678769 Selectdisplay Display 1 1 0 0 1 1 1 2 0 "" "" "Search (in2)" 4097 4 neighbors "Neighbors Table" votes "Category Votes" stats "Cache Stats" none None 4
+772935937 Recorddur "Record Duration (seconds)" 1 1 0 0 1 1 25 2 0 "" "" "Record (in1)" 10 me.par.Recordtimer.eval()
+?
+```
+
+- `?` lines bracket the block.
+- `pages <count> <name1> <name2> ...` — declares the COMP's custom parameter pages, in order.
+- Each subsequent line defines one custom parameter. Observed fields (positional):
+  1. **type id** — large signed int (e.g. `772804868`, `-1374678782`). Encodes the par type (Toggle / Int / Float / Str / Menu / Pulse / OP / …). Same id ⇒ same type; the exact decoding of the int is unknown.
+  2. **name** — internal name. Multi-component parameters use a `<group>:<name>` form (e.g. `Emb:Emb0label`).
+  3. **label** — display label (quoted if it contains spaces).
+  4. **size** (typically `1`, sometimes `3` for vector pars like `K`).
+  5–11. Numeric range/default/clamp fields: roughly `<min-clamp-flag> <max-clamp-flag> <?> <min> <max> <default> <section>` — exact order not pinned down, but `K`'s `1 3 1 1 1 100 100 2` shows `size=3`, default and limits land where you'd expect for the `K Neighbors` integer parameter.
+  12. **`0`** — appears constant in samples.
+  13–14. Two empty strings — possibly tooltip / help text slots.
+  15. **page name** — which page from the `pages` line this parameter sits on.
+  16. **page-internal flags / sort order** — e.g. `1` to `11`, plus `4097` on menu types.
+  - Menu parameters add a variable-length suffix: after the flags they emit `<entry-count> <key1> <label1> <key2> <label2> ...` followed by the trailing sort index.
+  - Parameters with a bind/eval expression append the expression text at the end of the line (`me.par.Recordtimer.eval()` on `Recorddur`).
+
+  This is the densest part of the format and where most precision loss would happen in a round-trip — leave verbatim unless you've decoded the exact column meanings against a TD-built fixture.
+
+## `.network` — COMP external connectors
+
+Present on COMPs that expose external in/out connectors (have `in_*` / `out_*` operators inside).
+
+```
+1
+compinputs
+{
+0 	""
+	in_record
+	CHOP
+1 	""
+	in_search
+	CHOP
+}
+end
+```
+
+- Line 1: format version (`1`).
+- `compinputs { ... }` (and presumably `compoutputs`, not seen yet) blocks list connector slots.
+- Each record: `<slot-index>\t"<label>"` then `\t<internal-op-name>` then `\t<family>` (CHOP/TOP/SOP/DAT/MAT/POP).
+- Empty `""` label = no explicit user-set label.
+
+## `.script` — Script DAT / Script CHOP / Script SOP body
+
+```
+1
+{
+   rate = 60
+   start = 0
+   tracklength = 1
+   tracks = 1
+   {
+      name = activeIndex
+      data_rle = 0
+   }
+}
+```
+
+- Line 1: version (`1`).
+- Body: brace-nested `key = value` records. Used for the serialized internal state of Script-family operators (channels, point attrs, etc.). Pure ASCII, diffs cleanly.
+
+## `.table` — Table DAT body (binary)
+
+```
+00000000: 31 0a 2a 00 00 00 01 00 00 00 02 00 00 00 09 00  1.*.............
+00000010: 00 00 00 00 00 00 02 00 00 00 06 73 74 61 74 75  ...........statu
+00000020: 73 00 ...                                        s. ...
+```
+
+- Line 1: `1\n` (version) — same convention as `.text`/`.script`.
+- Line 2: `*` then a binary header (`\x00\x00\x00\x01`, `\x00\x00\x00\x02` = col count?, `\x00\x00\x00\x09` = row count? — needs more samples).
+- Each cell: tag `\x00\x00\x00\x02`, then `\x00\x00\x00<LEN>` big-endian length prefix, then `<LEN>` bytes of UTF-8 text, then `\x00` terminator.
+
+Binary, but predictable; cells are still human-readable in a hex dump, and small table changes produce small diffs.
 
 ## `.panel` — panel layout
 
@@ -156,9 +253,11 @@ The binary header makes `.text` files slightly harder to diff than the other art
 ## Notes / open questions
 
 - `.n` `view` line layout (the 12 trailing numbers) is not decoded — leave verbatim when round-tripping.
-- `.parm` mode bitfield: only `0/17/32/48/49` observed in this snapshot; export-mode (bit unknown) and bind-with-expression combinations are untested.
+- `.parm` mode bitfield: need to map each observed low-byte pattern to TD's actual ParMode (CONSTANT/EXPRESSION/EXPORT/BIND × stored-expr/bind/value flags). The two high bits (`0x04000000`, `0x08000000`) presumably encode "is custom parameter" / "is OP-typed value" but haven't been confirmed.
+- `.cparm` column layout: the seven numeric fields in positions 5–11 (clamp flags, defaults, min/max, "section") are inferred, not proven. Build a fixture with one custom par per type to lock the schema down.
+- `.cparm` type-id integers: the encoding of the leading signed int (e.g. `772804868`, `-1374678782`, `772935937`) is unknown. Same id always means same par type; might be a packed FourCC or a TD-internal hash.
 - `.panel` `children` value seems to be a count of nested panel descendants, but the relationship to the actual child list (which is implicit via the sibling subdirectory) hasn't been confirmed.
-- `.text` binary preamble: needs more samples (DATs of different families — table, CHOP-derived, etc.) to fully decode.
+- `.text` and `.table` binary preambles share the `1\n*<padding><u32...>` shape — looks like a common DAT framing header. Decoding the full preamble would let us round-trip cleanly.
 - `radioname`/`lradioname` appear only at the root container — likely state from the active radio-button selection at save time, not structural.
 
-When extending these notes, prefer to add a small fixture under `tests/` rather than guessing — the existing `Sweet16*` fixtures plus the main `td-snapshot.tox` cover only a narrow slice of TD's operator zoo.
+When extending these notes, prefer to add a small fixture under `tests/` rather than guessing — current sources cover only two `.tox`es' worth of the operator zoo.
