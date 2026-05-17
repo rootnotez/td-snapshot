@@ -5,7 +5,7 @@
 # Captures the network containing this DAT (me.parent()) by default.
 # To target a different network: snapshot_patch('/project1/some/comp')
 
-# core.py v1.2.0 | sha256:d32216054b79ff555e6dfdf18cefc0f42033aa05d38c4687d1c71cad5b1f325b
+# core.py v1.4.0 | sha256:4b42adbd027594d35dbc8b72e5217aab93f7a1a646110cb3b342e4a93033190c
 import re
 
 def op_display_type(o):
@@ -142,6 +142,14 @@ def walk_patch(root=None):
                 # (e.g. Feedback TOP's "top" parameter pointing to a comp by value).
                 local_refs.add((p.name, cur.path))
                 ref_edges.add((o.path, cur.path, p.name))
+            elif mode == 'CONSTANT' and isinstance(cur, (list, tuple)):
+                # Multi-OP-valued parameter: list of OP references.
+                # Composite TOP 'tops', Switch TOP, Select TOP 'chops', Merge CHOP
+                # family, Cross TOP, etc. Each OP-typed element gets its own ref edge.
+                for item in cur:
+                    if hasattr(item, 'path'):
+                        local_refs.add((p.name, item.path))
+                        ref_edges.add((o.path, item.path, p.name))
 
             if changed:
                 pars_out.append({
@@ -236,8 +244,73 @@ def render_legacy(nodes, wire_edges, ref_edges, op_by_path):
     return '\n\n'.join(lines)
 
 
-def snapshot_patch(root=None):
+def render_blocks(nodes, wire_edges, ref_edges, op_by_path):
+    # Per-node-block format. See project_per_node_block_format memory for design rationale.
+    # Sequential IDs (n1, n2, ...) assigned in walk order; out-of-network ref/wire targets
+    # get IDs continuing past in-network nodes, declared as bare lines at the bottom.
+
+    id_by_path = {n['path']: 'n{}'.format(i + 1) for i, n in enumerate(nodes)}
+
+    in_network = set(id_by_path)
+    extra_paths = set()
+    for src, dst, _, _ in wire_edges:
+        if src not in in_network: extra_paths.add(src)
+        if dst not in in_network: extra_paths.add(dst)
+    for src, dst, _ in ref_edges:
+        if src not in in_network: extra_paths.add(src)
+        if dst not in in_network: extra_paths.add(dst)
+    extra_sorted = sorted(extra_paths)
+    for i, p in enumerate(extra_sorted):
+        id_by_path[p] = 'n{}'.format(len(nodes) + 1 + i)
+
+    wires_by_dst = {}
+    for src, dst, in_idx, out_idx in wire_edges:
+        wires_by_dst.setdefault(dst, []).append((in_idx, src, out_idx))
+    refs_by_src = {}
+    for src, dst, par_name in ref_edges:
+        refs_by_src.setdefault(src, []).append((par_name, dst))
+
+    def label_for(path):
+        o = op_by_path.get(path)
+        return op_label(o) if o else path
+
+    def fmt_par(par):
+        s = '  {} = {!r} (default {!r}'.format(par['name'], par['current'], par['default'])
+        if par['mode'] != 'CONSTANT':
+            s += ', {}'.format(par['mode'])
+        if par['expr']:
+            s += ', expr={!r}'.format(par['expr'])
+        return s + ')'
+
+    lines = ['# td-snapshot — each node block: changed pars, "in[N] <- src" for incoming wires, "ref par -> target" for parameter refs.']
+
+    for n in nodes:
+        nid = id_by_path[n['path']]
+        lines.append('')
+        lines.append('{} = {}'.format(nid, n['label']))
+        for par in n['pars']:
+            lines.append(fmt_par(par))
+        for in_idx, src_path, out_idx in sorted(wires_by_dst.get(n['path'], [])):
+            src_id = id_by_path.get(src_path, src_path)
+            if out_idx is not None and out_idx != 0:
+                lines.append('  in[{}] <- {} [out:{}]'.format(in_idx, src_id, out_idx))
+            else:
+                lines.append('  in[{}] <- {}'.format(in_idx, src_id))
+        for par_name, target_path in sorted(refs_by_src.get(n['path'], [])):
+            target_id = id_by_path.get(target_path, target_path)
+            lines.append('  ref {} -> {}'.format(par_name, target_id))
+
+    for p in extra_sorted:
+        lines.append('')
+        lines.append('{} = {}'.format(id_by_path[p], label_for(p)))
+
+    return '\n'.join(lines)
+
+
+def snapshot_patch(root=None, format='legacy'):
     nodes, wire_edges, ref_edges, op_by_path = walk_patch(root)
+    if format == 'blocks':
+        return render_blocks(nodes, wire_edges, ref_edges, op_by_path)
     return render_legacy(nodes, wire_edges, ref_edges, op_by_path)
 
 # quickpaste_runner.py v1.0.0 | sha256:483271940e07bb28d1b4f896443f8b6034e5edea57ed352887f31bce7e04eb91
