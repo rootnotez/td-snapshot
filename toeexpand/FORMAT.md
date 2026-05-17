@@ -1,6 +1,12 @@
 # toeexpand format notes
 
-`toeexpand` (TouchDesigner CLI tool at `/Applications/TouchDesigner.app/Contents/MacOS/toeexpand`) expands a `.toe`/`.tox` into a git-diffable directory tree plus a sibling `.toc` index file. These notes were derived primarily from `2026-05-13_td_snapshot.tox.dir/` (small, hand-built) and `2026-05-17__datlab-classified-v1/v1/classifier.tox.dir/` (larger, with custom parameters, COMP inputs, table/script DATs); they may not cover every operator family.
+`toeexpand` (TouchDesigner CLI tool at `/Applications/TouchDesigner.app/Contents/MacOS/toeexpand`) expands a `.toe`/`.tox` into a git-diffable directory tree plus a sibling `.toc` index file. These notes were derived from:
+
+- `2026-05-13_td_snapshot.tox.dir/` — small, hand-built `.tox`.
+- `2026-05-17__datlab-classified-v1/v1/classifier.tox.dir/` — larger `.tox` with custom parameters, COMP inputs, table/script DATs.
+- A 12-file sample expanded from `toeexpand/resources/` (TD-Tutorials, TouchDesigner_Shared, SharedTox, TDAudioAnalysis, isf-touchdesigner, FunctionStore_tools, TD-Toxes, etc.) covering both `.tox` and full project `.toe` files.
+
+They may not cover every operator family.
 
 Note: toeexpand accepts only `.toe`/`.tox` input. Pointing it at a `.zip` produces an empty `.toc` and no expansion — unzip first.
 
@@ -20,6 +26,19 @@ td-snapshot.tox.dir/
   <root>.text           # text-DAT body
   <root>.table          # table-DAT body (binary)
   <root>.script         # script-DAT / script-CHOP body
+  <root>.chop           # CHOP saved-state body
+  <root>.feedback       # Feedback CHOP/TOP body
+  <root>.beat           # Beat CHOP body
+  <root>.gnode          # geometry COMP transform matrices
+  <root>.ts             # time-slicer / track state
+  <root>.replicator     # Replicator COMP state
+  <root>.oldacbo        # legacy Audio CHOP buffer object
+  <root>.lod            # bundled archive of a sub-tree (see below)
+  # full .toe roots additionally produce:
+  .start                # project startup settings
+  .root                 # root viewport state
+  .grps                 # group definitions
+  .application          # desktop/pane layout
   <root>/               # subdir mirrors COMP children
     <child>.n
     ...
@@ -250,10 +269,68 @@ lradioname scopy_btn         # root container only
 
 The binary header makes `.text` files slightly harder to diff than the other artifacts, but the bulk content is plain text and diffs cleanly in practice.
 
+## Project-only files (full `.toe` roots)
+
+These appear in expansions of `.toe` (whole project) but not `.tox` (single COMP):
+
+- **`.start`** — startup settings, key/value lines:
+  ```
+  cookrate 60
+  clock -f 1 -s 1 -o 0 -w 0
+  realtime on
+  viewers off
+  #expectednodes 101 29193
+  resetaudioondevicechange off
+  ```
+- **`.root`** — root-viewport state. Single `v <x> <y> <zoom>` line plus `end`.
+- **`.grps`** — group definitions. Minimal in samples (`-2\n0\n`); needs a project with non-trivial node groups to fully decode.
+- **`.application`** — desktop/pane/window layout. `desk ...`, `neteditor ...`, `winplacement ...` directives — a flat command script restoring the editor UI state at save time.
+
+## Operator-body files (per node, family-specific saved state)
+
+Several CHOP/COMP families emit a body file alongside `.n`/`.parm`. The first line is always a version int, then family-specific content.
+
+| ext | example body | notes |
+|---|---|---|
+| `.chop` | `5\n1\n` | Constant/Null/etc CHOP saved channel data. Bare integers in samples; expect richer payloads for non-trivial CHOPs. |
+| `.feedback` | `3\n1920\n1080\n1\n1920\n1080\n0\n109\n` | Feedback TOP cache state — version, then resolution/format ints. |
+| `.beat` | `1\n` | Beat CHOP — version only in samples. |
+| `.gnode` | `1\nUT_DMatrix4 1 0 0 0 0 1 0 ... 1\n` ×3 | Geometry COMP — three 4x4 transform matrices (xform / pre-pivot / post-pivot, probably). |
+| `.ts` | `65538\n1\n555\n554\n0\n0\n1\n...{ rate=60 start=555 ... }` | Time-slicer state — header ints then a brace-block (same syntax as `.script`) holding track metadata. |
+| `.replicator` | `3\n0\n` | Replicator COMP cache. Trivial in samples. |
+| `.oldacbo` | `1\n0\n0\n` | Legacy Audio CHOP buffer-object cache. |
+
+All of these were emitted at least once across the 12-file sample; none have been fully decoded.
+
+## `.lod` — bundled archive
+
+Found inside full-`.toe` expansions, typically under `local/` (TD's project-local component scratch area). A `.lod` is a single binary file that packs an entire sub-COMP's worth of expanded artifacts inline rather than spilling them into a sibling subdirectory.
+
+Hex layout (from `local/midi.lod`):
+
+```
+04 20 20 20 59 .build\nversion 099\nbuild 2022.24200\n...
+04 09 20 20 20 59 device.n\nDAT:table\ntile 50 -130 644 126\n...
+04 20 20 20 5C device.parm\n?\ndefaultreadencoding 0 cp1252\n...
+04 20 20 20 5F device.table\n1\n*<padding>...
+...
+```
+
+Structure (working model):
+- Each record begins with a `\x04` framing byte.
+- Next 4 bytes encode an entry length (interpreted as a big-endian or padded int — first byte `\x20` ≈ space looks like padding; the trailing byte is the actual length, e.g. `0x59`, `0x5C`, `0x5F`).
+- Then the artifact path inside the bundle (e.g. `.build`, `device.n`, `device.parm`).
+- Then the artifact body (same bytes the corresponding standalone file would contain).
+- Records concatenate until end of file.
+
+A `.lod` essentially is a flat key/value store mirroring what would otherwise be a directory + table-of-contents. Roundtripping requires understanding the length encoding precisely — needs more sampling before doing so.
+
 ## Notes / open questions
 
 - `.n` `view` line layout (the 12 trailing numbers) is not decoded — leave verbatim when round-tripping.
-- `.parm` mode bitfield: need to map each observed low-byte pattern to TD's actual ParMode (CONSTANT/EXPRESSION/EXPORT/BIND × stored-expr/bind/value flags). The two high bits (`0x04000000`, `0x08000000`) presumably encode "is custom parameter" / "is OP-typed value" but haven't been confirmed.
+- `.parm` mode bitfield: many additional low-byte values appear in third-party toxes (`2, 18, 34, 64, 66, 80, 96, 113, 192, 512, 515, 547`, …). Notable: `113` = `64|32|16|1`, seen with bind-to-parent expressions like `me.parent().par.File`; `512` (bit 9) seen on pulse parameters bound to a same-named parent par; `64` (bit 6 alone) seen on a lot of custom-parameter value writes (`Feedbackgamma 64 0.9`). Map each observed low-byte pattern to TD's actual ParMode (CONSTANT/EXPRESSION/EXPORT/BIND × stored-expr/bind/value flags). The two high bits (`0x04000000`, `0x08000000`) presumably encode "is custom parameter" / "is OP-typed value" but haven't been confirmed.
+- `.lod` length encoding: needs more samples and a careful hex inspection to nail down whether the per-record length is 1-byte, 2-byte, or 4-byte big-endian with the padding interpretation above.
+- Operator-body files (`.chop`, `.feedback`, `.beat`, `.gnode`, `.ts`, `.replicator`, `.oldacbo`) — only minimal samples decoded. A targeted sweep with non-trivial CHOPs (loaded buffers, recorded channels) would expose richer payloads.
 - `.cparm` column layout: the seven numeric fields in positions 5–11 (clamp flags, defaults, min/max, "section") are inferred, not proven. Build a fixture with one custom par per type to lock the schema down.
 - `.cparm` type-id integers: the encoding of the leading signed int (e.g. `772804868`, `-1374678782`, `772935937`) is unknown. Same id always means same par type; might be a packed FourCC or a TD-internal hash.
 - `.panel` `children` value seems to be a count of nested panel descendants, but the relationship to the actual child list (which is implicit via the sibling subdirectory) hasn't been confirmed.
