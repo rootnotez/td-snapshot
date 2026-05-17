@@ -2,3 +2,4 @@ CLAUDE.md
 .claude/
 .DS_Store
 tests/post_refactor/
+tests/blocks_samples/
