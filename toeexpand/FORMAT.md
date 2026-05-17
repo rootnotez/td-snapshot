@@ -78,7 +78,9 @@ td_snapshot/core.n
 ...
 ```
 
-- Line 1: header `# <v0> <v1> <v2> <v3> <v4>`. First field appears to be a format version (4 in this snapshot); remaining fields unknown — likely counters/flags. **Conditional**: present on the `.toc` for most `.tox` outputs, but commonly absent on `.toe` outputs (where line 1 is `.build` directly). The header presence/absence does not appear to correlate strictly with TD build version — both build 2017 and build 2025 emit headerless `.toe.toc` files in our samples. Treat the header as optional when parsing.
+- Line 1: header `# <v0> <v1> <v2> <v3> <v4>`. First field appears to be a format version (4 in this snapshot); remaining fields likely counters/flags. **Presence is a clean `.tox` vs `.toe` marker**, confirmed across 18 `.toe.dir/` + 35 `.tox.dir/` samples spanning builds 2017–2025:
+  - `.tox.toc` → always has the `# 4 0 0 0 1` header.
+  - `.toe.toc` → never has the header; line 1 is `.build` directly.
 - Remaining lines: every file in `<basename>.dir/`, relative to the dir, in deterministic order. Acts as a manifest the inverse `toecollapse` tool can read.
 
 ## `.build` — build stamp
@@ -99,6 +101,7 @@ Plain `key value` lines. Captures the TD version that produced the export. Sits 
 FAMILY:type
 v <vx> <vy> <vzoom>
 tags <count> <flag> <tag1> [<tag2>...]
+dict <hex-encoded-pickle>
 tile <x> <y> <w> <h>
 flags = <tok> <tok> <tok>...
 comment "<user comment with \n escapes>"
@@ -119,13 +122,14 @@ exports
 }
 dock <sibling-name>
 color <r> <g> <b>
-view <...12 numbers...>
+view <...~11 numbers, layout depends on FAMILY...>
 end
 ```
 
 - Line 1 — `FAMILY:type`. Family ∈ `COMP|TOP|CHOP|SOP|MAT|DAT|POP`. Type is the operator type id (`container`, `button`, `text`, `out`, `panelexec`, `parexec`, `par`, …).
 - `v <x> <y> <zoom>` — only on COMPs; saved network-editor viewport for the COMP's interior.
 - `tags <count> <flag> <tag1>...` — node tagging (raytk). Example: `tags 0 1 buildLock` (one tag, "buildLock").
+- `dict <hex>` — hex-encoded Python pickle (v4 magic: `8004...`) holding arbitrary serialized COMP state. Observed in stoner.tox (build 2023.12120). Used for COMPs that stash unstructured Python metadata.
 - `tile <x> <y> <w> <h>` — node tile position and size in the parent network editor.
 - `flags = ...` — space-separated tokens, e.g. `picked on current on viewer 1 parlanguage 0`. Token grammar interleaves `<name> <value>` pairs (`viewer N`, `parlanguage N`) and bare `<name> on/off` flags. Note the literal two spaces after `=`. Full observed vocabulary (build-dependent — some appear only in TD 2021+):
 
@@ -156,10 +160,10 @@ end
 - `exports { ... }` — list of operator paths/names this node exports to its parent COMP's custom parameters. Observed on SOP:script, TOP:glslmulti, and other operators that publish results upward.
 - `dock <name>` — names a sibling node this DAT is docked to (callback DATs are typically docked to their owning operator's `_callbacks` slot).
 - `color <r> <g> <b>` — RGB in 0–1.
-- `view <...>` — 12-number editor view state, observed on DATs (text/parexec/panelexec). Layout not fully reverse-engineered.
+- `view <...>` — editor view state. Typically 11 numbers; layout depends on operator family (observed on DATs and on MAT operators starting in build 2021+; not exclusive to DATs). For DAT operators: `<type-flag> <h-scroll> 1 1 1 <v-scroll> 0 0 0 1 1`-ish. For CHOP operators: `5 -1 1 <zoom> <pan-x> <pan-y> <grid-w> <grid-h> <buf-idx-1> <buf-idx-2> 0`-ish. Round-trip verbatim.
 - `end` — terminator.
 
-Section order in the files observed (not all sections present on every node): `FAMILY:type`, `v`, `tags`, `tile`, `flags`, `comment`, `inputs`, `extrainputs`, `exports`, `dock`, `color`, `view`, `end`.
+Section order in the files observed (not all sections present on every node): `FAMILY:type`, `v`, `tags`, `dict`, `tile`, `flags`, `comment`, `inputs`, `extrainputs`, `exports`, `dock`, `color`, `view`, `end`.
 
 ## `.parm` — parameter values
 
@@ -196,7 +200,26 @@ scaletofit 49 onlyshrink "parent().par[me.curPar.name] or me.curPar.val"
     | 201326673 | `0x0C000051` | `Emb0data ... "" op('./stats_table')[...]` | empty | yes |
     | 201326912 | `0x0C000140` | `Emb0active 201326912 off` | real | no |
 
-    Open: tease apart what specific TD ParMode each low-byte pattern maps to (CONSTANT/EXPRESSION/EXPORT/BIND × stored-expr/stored-bind/changed-from-default). A targeted fixture with one parameter per mode is the cleanest way to nail this down.
+    **Confirmed bit-field rules** (validated against 163K parameter records, builds 2017–2025):
+    - `(mode & 0x30) != 0` → row carries a trailing expression (100% correlation).
+    - `(mode & 0xC0) == 0xC0` → menu/enum value, expression forbidden.
+    - `(mode & 0x04000000) != 0` → parameter sits on a custom-parameter page (low-byte semantics unchanged).
+    - `(mode & 0x0C000000) == 0x0C000000` → OP-typed reference (operator-path value or expression yielding an OP).
+
+    Common modes by frequency (top 20 out of all 163K records observed; total per cell across the full sweep):
+
+    | mode | hex | %expr | example |
+    |---:|:---|---:|:---|
+    | 0 | `0x00` | 2% | `label 0 "..."` (constants) |
+    | 17 | `0x11` | 100% | `clone 17 "" op.TDTox.op(...)` |
+    | 32 | `0x20` | 1% | `y 32 200` (numeric constants) |
+    | 49 | `0x31` | 100% | `scaletofit 49 onlyshrink "..."` |
+    | 64 | `0x40` | 5% | `Gamma 64 0.9` (custom-par values) |
+    | 113 | `0x71` | 100% | `File 113 "" me.parent().par.File` (bind-to-parent) |
+    | 48 | `0x30` | 100% | `file 48 "" f'scripts/{me.name}.py'` |
+    | 16 | `0x10` | 100% | `panels 16 copy_btn parent()` |
+    | 67108864 | `0x04000000` | 1% | `pageindex 67108864 3` |
+    | 67109120 | `0x04000100` | 0% | custom-page parent ref |
   - `<value>` — literal value token. Strings are double-quoted when needed; numbers, on/off, and bareword tokens (e.g. `onlyshrink`, `multiline`, `cp1252`) are unquoted.
   - `<expr>` — Python expression as written by the user. May be quoted (`"..."`) or unquoted (bare Python, including f-strings). Present only when the mode bit indicates an expression.
 
@@ -284,8 +307,19 @@ end
 ```
 
 - Line 1: `1\n` (version) — same convention as `.text`/`.script`.
-- Line 2: `*` then a binary header (`\x00\x00\x00\x01`, `\x00\x00\x00\x02` = col count?, `\x00\x00\x00\x09` = row count? — needs more samples).
-- Each cell: tag `\x00\x00\x00\x02`, then `\x00\x00\x00<LEN>` big-endian length prefix, then `<LEN>` bytes of UTF-8 text, then `\x00` terminator.
+- Line 2: `*` then 24-byte binary header (six big-endian u32s). **Decoded preamble fields:**
+
+  | u32 | meaning |
+  |---|---|
+  | u32[0] | `0x00000001` (sentinel) |
+  | u32[1] | **column count** |
+  | u32[2] | **row count** |
+  | u32[3] | `0x00000000` (reserved) |
+  | u32[4] | `0x00000002` (cell tag — start of cell stream) |
+  | u32[5] | length of first cell |
+- Each subsequent cell: tag `\x00\x00\x00\x02`, then `\x00\x00\x00<LEN>` big-endian length, then `<LEN>` bytes of UTF-8 text, then `\x00` terminator.
+
+The same `1\n*<u32×6>` framing is also used by **`.renderpick`** (col/row counts of the pick buffer), **`.fifo`** (with an extra ASCII field-count line before the `*`), and **`.data`** (no version line at all — header starts at offset 0, but the same tabular u32 layout). The `1\n*<u32×6>` shape is effectively a generic DAT-cell preamble shared across these kinds.
 
 Binary, but predictable; cells are still human-readable in a hex dump, and small table changes produce small diffs.
 
@@ -314,7 +348,21 @@ lradioname scopy_btn         # root container only
 ```
 
 - Lines 1–3: three integers (format version, sub-version, body-line-count). Body-line-count matches the number of key/value lines that follow.
-- Body: `key value` per line. Observed keys: `u`/`v` (normalized scroll), `trueu`/`truev`, `rollu`/`rollv`, `children`, `screenw`/`screenh`, `screenwm`/`screenhm`, `picked`, `radioname`/`lradioname` (radio-group bookkeeping on parent containers).
+- Body: `key value` per line. Decoded semantics:
+
+  | key | type | meaning |
+  |---|---|---|
+  | `u` / `v` | float `[0,1]` | normalised scroll position at save time |
+  | `trueu` / `truev` | float `[0,1]` | true scroll position accounting for content extent beyond viewport |
+  | `rollu` / `rollv` | float `[0,1]` | mouse hover/rollover position when patch was saved |
+  | `children` | int | count of nested panel descendants |
+  | `screenw` / `screenh` | int (px) | rendered viewport pixel size |
+  | `screenwm` / `screenhm` | int (px) | maximum/preferred (design-time) pixel size |
+  | `picked` | 0/1 | node was selected at save time |
+  | `radioname` / `lradioname` / `mradioname` / `rradioname` | string | active radio-group selection (l/m/r = mouse-button variants) |
+  | `state` / `lstate` / `mstate` / `rstate` | 0/1 | toggle/checkbox state per mouse button |
+  | `radio` / `lradio` / `mradio` / `rradio` | int | radio-group index (selected item id) |
+  | `display` / `enable` | 0/1 | panel visibility / interactivity |
 
 ## `.text` — DAT contents
 
@@ -324,7 +372,16 @@ lradioname scopy_btn         # root container only
 ```
 
 - Line 1: `2` (format version).
-- Line 2: starts with `*`, then 18 spaces (padding), then a binary header of five `\x00\x00\x00\x01` 32-bit big-endian ints followed by `\x00\x00\x00\x02` and a 32-bit length (`\x00\x00\x1b\xcb` = 7115 bytes in the sample) before the raw DAT body (`# core.py v1.1.2 …`). The body is whatever string content the DAT held (Python script, glsl, table CSV, etc.); the binary preamble carries DAT metadata (line count? encoding markers? — not fully decoded).
+- Line 2: `*`, then 24-byte binary header (six big-endian u32s), then the raw DAT body. **Decoded preamble fields:**
+
+  | u32 | meaning |
+  |---|---|
+  | u32[0] | `0x00000001` (sentinel) |
+  | u32[1] | `0x00000001` (sentinel) |
+  | u32[2] | `0x00000001` (sentinel) |
+  | u32[3] | `0x00000001` (sentinel) |
+  | u32[4] | `0x00000002` (end-of-sentinels marker) |
+  | u32[5] | **body length in bytes** (verified: file size − 27 = body length) |
 - Files end without a trailing newline marker beyond what the DAT body itself contains.
 
 The binary header makes `.text` files slightly harder to diff than the other artifacts, but the bulk content is plain text and diffs cleanly in practice.
@@ -379,7 +436,21 @@ Several CHOP/COMP families emit a body file alongside `.n`/`.parm`. The first li
 | `.timestamp` | `133852687303294513` (single int) | Saved-state epoch timestamp (likely microseconds-since-Windows-epoch). |
 | `.grp` | `1\ngroup1\n` | Node-group definition. |
 
-The recurring shape across the brace-block kinds (`.script`, `.ts`, `.chop`, `.logic`, `.hold`, `.midiin`, `.mousein`, `.joystick`) is: version int(s), then a nested `{ rate / start / tracklength / tracks }` record with one inner brace per track (`{ name = X, data_rle = Y }`). Data is RLE-compressed; the `@N V` syntax in `.logic` (`@78 0 @62 1`) means "value V repeated N times".
+The recurring shape across the brace-block kinds (`.script`, `.ts`, `.chop`, `.logic`, `.hold`, `.midiin`, `.mousein`, `.joystick`) is: version int(s), then a nested `{ rate / start / tracklength / tracks }` record with one inner brace per track (`{ name = X, data_rle = Y }`). Data is RLE-compressed; the `@N V` syntax (`@78 0 @62 1 @13 0`) means "value V repeated N times" — single literal values are written bare with no `@` prefix.
+
+**Per-kind format versions and header layouts** (observed in build range 2022.28040–2023.11880):
+
+| kind | version-int | header-ints before brace | typical tracks | sample track names |
+|---|---:|---:|---:|---|
+| `.logic` | 3 | 11 | 1 | logic-channel state, `data_rle` heavily compressed |
+| `.hold` | 1 | 1 | 2–3 | `tx`, `ty` (held position) |
+| `.midiin` | 3 | 1 | 251+ | `ch<N>n<M>`, `ch<N>ctrl<CC>`, `ch<N>prog` |
+| `.mousein` | 1 | 0 | 2–3 | `tx`, `ty`, `mselect` |
+| `.joystick` | 1 | 0 | 24 | `xaxis`, `yaxis`, `zaxis`, `xrot`, `yrot`, `zrot`, `b1`–`b16`, `p1_X`, `p1_Y` |
+| `.ts` | 65538 | 11 | 1–512+ | family-specific (DMX → `c1`–`c512`; MIDI → control names) |
+| `.chop` | 5 | varies | varies | varies by source CHOP |
+
+The version-int per kind is **fixed**, not a free payload version. `.ts` always emits `65538`; `.logic` always emits `3`. This makes per-kind parsing straightforward.
 
 ## `.lod` — bundled archive
 
@@ -395,14 +466,21 @@ Hex layout (from `local/midi.lod`):
 ...
 ```
 
-Structure (working model — **corrected** after cross-repo sampling):
-- Each record begins with the **ASCII byte `'4'` (0x34)**, not binary `\x04`. The earlier hex dump above was using a misleading rendering — both FreenectTD (`2025.31550`) and SharedTox/Kantare (`2021.16410`) show the literal `0x34` framing byte.
-- Next 4 bytes are a big-endian length field (observed values `0x00000057`, `0x00000059`, `0x0000005C`, `0x0000005F`, …) — the bytes that previously looked like padding spaces (`0x20`) were the high-order zero bytes of an unaligned but consistent 4-byte length encoding. *Caveat:* one agent reported `34 07 00 00 00` at the start, suggesting the offset/alignment may vary by build; sampling on more files is needed before claiming a single canonical layout.
-- Then the artifact path inside the bundle (e.g. `.build`, `device.n`, `device.parm`).
-- Then the artifact body (same bytes the corresponding standalone file would contain).
-- Records concatenate until end of file.
+**Grammar — fully decoded** (verified across 4 sample files spanning builds 2017.11520, 2021.13610, 2021.16410, 2023.11880; layout is identical across all):
 
-A `.lod` essentially is a flat key/value store mirroring what would otherwise be a directory + table-of-contents. Roundtripping still requires nailing down the length encoding precisely.
+```
+Record = FramingByte PathLenByte LengthField PathNullTerm Body
+
+FramingByte  = 0x34 (ASCII '4')
+PathLenByte  = u8: length of (path + null-terminator), e.g. 0x07 for ".build" (6 bytes + null)
+LengthField  = u32 big-endian: body length in bytes
+PathNullTerm = path string + 0x00, e.g. ".build\0", "device.n\0"
+Body         = <LengthField> bytes, identical to what the standalone file would contain
+```
+
+Records concatenate until end of file. The earlier "extra 0x07 byte" / "padding spaces" confusion was caused by misreading the `PathLenByte` value when rendered next to high-order zero bytes of `LengthField` in xxd output.
+
+A `.lod` is a flat key/value store mirroring what would otherwise be a directory + table-of-contents. With the grammar above, round-tripping is now straightforward.
 
 ## Notes / open questions
 
@@ -421,7 +499,29 @@ A `.lod` essentially is a flat key/value store mirroring what would otherwise be
 - `.lod` length encoding: needs more samples and a careful hex inspection to nail down whether the per-record length is 1-byte, 2-byte, or 4-byte big-endian with the padding interpretation above.
 - Operator-body files (`.chop`, `.feedback`, `.beat`, `.gnode`, `.ts`, `.replicator`, `.oldacbo`) — only minimal samples decoded. A targeted sweep with non-trivial CHOPs (loaded buffers, recorded channels) would expose richer payloads.
 - `.cparm` column layout: the seven numeric fields in positions 5–11 (clamp flags, defaults, min/max, "section") are inferred, not proven. Build a fixture with one custom par per type to lock the schema down.
-- `.cparm` type-id integers: the encoding of the leading signed int is unknown. Observed values include `772804866` (int vector), `772804867`, `772804868`, `772804869` (Help/Info label), `772804879`, `772804883` (Pulse/button), `772804888`, `772805122` (vector int 2-component), `772809473` (RGB color), `772809729`, `772935937` (with bind-eval expr), `-1374674175` (RGBA color), `-1374678768/-1374678769/-1374678779/-1374678780/-1374678781/-1374678782`. Same id ⇒ same par type; might be a packed FourCC or TD-internal hash.
+- `.cparm` type-id integers: encoding is still unknown (likely a packed FourCC or internal hash), but the **type-id → TD-ParType mapping** is now empirically established across 9,690 `.cparm` files (builds 088 through 2025.31550, same id ⇒ same type with no reassignments). Highest-frequency mappings (full table covers 60+ ids):
+
+  | type-id | inferred ParType | example |
+  |---:|---|---|
+  | `772804867` | String / Toggle | `Vcoriginal`, `Externalize` |
+  | `772804868` | String (label) | `Vcname`, `Toolname` |
+  | `772804869` | Pulse (button) | `Createnewbank` |
+  | `772804865` | Float | `Opacity`, `Speed` |
+  | `772804866` | Int | `Vcversion`, `Size` |
+  | `772804877` | OP (operator picker) | `Root`, `Paramsop` |
+  | `772804875` | DAT (operator ref) | `Parametersdat` |
+  | `772804879` | Menu (flag 4097 on row) | `Method`, `Type` |
+  | `772805121` | Float (range) | numeric ranges |
+  | `772805122` | Int vector (size 2/3) | `Resolution` |
+  | `772809473` | RGB color (size 3) | `Edgecolor` |
+  | `772809729` | RGBA color (size 4) | `Seabase` |
+  | `-1374678779` | Pulse (action) | `Update`, `Help` |
+  | `-1374678781` | Toggle | `Enable`, `State`, `Active` |
+  | `-1374674175` | RGBA color (variant) | `Sourcetint` |
+  | `773067012` | String (long/detail) | `Foldername` |
+  | `773067019` | DAT (code/data) | `Materialcode` |
+
+  Menu detection: `4097` in the page-flags column, followed by `<entry-count> <key1> <label1> ...`. Vector detection: `size` column (field 4) = 2/3/4. The id encoding itself remains opaque but the mapping is stable.
 - `.panel` `children` value seems to be a count of nested panel descendants, but the relationship to the actual child list (which is implicit via the sibling subdirectory) hasn't been confirmed.
 - `.text` and `.table` binary preambles share the `1\n*<padding><u32...>` shape — looks like a common DAT framing header. Decoding the full preamble would let us round-trip cleanly.
 - `radioname`/`lradioname` appear only at the root container — likely state from the active radio-button selection at save time, not structural.
@@ -434,7 +534,9 @@ The `TouchDesigner_Shared` repo expands with `.build` reporting `version 088` (b
 
 ## Open structural questions (still)
 
-- `.lod` length encoding: the per-record length width and alignment still need a careful hex confirmation across multiple builds. Two reports place the length-leading byte at offset 1 (`34 <LEN-BYTES>`); one report at offset 1 with a leading `07` byte. Sample more files of varying sub-tree sizes before locking this down.
-- `.text` / `.table` / `.fifo` / `.renderpick` / `.data` binary preamble: all share the `1\n*<padding><u32...>` shape but the meaning of the five `\x00\x00\x00\x01` ints and the subsequent length(s) hasn't been decoded.
 - `.parm.<N>` overflow files (one report only): possibly a per-page parameter file for COMPs with many custom-parameter pages. Not reproduced in other repos.
-- `.toc` header presence: confirmed conditional but the rule that decides it has not been determined.
+- `.cparm` type-id integer encoding: empirical mapping is stable, but the actual bit-level encoding (FourCC? hash? versioned enum?) is still unknown.
+- `.n view` line: per-FAMILY layout is partially decoded but a number of trailing fields remain opaque. Round-trip verbatim until needed.
+- Operator-body subtleties: `.oldacbo` is NOT exclusive to Audio CHOP (also appears on TOP:glsl). `SOP:script` does NOT emit a `.script` body file (only DAT:script and CHOP:script do; SOP:script uses `.cparm` + docked callbacks instead). The naming is misleading; treat the file extension as the source of truth, not the operator family.
+
+(Items previously listed here — `.lod` length encoding, `.text/.table/.fifo/.renderpick/.data` preamble, `.toc` header presence rule — are now resolved above.)
