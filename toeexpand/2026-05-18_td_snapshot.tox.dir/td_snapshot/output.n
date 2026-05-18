@@ -2,5 +2,5 @@ DAT:text
 tile -200 -75 130 90
 flags =  viewer 1 activate on parlanguage 0
 color 0.67 0.67 0.67 
-view -1 8 0 1 1 1 0 -12.0755 0 0 1 1 0
+view -1 8 0 1 1 1 0 -12.0554 0 0 1 1 0
 end

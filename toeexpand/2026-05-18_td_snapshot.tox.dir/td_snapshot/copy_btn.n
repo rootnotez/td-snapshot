@@ -1,5 +1,4 @@
 COMP:button
-v 327.918 348.116 0.593965
 tile 0 -75 109 93
 flags =  viewer 1 activate on parlanguage 0
 color 0.55 0.55 0.55 
