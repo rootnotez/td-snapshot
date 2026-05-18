@@ -5,7 +5,7 @@
 # Captures the network containing this DAT (me.parent()) by default.
 # To target a different network: snapshot_patch('/project1/some/comp')
 
-# core.py v1.4.0 | sha256:4b42adbd027594d35dbc8b72e5217aab93f7a1a646110cb3b342e4a93033190c
+# core.py v1.5.0 | sha256:7bc6a89913ba234e9722fc3030963f8efe797caf85d6dbdda2adac3b5923cc1a
 import re
 
 def op_display_type(o):
@@ -14,7 +14,14 @@ def op_display_type(o):
 def op_label(o):
     return '{} [{}]'.format(o.path, op_display_type(o))
 
-def walk_patch(root=None):
+def walk_patch(root=None,
+               include_comment=True,
+               include_bypass=True,
+               include_display=True,
+               include_viewer=True,
+               include_render=True,
+               include_dat_text=True,
+               dat_text_truncate=None):
     if root is None:
         root_op = me.parent()
     else:
@@ -160,16 +167,94 @@ def walk_patch(root=None):
                     'expr': expr_text,
                 })
 
-        nodes.append({
+        node = {
             'path': o.path,
             'label': op_label(o),
             'input_slots': input_slots,
             'outputs': outputs,
             'pars': pars_out,
             'refs': sorted(local_refs),
-        })
+        }
+
+        if include_comment:
+            try:
+                if o.comment:
+                    node['comment'] = o.comment
+            except:
+                pass
+
+        flags = {}
+        # Each flag emits only when diverged from the type's default:
+        # bypass/viewer default False (emit when True); display/render default True (emit when False).
+        if include_bypass:
+            try:
+                if o.bypass:
+                    flags['bypass'] = True
+            except:
+                pass
+        if include_viewer:
+            try:
+                if o.viewer:
+                    flags['viewer'] = True
+            except:
+                pass
+        if include_display:
+            try:
+                if hasattr(o, 'display') and o.display is False:
+                    flags['display'] = False
+            except:
+                pass
+        if include_render:
+            try:
+                if hasattr(o, 'render') and o.render is False:
+                    flags['render'] = False
+            except:
+                pass
+        if flags:
+            node['flags'] = flags
+
+        if include_dat_text:
+            try:
+                if o.family == 'DAT':
+                    txt = o.text
+                    if txt:
+                        if dat_text_truncate is not None and len(txt) > dat_text_truncate:
+                            node['dat_text'] = {
+                                'text': txt[:dat_text_truncate],
+                                'truncated': True,
+                                'full_len': len(txt),
+                            }
+                        else:
+                            node['dat_text'] = {'text': txt, 'truncated': False, 'full_len': len(txt)}
+            except:
+                pass
+
+        nodes.append(node)
 
     return nodes, wire_edges, ref_edges, op_by_path
+
+
+def _fmt_flags(flags):
+    return ', '.join('{}={}'.format(k, flags[k]) for k in sorted(flags))
+
+
+def _fmt_dat_text_block(dat_text, indent='    '):
+    lines = []
+    for line in dat_text['text'].splitlines():
+        lines.append(indent + line)
+    if dat_text['truncated']:
+        lines.append(indent + '(truncated, {} chars total)'.format(dat_text['full_len']))
+    return lines
+
+
+def _fmt_comment_block(comment, indent='    '):
+    lines = comment.splitlines()
+    if len(lines) <= 1:
+        return ['  comment: {}'.format(comment)]
+    out = ['  comment:']
+    for line in lines:
+        out.append(indent + line)
+    return out
 
 
 def render_legacy(nodes, wire_edges, ref_edges, op_by_path):
@@ -195,6 +280,12 @@ def render_legacy(nodes, wire_edges, ref_edges, op_by_path):
     for n in nodes:
         block = [n['label']]
 
+        if 'comment' in n:
+            block.extend(_fmt_comment_block(n['comment']))
+
+        if 'flags' in n:
+            block.append('  flags: ' + _fmt_flags(n['flags']))
+
         if n['input_slots']:
             block.append('  input_slots:')
             for idx, path in n['input_slots']:
@@ -216,6 +307,10 @@ def render_legacy(nodes, wire_edges, ref_edges, op_by_path):
             block.append('  refs:')
             for par_name, ref_path in n['refs']:
                 block.append('    {} -> {}'.format(par_name, ref_path))
+
+        if 'dat_text' in n:
+            block.append('  dat_text:')
+            block.extend(_fmt_dat_text_block(n['dat_text']))
 
         if not n['pars']:
             block.append('  par (no changed parameters found)')
@@ -288,6 +383,10 @@ def render_blocks(nodes, wire_edges, ref_edges, op_by_path):
         nid = id_by_path[n['path']]
         lines.append('')
         lines.append('{} = {}'.format(nid, n['label']))
+        if 'comment' in n:
+            lines.extend(_fmt_comment_block(n['comment']))
+        if 'flags' in n:
+            lines.append('  flags: ' + _fmt_flags(n['flags']))
         for par in n['pars']:
             lines.append(fmt_par(par))
         for in_idx, src_path, out_idx in sorted(wires_by_dst.get(n['path'], [])):
@@ -299,6 +398,9 @@ def render_blocks(nodes, wire_edges, ref_edges, op_by_path):
         for par_name, target_path in sorted(refs_by_src.get(n['path'], [])):
             target_id = id_by_path.get(target_path, target_path)
             lines.append('  ref {} -> {}'.format(par_name, target_id))
+        if 'dat_text' in n:
+            lines.append('  dat_text:')
+            lines.extend(_fmt_dat_text_block(n['dat_text']))
 
     for p in extra_sorted:
         lines.append('')
@@ -307,8 +409,24 @@ def render_blocks(nodes, wire_edges, ref_edges, op_by_path):
     return '\n'.join(lines)
 
 
-def snapshot_patch(root=None, format='legacy'):
-    nodes, wire_edges, ref_edges, op_by_path = walk_patch(root)
+def snapshot_patch(root=None, format='legacy',
+                   include_comment=True,
+                   include_bypass=True,
+                   include_display=True,
+                   include_viewer=True,
+                   include_render=True,
+                   include_dat_text=True,
+                   dat_text_truncate=None):
+    nodes, wire_edges, ref_edges, op_by_path = walk_patch(
+        root,
+        include_comment=include_comment,
+        include_bypass=include_bypass,
+        include_display=include_display,
+        include_viewer=include_viewer,
+        include_render=include_render,
+        include_dat_text=include_dat_text,
+        dat_text_truncate=dat_text_truncate,
+    )
     if format == 'blocks':
         return render_blocks(nodes, wire_edges, ref_edges, op_by_path)
     return render_legacy(nodes, wire_edges, ref_edges, op_by_path)
