@@ -16,7 +16,7 @@ OP-typed value refs are recorded unconditionally — including targets in `/sys/
 
 ```
 src/
-  core.py                ← edit this — snapshot_patch() lives here
+  core.py                ← edit this — snapshot_patch() lives here. Used by both options: concatenated onto quickpaste_runner.py to produce td-snapshot.py (Option 1), and loaded into the TOX's `core` Text DAT (Option 2)
   quickpaste_runner.py   ← entry point for Option 1 (Quick paste); concatenated onto core.py to produce td-snapshot.py
   tox_runner_copy.py     ← Option 2 — script that runs in the TOX's Copy button (Panel Execute DAT)
   tox_runner_inspect.py  ← Option 2 — script that runs in the TOX's Inspect button (Panel Execute DAT)
