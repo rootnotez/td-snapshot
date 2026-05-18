@@ -564,11 +564,12 @@ The `TouchDesigner_Shared` repo expands with `.build` reporting `version 088` (b
 
 ## Open structural questions (still)
 
-- `.parm.<N>` overflow files (one report only): possibly a per-page parameter file for COMPs with many custom-parameter pages. Not reproduced in other repos.
+- **Name-collision disambiguator:** When two operators in the same network share a stem (e.g. lowercase DAT `help` next to uppercase COMP `Help`), toeexpand suffixes the second instance with `.<N>` — producing `help.n.2`, `help.parm.2`, etc. The `.toc` records both as `help.n 2`. **Not** a parameter-page-overflow scheme; an earlier survey misread this as `.parm.<N>` paging.
 - `.cparm` type-id integer encoding: empirical mapping is stable, but the actual bit-level encoding (FourCC? hash? versioned enum?) is still unknown.
 - `.n view` line: per-FAMILY layout is partially decoded but a number of trailing fields remain opaque. Round-trip verbatim until needed.
 - Operator-body subtleties: `.oldacbo` is NOT exclusive to Audio CHOP — also appears on `TOP:glslmulti`, where it caches multi-output buffer state. Name is misleading; treat the file extension as the source of truth, not the operator family. `SOP:script` does NOT emit a `.script` body file (only DAT:script and CHOP:script do; SOP:script uses `.cparm` + docked callbacks instead).
-- POP-family operators and Audio CHOPs (deep-dive surveys hit account limits before returning useful output): coverage gap. Audio CHOPs are likely to emit audio-buffer cache kinds we haven't seen; POPs are a 2024+ TD feature whose family-specific body files (if any) are unmapped. Retry these as a future pass.
+- **Audio CHOP body-file pattern (resolved):** every audio CHOP type emits a `.chop` (v5) + `.ts` (v65538) buffer-cache pair, **except `audiospect`** (analysis-only, no buffer cache). `audiovst` adds `.pluginstate` + `.learnedparms` + `.cparm` on top. No audio-exclusive file kinds beyond what FORMAT.md already documents.
+- **POP-family coverage gap (unchanged):** 45 expanded `.dir/` outputs across builds 088→2025.31550 contain **zero** `POP:` operators. POPs are a 2024+ TD feature and this resource set doesn't exercise them. Retry whenever a POP-native project lands in `resources/`.
 - `TOP:glslmulti` structure: shader source lives in **docked sibling DAT:text nodes** (suffixed `_pixelN` / `_computeN`), referenced from the main glslmulti's `pixeldat` / `computedat` parms by name. Uniforms are stored as flat `uniname<K>` + `value<K>{x,y,z,w}` rows in `.parm`. The `exports` block uses `uniform_exports` to publish computed uniform values upward.
 
 (Items previously listed here — `.lod` length encoding, `.text/.table/.fifo/.renderpick/.data` preamble, `.toc` header presence rule — are now resolved above.)
