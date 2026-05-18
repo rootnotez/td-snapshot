@@ -401,7 +401,17 @@ These appear in expansions of `.toe` (whole project) but not `.tox` (single COMP
   ```
 - **`.root`** — root-viewport state. Single `v <x> <y> <zoom>` line plus `end`.
 - **`.grps`** — group definitions. Minimal in samples (`-2\n0\n`); needs a project with non-trivial node groups to fully decode.
-- **`.application`** — desktop/pane/window layout. `desk ...`, `neteditor ...`, `winplacement ...` directives — a flat command script restoring the editor UI state at save time.
+- **`.application`** — desktop/pane/window layout. A flat command script restoring the editor UI state at save time. Directives (stable across builds 2017–2023):
+
+  | directive | syntax | flags | meaning |
+  |---|---|---|---|
+  | `desk` | `desk <flag> <args>` | `-c *` init; `-n <pane> *` name pane; `-p <op-path> <pane>`; `-t <pane-type> <pane>`; `-k 0\|1 <pane>` lock; `-h <pane> <ratio> -n <new>` h-split; `-v <pane> <ratio> -n <new>` v-split | desktop pane-tree definition |
+  | `neteditor` | `neteditor <12 flags>` | `-c` code inspector; `-e` expressions visible; `-G <float>` grid opacity; `-o` optimize; `-r` cook; `-P <float>` zoom; `-s` snap; `-w` wires visible; `-x` ops visible; `-t` annotations; `-d` dock visible; `-g` background grid; `-p <pane>` | network editor viewport state per pane |
+  | `textport` | `textport <flag> <op-path>` | `-l` listen; `-c` call | DAT script/execute port hookups |
+  | `browser` | `browser on\|off` | — | asset browser visibility |
+  | `winplacement` | `winplacement <key=val pairs>` | `ontop=`, `mode=auto\|custom`, `posx/posy/sizex/sizey`, `enable=`, `perform.path=`, `perform.start=` | main window geometry + perform-mode COMP |
+
+  Pane types: `neteditor`, `panel`, `textport`, `parameters`, `topviewer`.
 
 ## Operator-body files (per node, family-specific saved state)
 
@@ -521,7 +531,15 @@ A `.lod` is a flat key/value store mirroring what would otherwise be a directory
   | `773067012` | String (long/detail) | `Foldername` |
   | `773067019` | DAT (code/data) | `Materialcode` |
 
-  Menu detection: `4097` in the page-flags column, followed by `<entry-count> <key1> <label1> ...`. Vector detection: `size` column (field 4) = 2/3/4. The id encoding itself remains opaque but the mapping is stable.
+  Menu detection: `4097` in the page-flags column, followed by `<entry-count> <key1> <label1> ...`. Vector detection: `size` column (field 4) = 2/3/4.
+
+  **Type-id bit pattern (working hypothesis):** the high byte sign-flag the family — `0x2E` for positive ids, `0xAE` for negative — and the low 24 bits encode the ParType as a sub-region enum:
+  - `0x101xxx` — scalar types (Float, Int, String, Pulse, Toggle)
+  - `0x102xxx` — ranged scalars / vector / color
+  - `0x141xxx` — long-string / code-bearing DAT refs
+  - Consecutive ids (e.g. `772804865 → 772804869` = `0x2E101101 → 0x2E101105`) differ by +1 in the low byte, ruling out a hash. Not a FourCC (bytes don't render as ASCII in any byte order).
+
+  **Numeric columns 5–11 of each row** (the `<min-clamp> <min> <max-clamp> <max-vis> <max-hard> 0 <default>` block) are decoded for scalar types — clamp flags at 5/7, range at 6/8/9, default at 11; column 10 is consistently 0 (reserved). Vector types repeat this 7-field group per component. Menu types reuse the scalar layout and append `4097 <entry-count> <key1> <label1> ...` after the page name.
 - `.panel` `children` value seems to be a count of nested panel descendants, but the relationship to the actual child list (which is implicit via the sibling subdirectory) hasn't been confirmed.
 - `.text` and `.table` binary preambles share the `1\n*<padding><u32...>` shape — looks like a common DAT framing header. Decoding the full preamble would let us round-trip cleanly.
 - `radioname`/`lradioname` appear only at the root container — likely state from the active radio-button selection at save time, not structural.
@@ -530,13 +548,27 @@ When extending these notes, prefer to add a small fixture under `tests/` rather 
 
 ## Legacy generation: TD 088
 
-The `TouchDesigner_Shared` repo expands with `.build` reporting `version 088` (builds `48780`–`62610`, ~2014). This is the pre-099 generation; its file layouts mostly match the current format but have **not** been re-verified field by field. If you're parsing 088 expansions, double-check rather than assume.
+The `TouchDesigner_Shared` repo expands with `.build` reporting `version 088` (builds `48780`–`62610`, ~2014). Concrete diffs vs 099 (from a per-operator comparison sweep):
+
+| feature | 088 | 099 | severity |
+|---|---|---|---|
+| `.toc` header | `# 4 0 0 0 1` on `.tox` | same | identical |
+| `.build` osname/osversion | absent | present | cosmetic |
+| `.parm` mode field | 0–255 (low byte only) | 32-bit (high-byte `0x04000000` / `0x0C000000` flags appear) | **parser-breaking** |
+| `.parm` mode values | only `0, 17, 32, 49, 64, 80, 192` observed | full vocabulary including expression/bind variants | parser-breaking |
+| `.n` flag vocabulary | same core set | same | identical |
+| `.cparm` / `.panel` / `.network` / `.text` / `.table` framing | unchanged | unchanged | identical |
+| Operator-body kinds | `.oldacbo` only | `.timer`, `.logic`, `.hold`, `.midiin`, `.mousein` (+ still `.oldacbo`) | additive |
+
+**Parser rule:** when `.build` says `version 088`, treat `.parm` mode as an 8-bit field and don't try to decode the `0x04...` / `0x0C...` high-byte categories — they never appear.
 
 ## Open structural questions (still)
 
 - `.parm.<N>` overflow files (one report only): possibly a per-page parameter file for COMPs with many custom-parameter pages. Not reproduced in other repos.
 - `.cparm` type-id integer encoding: empirical mapping is stable, but the actual bit-level encoding (FourCC? hash? versioned enum?) is still unknown.
 - `.n view` line: per-FAMILY layout is partially decoded but a number of trailing fields remain opaque. Round-trip verbatim until needed.
-- Operator-body subtleties: `.oldacbo` is NOT exclusive to Audio CHOP (also appears on TOP:glsl). `SOP:script` does NOT emit a `.script` body file (only DAT:script and CHOP:script do; SOP:script uses `.cparm` + docked callbacks instead). The naming is misleading; treat the file extension as the source of truth, not the operator family.
+- Operator-body subtleties: `.oldacbo` is NOT exclusive to Audio CHOP — also appears on `TOP:glslmulti`, where it caches multi-output buffer state. Name is misleading; treat the file extension as the source of truth, not the operator family. `SOP:script` does NOT emit a `.script` body file (only DAT:script and CHOP:script do; SOP:script uses `.cparm` + docked callbacks instead).
+- POP-family operators and Audio CHOPs (deep-dive surveys hit account limits before returning useful output): coverage gap. Audio CHOPs are likely to emit audio-buffer cache kinds we haven't seen; POPs are a 2024+ TD feature whose family-specific body files (if any) are unmapped. Retry these as a future pass.
+- `TOP:glslmulti` structure: shader source lives in **docked sibling DAT:text nodes** (suffixed `_pixelN` / `_computeN`), referenced from the main glslmulti's `pixeldat` / `computedat` parms by name. Uniforms are stored as flat `uniname<K>` + `value<K>{x,y,z,w}` rows in `.parm`. The `exports` block uses `uniform_exports` to publish computed uniform values upward.
 
 (Items previously listed here — `.lod` length encoding, `.text/.table/.fifo/.renderpick/.data` preamble, `.toc` header presence rule — are now resolved above.)
