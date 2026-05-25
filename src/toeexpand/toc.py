@@ -23,7 +23,7 @@ class Toc:
 
     @classmethod
     def parse(cls, raw: bytes) -> "Toc":
-        text = raw.decode("ascii")
+        text = raw.decode("latin-1")
         trailing_newline = text.endswith("\n")
         lines = text.split("\n")
         if trailing_newline:
@@ -46,7 +46,7 @@ class Toc:
         text = "\n".join(lines)
         if self.trailing_newline:
             text += "\n"
-        return text.encode("ascii")
+        return text.encode("latin-1")
 
 
 def read_toc(path: Path) -> Toc:

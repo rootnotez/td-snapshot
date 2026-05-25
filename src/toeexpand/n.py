@@ -55,7 +55,7 @@ class N:
 
     @classmethod
     def parse(cls, raw: bytes) -> "N":
-        text = raw.decode("ascii")
+        text = raw.decode("latin-1")
         trailing_newline = text.endswith("\n")
         all_lines = text.split("\n")
         if trailing_newline:
@@ -110,7 +110,7 @@ class N:
         text = "\n".join(parts)
         if self.trailing_newline:
             text += "\n"
-        return text.encode("ascii")
+        return text.encode("latin-1")
 
     # ---- structured accessors (read-only conveniences) ----
 

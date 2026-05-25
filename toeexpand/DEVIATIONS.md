@@ -16,6 +16,14 @@ Format per entry:
 **Decision:** preserve verbatim / normalise / flag-and-skip
 ```
 
+## Resolved
+
+### Text-file encoding — non-ASCII bytes inside `.parm` (and likely other text kinds)
+
+**Sample:** `toeexpand/resources/raytk/examples/tutorial-fields-1-v3-final.toe.dir/project1/raytk/tools/palette/help_section.parm` (byte 0xEF at offset 1666, plus 151 other files in the same corpus).
+**Build:** various 099 builds; appears whenever a parameter string contains a UTF-8 multi-byte character (icon glyphs in raytk).
+**Resolution:** the parser switched from `decode("ascii")` to `decode("latin-1")`. Latin-1 maps bytes 0x00–0xFF one-to-one to code points U+0000–U+00FF, so any byte sequence is round-trip safe even when the source intent was UTF-8 (the bytes survive identically; we just don't try to interpret them as glyphs).
+
 ## Known watch-list (not yet observed as failures)
 
 - **Line endings** — all current samples use LF. If a Windows-exported `.tox`

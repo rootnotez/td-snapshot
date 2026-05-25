@@ -26,7 +26,7 @@ class Build:
 
     @classmethod
     def parse(cls, raw: bytes) -> "Build":
-        text = raw.decode("ascii")
+        text = raw.decode("latin-1")
         trailing_newline = text.endswith("\n")
         lines = text.split("\n")
         if trailing_newline:
@@ -46,7 +46,7 @@ class Build:
         text = "\n".join(lines)
         if self.trailing_newline:
             text += "\n"
-        return text.encode("ascii")
+        return text.encode("latin-1")
 
     def get(self, key: str) -> str | None:
         for k, v in self.entries:

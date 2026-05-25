@@ -18,7 +18,7 @@ HERE = Path(__file__).resolve().parent
 REPO = HERE.parent
 sys.path.insert(0, str(REPO / "src"))
 
-from toeexpand import build, n, toc  # noqa: E402
+from toeexpand import build, n, parm, toc  # noqa: E402
 
 CORPUS_ROOTS = [
     REPO / "toeexpand" / "2026-05-13_td_snapshot.tox.dir",
@@ -110,3 +110,53 @@ def test_n_family_accessor():
     assert parsed.family == "COMP"
     assert parsed.type == "container"
     assert "viewer" in parsed.flag_tokens()
+
+
+def _parm_paths() -> list[Path]:
+    paths: list[Path] = []
+    for root in CORPUS_ROOTS:
+        if not root.exists():
+            continue
+        paths.extend(root.rglob("*.parm"))
+    return paths
+
+
+def test_parm_roundtrip_corpus():
+    found = _parm_paths()
+    assert found, "no .parm corpus files found"
+    failures: list[Path] = []
+    for p in found:
+        raw = p.read_bytes()
+        parsed = parm.Parm.parse(raw)
+        emitted = parsed.emit()
+        if emitted != raw:
+            failures.append(p)
+    assert not failures, f"{len(failures)}/{len(found)} .parm files failed bit-exact"
+
+
+def test_parm_accessor_smoke():
+    """Spot-check a known sample: classifier.parm has mode-decoded fields."""
+    sample = (
+        REPO / "toeexpand" / "2026-05-17__datlab-classified-v1" / "v1"
+        / "classifier.tox.dir" / "classifier.parm"
+    )
+    parsed = parm.Parm.parse(sample.read_bytes())
+    page_markers = [r for r in parsed.rows if r.is_page_marker]
+    assert page_markers, "expected at least one ? page marker"
+
+    rows = parsed.parameter_rows()
+    assert rows, "expected at least one parameter row"
+
+    # pageindex 67108864 3 → custom-page mode, no expression
+    pageindex = parsed.named("pageindex")
+    assert pageindex is not None
+    assert pageindex.mode == 67108864
+    assert pageindex.is_custom_page
+    assert not pageindex.has_expression
+
+    # Emb0data 201326673 ... → OP-typed, has expression
+    emb0data = parsed.named("Emb0data")
+    assert emb0data is not None
+    assert emb0data.mode == 201326673
+    assert emb0data.is_op_typed
+    assert emb0data.has_expression
