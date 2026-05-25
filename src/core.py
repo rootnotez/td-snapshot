@@ -1,4 +1,4 @@
-# core.py v1.5.0 | sha256:7bc6a89913ba234e9722fc3030963f8efe797caf85d6dbdda2adac3b5923cc1a
+# core.py v2.0.0 | sha256:d7adf48ba867bec3cb25004d6f4e50c736fadb26c26da161b7ea5e1cc6a2a8b0
 import re
 
 def op_display_type(o):
@@ -250,88 +250,6 @@ def _fmt_comment_block(comment, indent='    '):
     return out
 
 
-def render_legacy(nodes, wire_edges, ref_edges, op_by_path):
-    def fmt_wire(src_path, dst_path, in_idx, out_idx):
-        src_o = op_by_path.get(src_path)
-        dst_o = op_by_path.get(dst_path)
-        src_label = op_label(src_o) if src_o else src_path
-        dst_label = op_label(dst_o) if dst_o else dst_path
-        if out_idx is not None and out_idx != 0:
-            slot = 'out:{}, in:{}'.format(out_idx, in_idx)
-        else:
-            slot = 'in:{}'.format(in_idx)
-        return '  {} -[{}]-> {}'.format(src_label, slot, dst_label)
-
-    def fmt_ref(src_path, dst_path, par_name):
-        src_o = op_by_path.get(src_path)
-        dst_o = op_by_path.get(dst_path)
-        src_label = op_label(src_o) if src_o else src_path
-        dst_label = op_label(dst_o) if dst_o else dst_path
-        return '  {} -[{}]-> {}'.format(src_label, par_name, dst_label)
-
-    node_blocks = []
-    for n in nodes:
-        block = [n['label']]
-
-        if 'comment' in n:
-            block.extend(_fmt_comment_block(n['comment']))
-
-        if 'flags' in n:
-            block.append('  flags: ' + _fmt_flags(n['flags']))
-
-        if n['input_slots']:
-            block.append('  input_slots:')
-            for idx, path in n['input_slots']:
-                block.append('    [{}] {}'.format(idx, path))
-        else:
-            block.append('  input_slots: (none)')
-
-        block.append('  outputs: ' + (', '.join(n['outputs']) if n['outputs'] else '(none)'))
-
-        for par in n['pars']:
-            line = '  par {}: current={!r}, default={!r}, mode={}'.format(
-                par['name'], par['current'], par['default'], par['mode']
-            )
-            if par['expr']:
-                line += ' | expr={!r}'.format(par['expr'])
-            block.append(line)
-
-        if n['refs']:
-            block.append('  refs:')
-            for par_name, ref_path in n['refs']:
-                block.append('    {} -> {}'.format(par_name, ref_path))
-
-        if 'dat_text' in n:
-            block.append('  dat_text:')
-            block.extend(_fmt_dat_text_block(n['dat_text']))
-
-        if not n['pars']:
-            block.append('  par (no changed parameters found)')
-
-        node_blocks.append('\n'.join(block))
-
-    lines = []
-    lines.append('WIRE EDGES')
-    for src, dst, in_idx, out_idx in sorted(wire_edges):
-        lines.append(fmt_wire(src, dst, in_idx, out_idx))
-    if not wire_edges:
-        lines.append('  (none)')
-
-    lines.append('')
-    lines.append('REFERENCE EDGES')
-    for src, dst, par_name in sorted(ref_edges):
-        lines.append(fmt_ref(src, dst, par_name))
-    if not ref_edges:
-        lines.append('  (none)')
-
-    lines.append('')
-    lines.append('NODES')
-    lines.append('')
-    lines.extend(node_blocks)
-
-    return '\n\n'.join(lines)
-
-
 def render_blocks(nodes, wire_edges, ref_edges, op_by_path):
     # Per-node-block format. See project_per_node_block_format memory for design rationale.
     # Sequential IDs (n1, n2, ...) assigned in walk order; out-of-network ref/wire targets
@@ -402,7 +320,7 @@ def render_blocks(nodes, wire_edges, ref_edges, op_by_path):
     return '\n'.join(lines)
 
 
-def snapshot_patch(root=None, format='legacy',
+def snapshot_patch(root=None,
                    include_comment=True,
                    include_bypass=True,
                    include_display=True,
@@ -420,6 +338,4 @@ def snapshot_patch(root=None, format='legacy',
         include_dat_text=include_dat_text,
         dat_text_truncate=dat_text_truncate,
     )
-    if format == 'blocks':
-        return render_blocks(nodes, wire_edges, ref_edges, op_by_path)
-    return render_legacy(nodes, wire_edges, ref_edges, op_by_path)
+    return render_blocks(nodes, wire_edges, ref_edges, op_by_path)
