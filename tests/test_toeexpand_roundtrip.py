@@ -21,7 +21,7 @@ sys.path.insert(0, str(REPO / "src"))
 from toeexpand import build, cparm, n, network, panel, parm, toc  # noqa: E402
 
 CORPUS_ROOTS = [
-    REPO / "toeexpand" / "2026-05-13_td_snapshot.tox.dir",
+    REPO / "toeexpand" / "2026-05-18_td_snapshot.tox.dir",
     REPO / "toeexpand" / "2026-05-17__datlab-classified-v1" / "v1" / "classifier.tox.dir",
     REPO / "toeexpand" / "2026-05-17__datlab-classified-v1" / "v1" / "convert_pca.tox.dir",
 ]
@@ -105,7 +105,7 @@ def test_n_roundtrip_corpus():
 
 def test_n_family_accessor():
     """Spot-check a known sample so the accessor logic isn't silently empty."""
-    sample = REPO / "toeexpand" / "2026-05-13_td_snapshot.tox.dir" / "td_snapshot.n"
+    sample = REPO / "toeexpand" / "2026-05-18_td_snapshot.tox.dir" / "td_snapshot.n"
     parsed = n.N.parse(sample.read_bytes())
     assert parsed.family == "COMP"
     assert parsed.type == "container"
