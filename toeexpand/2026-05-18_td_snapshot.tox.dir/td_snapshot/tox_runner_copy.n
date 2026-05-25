@@ -1,6 +1,6 @@
-COMP:container
-v 499.289 513.822 0.355556
-tile -350 -225 144 117
+DAT:panelexec
+tile -375 -262 317 152
 flags =  picked on current on viewer 1 parlanguage 0
 color 0.67 0.67 0.67 
+view -1 8 0 1 1 1 0 -2.47209 0 0 1 1 0
 end

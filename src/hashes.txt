@@ -1,10 +1,10 @@
 td-snapshot — source file checksums
 
-core.py:                       v1.4.0    4b42adbd027594d35dbc8b72e5217aab93f7a1a646110cb3b342e4a93033190c
+core.py:                       v2.0.0    d7adf48ba867bec3cb25004d6f4e50c736fadb26c26da161b7ea5e1cc6a2a8b0
 quickpaste_runner.py:          v1.0.0    483271940e07bb28d1b4f896443f8b6034e5edea57ed352887f31bce7e04eb91
 tox_runner_copy.py:            v1.0.0    0b5137746c322ce135b0af0544d7b452a9a3aaadeb356c5abab90c43f3d9c4af
 tox_runner_inspect.py:         v1.0.0    19467831a364093deb7c6f338b5d3632155036b457b09ae64649b1ed681eb662
 
 td-snapshot — binary artifact checksum
 
-td-snapshot.tox:               3a4d5f2c3816079cd32069f3adf21261a558fb2507990a7818d469cd46aa19f4
+td-snapshot.tox:               a2ee17be75d16957471faab8a272daaac37340363160493e5fc728ad8041fe92
