@@ -3,3 +3,5 @@ CLAUDE.md
 .DS_Store
 tests/post_refactor/
 tests/blocks_samples/
+__pycache__/
+.pytest_cache/
