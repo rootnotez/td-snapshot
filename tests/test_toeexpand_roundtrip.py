@@ -18,7 +18,7 @@ HERE = Path(__file__).resolve().parent
 REPO = HERE.parent
 sys.path.insert(0, str(REPO / "src"))
 
-from toeexpand import build, n, parm, toc  # noqa: E402
+from toeexpand import build, cparm, n, network, panel, parm, toc  # noqa: E402
 
 CORPUS_ROOTS = [
     REPO / "toeexpand" / "2026-05-13_td_snapshot.tox.dir",
@@ -132,6 +132,80 @@ def test_parm_roundtrip_corpus():
         if emitted != raw:
             failures.append(p)
     assert not failures, f"{len(failures)}/{len(found)} .parm files failed bit-exact"
+
+
+def _suffix_paths(suffix: str) -> list[Path]:
+    paths: list[Path] = []
+    for root in CORPUS_ROOTS:
+        if not root.exists():
+            continue
+        paths.extend(root.rglob(f"*{suffix}"))
+    return paths
+
+
+def test_panel_roundtrip_corpus():
+    found = _suffix_paths(".panel")
+    assert found, "no .panel corpus files found"
+    failures: list[Path] = []
+    for p in found:
+        raw = p.read_bytes()
+        emitted = panel.Panel.parse(raw).emit()
+        if emitted != raw:
+            failures.append(p)
+    assert not failures, f"{len(failures)}/{len(found)} .panel files failed"
+
+
+def test_network_roundtrip_corpus():
+    found = _suffix_paths(".network")
+    if not found:
+        return  # not every corpus has .network files
+    failures: list[Path] = []
+    for p in found:
+        raw = p.read_bytes()
+        emitted = network.Network.parse(raw).emit()
+        if emitted != raw:
+            failures.append(p)
+    assert not failures, f"{len(failures)}/{len(found)} .network files failed"
+
+
+def test_network_compinputs_accessor():
+    sample = (
+        REPO / "toeexpand" / "2026-05-17__datlab-classified-v1" / "v1"
+        / "classifier.tox.dir" / "classifier.network"
+    )
+    if not sample.exists():
+        return
+    parsed = network.Network.parse(sample.read_bytes())
+    inputs = parsed.compinputs()
+    assert len(inputs) == 2
+    assert inputs[0].op_name == "in_record"
+    assert inputs[0].family == "CHOP"
+
+
+def test_cparm_roundtrip_corpus():
+    found = _suffix_paths(".cparm")
+    if not found:
+        return
+    failures: list[Path] = []
+    for p in found:
+        raw = p.read_bytes()
+        emitted = cparm.Cparm.parse(raw).emit()
+        if emitted != raw:
+            failures.append(p)
+    assert not failures, f"{len(failures)}/{len(found)} .cparm files failed"
+
+
+def test_cparm_pages_accessor():
+    sample = (
+        REPO / "toeexpand" / "2026-05-17__datlab-classified-v1" / "v1"
+        / "classifier.tox.dir" / "classifier.cparm"
+    )
+    if not sample.exists():
+        return
+    parsed = cparm.Cparm.parse(sample.read_bytes())
+    pages = parsed.pages()
+    assert "About" in pages
+    assert "Record (in1)" in pages
 
 
 def test_parm_accessor_smoke():
