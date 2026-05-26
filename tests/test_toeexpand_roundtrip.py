@@ -18,13 +18,47 @@ HERE = Path(__file__).resolve().parent
 REPO = HERE.parent
 sys.path.insert(0, str(REPO / "src"))
 
-from toeexpand import build, cparm, n, network, panel, parm, toc  # noqa: E402
+from toeexpand import (  # noqa: E402
+    build,
+    chop,
+    cparm,
+    data,
+    fifo,
+    hold,
+    joystick,
+    lod,
+    logic,
+    midiin,
+    mousein,
+    n,
+    network,
+    panel,
+    parm,
+    renderpick,
+    script,
+    table,
+    text,
+    timestamp,
+    toc,
+    ts,
+)
 
 CORPUS_ROOTS = [
     REPO / "toeexpand" / "2026-05-18_td_snapshot.tox.dir",
     REPO / "toeexpand" / "2026-05-17__datlab-classified-v1" / "v1" / "classifier.tox.dir",
     REPO / "toeexpand" / "2026-05-17__datlab-classified-v1" / "v1" / "convert_pca.tox.dir",
 ]
+
+# Committed baseline fixtures for kinds that aren't represented in the main corpus.
+KIND_FIXTURES = REPO / "tests" / "baselines" / "toeexpand_kinds"
+
+
+def _fixture_paths(kind: str) -> list[Path]:
+    """Return all files under tests/baselines/toeexpand_kinds/<kind>/*.<kind>."""
+    d = KIND_FIXTURES / kind
+    if not d.exists():
+        return []
+    return sorted(d.glob(f"*.{kind}"))
 
 
 def _toc_paths() -> list[Path]:
@@ -234,3 +268,171 @@ def test_parm_accessor_smoke():
     assert emb0data.mode == 201326673
     assert emb0data.is_op_typed
     assert emb0data.has_expression
+
+
+# --- Binary kinds (preamble-based) ---
+
+
+def _roundtrip_all(paths: list[Path], parse_fn) -> list[Path]:
+    failures: list[Path] = []
+    for p in paths:
+        raw = p.read_bytes()
+        if parse_fn(raw).emit() != raw:
+            failures.append(p)
+    return failures
+
+
+def test_text_roundtrip_corpus():
+    found = _suffix_paths(".text") + _fixture_paths("text")
+    assert found
+    failures = _roundtrip_all(found, text.Text.parse)
+    assert not failures, f"{len(failures)}/{len(found)} .text files failed"
+
+
+def test_text_body_length_accessor():
+    sample = REPO / "toeexpand" / "2026-05-18_td_snapshot.tox.dir" / "td_snapshot" / "core.text"
+    if not sample.exists():
+        return
+    parsed = text.Text.parse(sample.read_bytes())
+    assert parsed.version == 2
+    assert parsed.body_length == len(parsed.body)
+
+
+def test_table_roundtrip_corpus():
+    found = _suffix_paths(".table") + _fixture_paths("table")
+    assert found
+    failures = _roundtrip_all(found, table.Table.parse)
+    assert not failures, f"{len(failures)}/{len(found)} .table files failed"
+
+
+def test_table_dimensions_accessor():
+    sample = (
+        REPO / "toeexpand" / "2026-05-17__datlab-classified-v1" / "v1"
+        / "classifier.tox.dir" / "classifier" / "stats_table.table"
+    )
+    if not sample.exists():
+        return
+    parsed = table.Table.parse(sample.read_bytes())
+    assert parsed.version == 1
+    # stats_table is a 2-column × 9-row key/value table.
+    assert parsed.column_count == 2
+    assert parsed.row_count == 9
+
+
+def test_fifo_roundtrip_fixtures():
+    found = _suffix_paths(".fifo") + _fixture_paths("fifo")
+    if not found:
+        return
+    failures = _roundtrip_all(found, fifo.Fifo.parse)
+    assert not failures, f"{len(failures)}/{len(found)} .fifo files failed"
+
+
+def test_renderpick_roundtrip_fixtures():
+    found = _suffix_paths(".renderpick") + _fixture_paths("renderpick")
+    if not found:
+        return
+    failures = _roundtrip_all(found, renderpick.Renderpick.parse)
+    assert not failures, f"{len(failures)}/{len(found)} .renderpick files failed"
+
+
+def test_data_roundtrip_fixtures():
+    found = _suffix_paths(".data") + _fixture_paths("data")
+    if not found:
+        return
+    failures = _roundtrip_all(found, data.Data.parse)
+    assert not failures, f"{len(failures)}/{len(found)} .data files failed"
+
+
+def test_lod_roundtrip_fixtures():
+    found = _suffix_paths(".lod") + _fixture_paths("lod")
+    if not found:
+        return
+    failures = _roundtrip_all(found, lod.Lod.parse)
+    assert not failures, f"{len(failures)}/{len(found)} .lod files failed"
+
+
+def test_lod_files_accessor():
+    sample = KIND_FIXTURES / "lod" / "midi.lod"
+    if not sample.exists():
+        return
+    parsed = lod.Lod.parse(sample.read_bytes())
+    files = parsed.files()
+    paths = [p for p, _ in files]
+    assert ".build" in paths
+    # midi.lod has nested template/ and template/mapmaster1/ subdirs.
+    assert any(p.startswith("template/") for p in paths)
+
+
+def test_timestamp_roundtrip_fixtures():
+    found = _fixture_paths("timestamp")
+    if not found:
+        return
+    failures = _roundtrip_all(found, timestamp.Timestamp.parse)
+    assert not failures
+
+
+# --- Brace-block CHOP-style kinds ---
+
+
+def test_script_roundtrip_corpus():
+    found = _suffix_paths(".script") + _fixture_paths("script")
+    if not found:
+        return
+    failures = _roundtrip_all(found, script.Script.parse)
+    assert not failures, f"{len(failures)}/{len(found)} .script files failed"
+
+
+def test_ts_roundtrip_fixtures():
+    found = _suffix_paths(".ts") + _fixture_paths("ts")
+    if not found:
+        return
+    failures = _roundtrip_all(found, ts.Ts.parse)
+    assert not failures
+
+
+def test_chop_roundtrip_fixtures():
+    found = _suffix_paths(".chop") + _fixture_paths("chop")
+    if not found:
+        return
+    failures = _roundtrip_all(found, chop.Chop.parse)
+    assert not failures
+
+
+def test_logic_roundtrip_fixtures():
+    found = _fixture_paths("logic")
+    if not found:
+        return
+    failures = _roundtrip_all(found, logic.Logic.parse)
+    assert not failures
+
+
+def test_hold_roundtrip_fixtures():
+    found = _fixture_paths("hold")
+    if not found:
+        return
+    failures = _roundtrip_all(found, hold.Hold.parse)
+    assert not failures
+
+
+def test_midiin_roundtrip_fixtures():
+    found = _fixture_paths("midiin")
+    if not found:
+        return
+    failures = _roundtrip_all(found, midiin.Midiin.parse)
+    assert not failures
+
+
+def test_mousein_roundtrip_fixtures():
+    found = _fixture_paths("mousein")
+    if not found:
+        return
+    failures = _roundtrip_all(found, mousein.Mousein.parse)
+    assert not failures
+
+
+def test_joystick_roundtrip_fixtures():
+    found = _fixture_paths("joystick")
+    if not found:
+        return
+    failures = _roundtrip_all(found, joystick.Joystick.parse)
+    assert not failures

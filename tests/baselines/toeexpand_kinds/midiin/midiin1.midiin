@@ -1,0 +1,35 @@
+3
+1
+{
+   rate = 60
+   start = 0
+   tracklength = 1
+   tracks = 5
+   {
+      name = ch1ctrl80
+      data_rle = 0 
+   }
+   {
+      name = ch1ctrl77
+      data_rle = 58 
+   }
+   {
+      name = ch1ctrl78
+      data_rle = 73 
+   }
+   {
+      name = ch1ctrl79
+      data_rle = 35 
+   }
+   {
+      name = ch1ctrl65
+      data_rle = 7 
+   }
+
+}
+0
+0
+0
+0
+0
+0
