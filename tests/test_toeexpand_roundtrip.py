@@ -19,6 +19,7 @@ REPO = HERE.parent
 sys.path.insert(0, str(REPO / "src"))
 
 from toeexpand import (  # noqa: E402
+    Project,
     build,
     chop,
     cparm,
@@ -436,3 +437,36 @@ def test_joystick_roundtrip_fixtures():
         return
     failures = _roundtrip_all(found, joystick.Joystick.parse)
     assert not failures
+
+
+# --- Whole-tree Project facade ---
+
+
+def test_project_roundtrip_corpus(tmp_path):
+    roots = [r for r in CORPUS_ROOTS if r.exists()]
+    assert roots, "no tracked-corpus .dir/ trees found"
+    for root in roots:
+        project = Project.from_dir(root)
+
+        # In-memory verify: every entry's emit() equals the source bytes.
+        mismatches = project.verify(root)
+        assert not mismatches, f"{root.name}: in-memory verify failed: {mismatches[:5]}"
+
+        # Round-trip through disk: write to a fresh location, diff every file.
+        out_dir = tmp_path / root.name
+        project.to_dir(out_dir)
+        for rel in project.toc.paths:
+            src = (root / rel).read_bytes()
+            dst = (out_dir / rel).read_bytes()
+            assert src == dst, f"{root.name}: {rel} differs after to_dir()"
+        src_toc = (root.parent / (root.name[:-len(".dir")] + ".toc")).read_bytes()
+        dst_toc = (out_dir.parent / (out_dir.name[:-len(".dir")] + ".toc")).read_bytes()
+        assert src_toc == dst_toc, f"{root.name}: .toc differs after to_dir()"
+
+
+def test_project_entries_match_toc_order():
+    root = REPO / "toeexpand" / "2026-05-18_td_snapshot.tox.dir"
+    if not root.exists():
+        return
+    project = Project.from_dir(root)
+    assert list(project.entries.keys()) == project.toc.paths
