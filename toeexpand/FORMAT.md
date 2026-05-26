@@ -386,6 +386,8 @@ lradioname scopy_btn         # root container only
 
 The binary header makes `.text` files slightly harder to diff than the other artifacts, but the bulk content is plain text and diffs cleanly in practice.
 
+**Important correction discovered during parser implementation:** previous FORMAT.md drafts described `.table` as sharing the 6-u32 preamble. It does **not** — `.table` and the table-shaped kinds (`.renderpick`, `.fifo`, `.data`) use a **4-u32** preamble (`sentinel, col_count, row_count, reserved`) followed directly by a cell stream. The bytes that looked like u32[4]/u32[5] are actually the start of the first cell record. Wide-corpus testing (20,207 `.table` files + 22 `.renderpick` + 256 `.fifo` + 3,166 `.data`) confirms 4-u32 universally.
+
 ## Project-only files (full `.toe` roots)
 
 These appear in expansions of `.toe` (whole project) but not `.tox` (single COMP):
@@ -476,21 +478,24 @@ Hex layout (from `local/midi.lod`):
 ...
 ```
 
-**Grammar — fully decoded** (verified across 4 sample files spanning builds 2017.11520, 2021.13610, 2021.16410, 2023.11880; layout is identical across all):
+**Grammar — fully decoded** (verified bit-exact across all 30 `.lod` files in the wide-corpus survey, builds 2017.11520 → 2023.11880):
 
 ```
-Record = FramingByte PathLenByte LengthField PathNullTerm Body
+Record = FileRecord | DescRecord | AscendRecord
 
-FramingByte  = 0x34 (ASCII '4')
-PathLenByte  = u8: length of (path + null-terminator), e.g. 0x07 for ".build" (6 bytes + null)
-LengthField  = u32 big-endian: body length in bytes
-PathNullTerm = path string + 0x00, e.g. ".build\0", "device.n\0"
-Body         = <LengthField> bytes, identical to what the standalone file would contain
+FileRecord   = 0x34 u8(path_len+1) u32_BE(body_len) <path>\0 <body>
+DescRecord   = 0x36 u8(subtype) u8(path_len+1) <path>\0       (no body)
+AscendRecord = 0x35                                            (single byte)
 ```
 
-Records concatenate until end of file. The earlier "extra 0x07 byte" / "padding spaces" confusion was caused by misreading the `PathLenByte` value when rendered next to high-order zero bytes of `LengthField` in xxd output.
+A `.lod` is a **depth-first** serialisation of a subtree:
+- `FileRecord` carries a single artifact's bytes (identical to what the standalone file would contain).
+- `DescRecord` opens a subdirectory — push `path` onto a path stack. The `subtype` byte after `0x36` is consistently `0x34` in all observed bundles; its exact meaning is still inferred (likely "the children to follow are file records").
+- `AscendRecord` closes the most-recent subdirectory — pop the path stack. Multiple consecutive `0x35` bytes ascend multiple levels.
 
-A `.lod` is a flat key/value store mirroring what would otherwise be a directory + table-of-contents. With the grammar above, round-tripping is now straightforward.
+Earlier drafts of this spec only documented `FileRecord` because the survey samples were shallow `.lod` bundles. Wider testing on `Kantare.toe.dir/local/midi.lod` and similar surfaced the `0x36`/`0x35` markers.
+
+With the grammar above, round-tripping is byte-exact: `parser/lod.py` walks records linearly and emits them unchanged.
 
 ## Notes / open questions
 

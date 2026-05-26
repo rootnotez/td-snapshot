@@ -1,0 +1,16 @@
+1
+{
+   rate = 60
+   start = 0
+   tracklength = 1
+   tracks = 2
+   {
+      name = tx
+      data_rle = 0 
+   }
+   {
+      name = ty
+      data_rle = 0 
+   }
+
+}

@@ -1,0 +1,13 @@
+1
+0
+{
+   rate = 60
+   start = 42467
+   tracklength = 1
+   tracks = 1
+   {
+      name = frame
+      data_rle = 467 
+   }
+
+}

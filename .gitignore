@@ -5,3 +5,8 @@ tests/post_refactor/
 tests/blocks_samples/
 __pycache__/
 .pytest_cache/
+# Third-party survey corpus — too large/external to track. Re-fetch via repo URLs in toeexpand/FORMAT.md if needed.
+toeexpand/resources/
+# Working samples used for one-off binary-kind analysis.
+toeexpand/2026-05-17__datlab-classified-v1/
+datlab-classified-v1.zip
