@@ -417,6 +417,33 @@ The binary header makes `.text` files slightly harder to diff than the other art
 
 **Important correction discovered during parser implementation:** previous FORMAT.md drafts described `.table` as sharing the 6-u32 preamble. It does **not** — `.table` and the table-shaped kinds (`.renderpick`, `.fifo`, `.data`) use a **4-u32** preamble (`sentinel, col_count, row_count, reserved`) followed directly by a cell stream. The bytes that looked like u32[4]/u32[5] are actually the start of the first cell record. Wide-corpus testing (20,207 `.table` files + 22 `.renderpick` + 256 `.fifo` + 3,166 `.data`) confirms 4-u32 universally.
 
+### Short-form `.text` — 4-u32 preamble (TD 2025.30280+)
+
+Some Text DATs serialize with a **4-u32** preamble instead of the standard 6-u32 form, producing a 19-byte file with no body:
+
+```
+hex: 32 0a 2a 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 01
+     '2' \n '*' [u32=1     ][u32=0     ][u32=0     ][u32=1     ]
+```
+
+Decoded:
+
+| u32 | value | meaning vs. standard 6-u32 form |
+|---|---|---|
+| u32[0] | `0x00000001` | matches sentinel u32[0] |
+| u32[1] | `0x00000000` | would be sentinel `1` in standard form |
+| u32[2] | `0x00000000` | would be sentinel `1` in standard form |
+| u32[3] | `0x00000001` | would be sentinel `1` in standard form |
+|  —  |  —  | no u32[4]=2 end-marker, no u32[5] body length |
+
+Total: `2\n` (2) + `*` (1) + 4×u32 (16) = **19 bytes**, no body bytes. For comparison, the smallest standard-form empty `.text` is **27 bytes**: `2\n*` + `[1, 1, 1, 1, 2, 0]`.
+
+**Observed:** exactly once in the 1 630-file stress corpus — `raytk/devel/toolkitEditor/createRopDialog/createRopDialog.tox` (build **2025.30280**, `osname Windows`), at `createRopDialog/set_messageText.text`. The companion `.n` reads `DAT:text` so this is unambiguously a Text DAT, not a misrouted kind. The node has no `.parm` sibling either, suggesting the entire DAT is at TD's factory default with no body assigned — distinct from "explicitly empty body" which still serializes via the 6-u32 form. Hypothesis: TD 2025 introduced a compact serialization for newly-created / never-touched Text DATs.
+
+**Stable through round-trip:** `toecollapse` → `toeexpand` on this `.tox` regenerates the same 19-byte file byte-for-byte. Not a transient or platform-injection artifact — it's a deterministic property of TD 2025's serializer.
+
+**Parser rule:** detect form by remaining-byte count after the `*` marker. ≥ 24 bytes → standard 6-u32 preamble; otherwise → 4-u32 short form. The `Preamble(fields)` container already supports variable field counts, so emit is unchanged; only `body_length` (u32[5]) and `rebuild_lengths()` need to guard for the 4-field case.
+
 ## Project-only files (full `.toe` roots)
 
 These appear in expansions of `.toe` (whole project) but not `.tox` (single COMP):
