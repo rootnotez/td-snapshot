@@ -83,6 +83,35 @@ td_snapshot/core.n
   - `.toe.toc` → never has the header; line 1 is `.build` directly.
 - Remaining lines: every file in `<basename>.dir/`, relative to the dir, in deterministic order. Acts as a manifest the inverse `toecollapse` tool can read.
 
+### Case-collision suffix mismatch (toeexpand bug)
+
+When two siblings in the same folder differ only by case (e.g. `Image` and `image` under `pixel_sorter/`), APFS case-insensitivity forces `toeexpand` to disambiguate the second one. It does so **inconsistently between the manifest and the filesystem**:
+
+- TOC line: `project/pixel_sorter/image.n 2` (suffix is **space + digit**)
+- File on disk: `project/pixel_sorter/image.n.2` (suffix is **dot + digit**)
+
+Concrete example, Glitches' `pixel_sorter` directory:
+
+```
+TOC entries:                        files on disk:
+  project/pixel_sorter/Image.n        Image.n
+  project/pixel_sorter/Image.parm     Image.parm
+  project/pixel_sorter/Image.oldacbo  Image.oldacbo
+  project/pixel_sorter/image.n 2      image.n.2
+  project/pixel_sorter/image.parm 2   image.parm.2
+  project/pixel_sorter/image.text     image.text
+```
+
+Confirmed across **all 8 affected samples in the 1 630-file stress corpus**, spanning builds 2019.17550, 2020.40240, 2021.13610, 2021.16960, 2023.11880 (×3), and 2025.30770. Count of TOC ` 2`-suffixed entries always equals count of `.2`-suffixed files on disk. The mismatch survives a `toeexpand → toecollapse → toeexpand` round-trip with zero diff, so it is a deterministic property of `toeexpand`'s TOC writer, not a Finder/iCloud artifact.
+
+**All 8 affected originals have `osname Windows` / `osversion 10` in `.build`.** Windows is case-sensitive, so `Image` and `image` can coexist as siblings in the source `.toe`/`.tox` without any disambiguation. macOS APFS (case-insensitive by default) then forces `toeexpand` to invent a suffix for the second one — and it ships the TOC and the on-disk filename with different suffixes. So the rule of thumb is: this issue only arises when expanding Windows-authored files on macOS.
+
+**No `* 2` files (literal space-2 suffix) ever appear on disk** in any observed sample — the dot-vs-space split happens 100 % at TOC-write time.
+
+Parsers reading from the TOC must therefore translate a missing `<path> <N>` entry to `<path>.<N>` before opening it, where `<N>` is one or more digits.
+
+(Related: `toecollapse` is itself not a bit-exact inverse of `toeexpand` on the *first* pass — collapsed files are uniformly larger than originals by ~1–13 % — but it converges to a fixed point after exactly one round. Verified on all 8 case-collision samples × 4 successive expand/collapse rounds: every file's collapsed sha256, expanded tree sha, and TOC sha are identical from round 1 through round 4. The growth is therefore one-time canonicalization, not accumulating drift. **Note:** `.build` is preserved verbatim through the round-trip — osname/osversion/time/build number all survive. So the canonicalization is in the binary container layout (alignment, section ordering, padding) chosen by the local platform's `toecollapse`, not a metadata rewrite.)
+
 ## `.build` — build stamp
 
 ```
