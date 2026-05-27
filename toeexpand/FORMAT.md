@@ -444,6 +444,34 @@ Total: `2\n` (2) + `*` (1) + 4×u32 (16) = **19 bytes**, no body bytes. For comp
 
 **Parser rule:** detect form by remaining-byte count after the `*` marker. ≥ 24 bytes → standard 6-u32 preamble; otherwise → 4-u32 short form. The `Preamble(fields)` container already supports variable field counts, so emit is unchanged; only `body_length` (u32[5]) and `rebuild_lengths()` need to guard for the 4-field case.
 
+### Brace-block-form `.renderpick` (TD 2025.30280+)
+
+Some `.renderpick` files use the **brace-block grammar** (shared with `.logic`, `.hold`, `.ts`, etc.) instead of the binary table form. The discriminator is the byte immediately after the version line:
+
+- `*` → binary table form: `1\n*<u32×4>` + cell stream (the established shape)
+- `{` → brace-block form: `1\n{` + key-value body describing rate/start/tracks
+
+Example brace-block body (`raytk/.../renderpick1.renderpick`, build **2025.30280**):
+
+```
+1
+{
+   rate = 60
+   start = 0
+   tracklength = 1
+   tracks = 5
+   {
+      name = tx
+      data_rle = 0
+   }
+   ...
+}
+```
+
+**Observed:** once in the 1 630-file stress corpus — `raytk/tests/testCases/operators/output/raymarchRender3D_renderComposite_test.tox`. The 22 other corpus `.renderpick` files all use the binary form, so brace-block is rare but real.
+
+**Parser rule:** peek at byte `nl+1`. `{` → store as `BraceBlockBody` (opaque, round-trip via raw bytes); `*` → existing preamble + cell-stream path.
+
 ## Project-only files (full `.toe` roots)
 
 These appear in expansions of `.toe` (whole project) but not `.tox` (single COMP):
