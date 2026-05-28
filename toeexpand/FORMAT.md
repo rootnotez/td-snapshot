@@ -522,7 +522,7 @@ Several CHOP/COMP families emit a body file alongside `.n`/`.parm`. The first li
 | `.pluginstate` | `1\n<XML containing base64 VST3 state>` | Audio VST CHOP plugin state. Not human-editable. |
 | `.learnedparms` | `1\n0\n` | Audio VST CHOP MIDI-learn map. Minimal in samples. |
 | `.pointfilein` | `1\nActive\nZero\nOne\nx\ny\nz\nnx\nny\nnz\nred\n...` | Point File In TOP — attribute-name table. |
-| `.renderpick` | `1\n*<padding>...` | Render Pick TOP cache. `1\n*`-framed binary. |
+| `.renderpick` | `1\n*<padding>...` **or** `1\n{...}` | Render Pick TOP cache. Two forms: binary `1\n*<u32×4>`+cells (most common) or brace-block `1\n{...}` (TD 2025.30280+). See "Brace-block-form `.renderpick`" above. |
 | `.opfind` | `1\n<tab-separated op-reference table>` | OPFind DAT cache — operator-path / family / category rows. Can be tens of KB on large projects. |
 | `.geopaths` | `1\n1\n/fbxNode4/lambert1\n7872\n1\n` | Geometry COMP path/material mapping. |
 | `.textureimports` | `1\n1\n` | Geometry COMP texture-import manifest. |

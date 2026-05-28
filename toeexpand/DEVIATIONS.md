@@ -42,6 +42,24 @@ Format per entry:
 **Build:** 099.
 **Resolution:** `.data` is a generic binary blob used by different operators for different payloads — TOP icon rasters (ASCII-int header), COMP help text (DAT-cell preamble at offset 0), JSON-style bodies, etc. The parser stores raw bytes and exposes a `signature` accessor that sniffs the first byte (`dat_preamble` / `u32_preamble` / `ascii_int_header` / `brace_block` / `binary_b` / `other_*`). Round-trip is trivially bit-exact since we never re-parse the body.
 
+### `.toc` case-collision suffix mismatch — ` N` vs. `.N`
+
+**Sample:** `toeexpand/resources/TouchDesigner_Shared/Starters/bezier_curve_gui/bezier_gui.toe` (one of 8 affected samples spanning builds 2019.17550 → 2025.30770).
+**Build:** various, always Windows-authored.
+**Resolution:** toeexpand disambiguates same-name siblings (case-collision on APFS) with two **different** suffix schemes — `.toc` line gets ` N` (space + digits), on-disk file gets `.N` (dot + digits). `Project.from_dir`/`to_dir` translate via `_toc_to_disk(rel)` (regex `r' (\d+)$' → r'.\1'`). Round-trip is bit-exact across all 8 affected samples. See FORMAT.md "Case-collision suffix mismatch" for the full mechanism.
+
+### `.text` short-form 4-u32 preamble (TD 2025.30280+)
+
+**Sample:** `toeexpand/resources/raytk/devel/toolkitEditor/createRopDialog/createRopDialog.tox` → `createRopDialog/set_messageText.text` (19 bytes).
+**Build:** 2025.30280, Windows.
+**Resolution:** TD 2025 emits a 4-u32 preamble `[1,0,0,1]` (no u32[4]=2 sentinel, no body-length field) for never-touched Text DATs, vs. the standard 6-u32 `[1,1,1,1,2,body_len]`. Parser detects by remaining-byte count after `*` (< 24 → 4-u32 short form). FORMAT.md "Short-form `.text` — 4-u32 preamble" has the full byte table.
+
+### `.renderpick` brace-block form (TD 2025.30280+)
+
+**Sample:** `toeexpand/resources/raytk/tests/testCases/operators/output/raymarchRender3D_renderComposite_test.tox` → `.../camera/renderpick1.renderpick`.
+**Build:** 2025.30280.
+**Resolution:** TD 2025 also emits `.renderpick` files in the brace-block grammar (`1\n{...}`) shared with `.logic` / `.hold` / `.ts`, alongside the established `1\n*<u32×4>` binary table form. `Renderpick.parse` discriminates on the byte after the version line (`*` → binary, `{` → opaque `BraceBlockBody`). Round-trip bit-exact for both forms; all 22 existing binary-form samples still pass.
+
 ## Known watch-list (not yet observed as failures)
 
 - **Line endings** — all current samples use LF. If a Windows-exported `.tox`
