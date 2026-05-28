@@ -22,3 +22,4 @@ HEADER
 echo "Built td-snapshot.py"
 
 ./scripts/tox-sync.sh
+./scripts/hashes.sh
