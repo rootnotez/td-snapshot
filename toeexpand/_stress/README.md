@@ -5,6 +5,11 @@ directory of `.tox` / `.toe` files, runs the TouchDesigner `toeexpand`
 binary on each, then drives `Project.from_dir().to_dir()` and byte-diffs
 the result against the original expansion.
 
+**Latest validated run:** `run-2/` — 1630/1630 OK across builds 2016.5580
+→ 2025.31550 (`--timeout 600` to accommodate Luminosity_0_8.toe).
+`run-1.md` documents the initial triage that drove the fixes in commits
+`5271889` / `b30edfe` / `672cd71` / `f0ad994`.
+
 Failures are kept on disk side-by-side (`orig/`, `ours/`, source copy)
 so they can be inspected without re-running `toeexpand`.
 

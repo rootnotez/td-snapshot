@@ -24,8 +24,12 @@ from pathlib import Path
 
 from ._preamble import Preamble
 
-# .text uses 6 u32s in its preamble: [1, 1, 1, 1, 2, body_length]
+# .text normally uses 6 u32s in its preamble: [1, 1, 1, 1, 2, body_length].
+# TD 2025.30280+ also emits a 4-u32 short form for stub/uninitialized Text
+# DATs (file is exactly 19 bytes: `2\n*` + 4 u32s, no body). Detected at
+# parse-time by remaining-byte count.
 PREAMBLE_FIELDS = 6
+PREAMBLE_FIELDS_SHORT = 4
 
 
 @dataclass
@@ -39,7 +43,11 @@ class Text:
         # Version line: digits up to and including the newline.
         nl = raw.index(b"\n")
         version_line = raw[:nl + 1]
-        preamble = Preamble.parse(raw, nl + 1, PREAMBLE_FIELDS)
+        # Bytes available after the `*` marker. Pick 4 u32s when the file
+        # is too short for the standard 6-u32 preamble.
+        remaining = len(raw) - (nl + 1) - 1
+        fields = PREAMBLE_FIELDS if remaining >= 4 * PREAMBLE_FIELDS else PREAMBLE_FIELDS_SHORT
+        preamble = Preamble.parse(raw, nl + 1, fields)
         body = raw[nl + 1 + preamble.byte_size:]
         return cls(version_line=version_line, preamble=preamble, body=body)
 
@@ -54,15 +62,19 @@ class Text:
 
     @property
     def body_length(self) -> int:
-        return self.preamble.fields[5]
+        # 6-field form stores body length at u32[5]; 4-field stub has no body.
+        return self.preamble.fields[5] if len(self.preamble.fields) == PREAMBLE_FIELDS else 0
 
     def rebuild_lengths(self) -> None:
         """Refresh preamble u32[5] to match the actual `body` length.
 
         Use only when intentionally editing `body` — bit-exact round-trip
-        otherwise relies on never re-deriving stored fields.
+        otherwise relies on never re-deriving stored fields. No-op for the
+        4-field short form (stub Text DATs have no body length field).
         """
         f = self.preamble.fields
+        if len(f) != PREAMBLE_FIELDS:
+            return
         self.preamble = Preamble(fields=(f[0], f[1], f[2], f[3], f[4], len(self.body)))
 
 

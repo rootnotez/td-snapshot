@@ -16,9 +16,21 @@ round-trips them, accessors just aren't available.
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable
+
+# toeexpand uses two parallel encodings when sibling node names collide on
+# case-insensitive APFS (e.g. `Map` + `map`): the `.toc` lists the duplicate
+# with a trailing ` N` (space + digits) suffix, while the on-disk file gets a
+# `.N` (dot + digits) suffix. Translate between them so the parser can locate
+# the file the `.toc` references.
+_TOC_DUP_SUFFIX = re.compile(r" (\d+)$")
+
+
+def _toc_to_disk(rel: str) -> str:
+    return _TOC_DUP_SUFFIX.sub(r".\1", rel)
 
 from . import (
     build as _build,
@@ -106,7 +118,7 @@ class Project:
         toc_model = _toc.Toc.parse(toc_path.read_bytes())
         entries: dict[str, Any] = {}
         for rel in toc_model.paths:
-            f = d / rel
+            f = d / _toc_to_disk(rel)
             raw = f.read_bytes()
             parser = KIND_PARSERS.get(_suffix_key(rel))
             entries[rel] = parser(raw) if parser is not None else raw
@@ -129,7 +141,7 @@ class Project:
         toc_path.write_bytes(self.toc.emit())
 
         for rel, model in self.entries.items():
-            target = d / rel
+            target = d / _toc_to_disk(rel)
             target.parent.mkdir(parents=True, exist_ok=True)
             raw = model if isinstance(model, (bytes, bytearray)) else model.emit()
             target.write_bytes(raw)
@@ -146,6 +158,6 @@ class Project:
             mismatches.append(toc_path.name)
         for rel, model in self.entries.items():
             raw = model if isinstance(model, (bytes, bytearray)) else model.emit()
-            if raw != (d / rel).read_bytes():
+            if raw != (d / _toc_to_disk(rel)).read_bytes():
                 mismatches.append(rel)
         return mismatches

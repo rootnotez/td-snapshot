@@ -91,12 +91,14 @@ def _worker_entry(args: WorkerArgs) -> SampleResult:
     _bootstrap_sys_path()
     from toeexpand import Build, Project, Toc  # noqa: F811
 
-    scratch = Path(args.work_root) / args.sha_hex[:8]
+    # Scratch must be unique per invocation so concurrent workers can never
+    # contaminate each other's expansion — e.g. two corpus files with the
+    # same sha would have collided here when scratch was sha-keyed, racing
+    # toeexpand writes inside the same `expanded/` and producing impossible
+    # output names like `<name>.2.toe.dir`.
+    scratch = Path(tempfile.mkdtemp(prefix=f"{args.sha_hex[:8]}-", dir=args.work_root))
     expanded = scratch / "expanded"
     reemitted = scratch / "reemitted"
-    # Ensure clean scratch state in case a prior aborted run left junk.
-    if scratch.exists():
-        shutil.rmtree(scratch, ignore_errors=True)
     expanded.mkdir(parents=True, exist_ok=True)
 
     src = Path(args.source_path)
@@ -187,8 +189,10 @@ def _worker_entry(args: WorkerArgs) -> SampleResult:
     ours_toc = reemitted_dir.parent / toc_filename
 
     pairs: list[tuple[str, Path, Path]] = [(toc_filename, orig_toc, ours_toc)]
+    from toeexpand.project import _toc_to_disk  # local to keep top-level import surface tight
     for rel in toc.paths:
-        pairs.append((rel, expanded_dir / rel, reemitted_dir / rel))
+        disk_rel = _toc_to_disk(rel)
+        pairs.append((rel, expanded_dir / disk_rel, reemitted_dir / disk_rel))
 
     mismatched: list[str] = []
     first_diff_path: Optional[str] = None

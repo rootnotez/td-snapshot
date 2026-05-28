@@ -83,6 +83,35 @@ td_snapshot/core.n
   - `.toe.toc` → never has the header; line 1 is `.build` directly.
 - Remaining lines: every file in `<basename>.dir/`, relative to the dir, in deterministic order. Acts as a manifest the inverse `toecollapse` tool can read.
 
+### Case-collision suffix mismatch (toeexpand bug)
+
+When two siblings in the same folder differ only by case (e.g. `Image` and `image` under `pixel_sorter/`), APFS case-insensitivity forces `toeexpand` to disambiguate the second one. It does so **inconsistently between the manifest and the filesystem**:
+
+- TOC line: `project/pixel_sorter/image.n 2` (suffix is **space + digit**)
+- File on disk: `project/pixel_sorter/image.n.2` (suffix is **dot + digit**)
+
+Concrete example, Glitches' `pixel_sorter` directory:
+
+```
+TOC entries:                        files on disk:
+  project/pixel_sorter/Image.n        Image.n
+  project/pixel_sorter/Image.parm     Image.parm
+  project/pixel_sorter/Image.oldacbo  Image.oldacbo
+  project/pixel_sorter/image.n 2      image.n.2
+  project/pixel_sorter/image.parm 2   image.parm.2
+  project/pixel_sorter/image.text     image.text
+```
+
+Confirmed across **all 8 affected samples in the 1 630-file stress corpus**, spanning builds 2019.17550, 2020.40240, 2021.13610, 2021.16960, 2023.11880 (×3), and 2025.30770. Count of TOC ` 2`-suffixed entries always equals count of `.2`-suffixed files on disk. The mismatch survives a `toeexpand → toecollapse → toeexpand` round-trip with zero diff, so it is a deterministic property of `toeexpand`'s TOC writer, not a Finder/iCloud artifact.
+
+**All 8 affected originals have `osname Windows` / `osversion 10` in `.build`.** Windows is case-sensitive, so `Image` and `image` can coexist as siblings in the source `.toe`/`.tox` without any disambiguation. macOS APFS (case-insensitive by default) then forces `toeexpand` to invent a suffix for the second one — and it ships the TOC and the on-disk filename with different suffixes. So the rule of thumb is: this issue only arises when expanding Windows-authored files on macOS.
+
+**No `* 2` files (literal space-2 suffix) ever appear on disk** in any observed sample — the dot-vs-space split happens 100 % at TOC-write time.
+
+Parsers reading from the TOC must therefore translate a missing `<path> <N>` entry to `<path>.<N>` before opening it, where `<N>` is one or more digits.
+
+(Related: `toecollapse` is itself not a bit-exact inverse of `toeexpand` on the *first* pass — collapsed files are uniformly larger than originals by ~1–13 % — but it converges to a fixed point after exactly one round. Verified on all 8 case-collision samples × 4 successive expand/collapse rounds: every file's collapsed sha256, expanded tree sha, and TOC sha are identical from round 1 through round 4. The growth is therefore one-time canonicalization, not accumulating drift. **Note:** `.build` is preserved verbatim through the round-trip — osname/osversion/time/build number all survive. So the canonicalization is in the binary container layout (alignment, section ordering, padding) chosen by the local platform's `toecollapse`, not a metadata rewrite.)
+
 ## `.build` — build stamp
 
 ```
@@ -388,6 +417,61 @@ The binary header makes `.text` files slightly harder to diff than the other art
 
 **Important correction discovered during parser implementation:** previous FORMAT.md drafts described `.table` as sharing the 6-u32 preamble. It does **not** — `.table` and the table-shaped kinds (`.renderpick`, `.fifo`, `.data`) use a **4-u32** preamble (`sentinel, col_count, row_count, reserved`) followed directly by a cell stream. The bytes that looked like u32[4]/u32[5] are actually the start of the first cell record. Wide-corpus testing (20,207 `.table` files + 22 `.renderpick` + 256 `.fifo` + 3,166 `.data`) confirms 4-u32 universally.
 
+### Short-form `.text` — 4-u32 preamble (TD 2025.30280+)
+
+Some Text DATs serialize with a **4-u32** preamble instead of the standard 6-u32 form, producing a 19-byte file with no body:
+
+```
+hex: 32 0a 2a 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 01
+     '2' \n '*' [u32=1     ][u32=0     ][u32=0     ][u32=1     ]
+```
+
+Decoded:
+
+| u32 | value | meaning vs. standard 6-u32 form |
+|---|---|---|
+| u32[0] | `0x00000001` | matches sentinel u32[0] |
+| u32[1] | `0x00000000` | would be sentinel `1` in standard form |
+| u32[2] | `0x00000000` | would be sentinel `1` in standard form |
+| u32[3] | `0x00000001` | would be sentinel `1` in standard form |
+|  —  |  —  | no u32[4]=2 end-marker, no u32[5] body length |
+
+Total: `2\n` (2) + `*` (1) + 4×u32 (16) = **19 bytes**, no body bytes. For comparison, the smallest standard-form empty `.text` is **27 bytes**: `2\n*` + `[1, 1, 1, 1, 2, 0]`.
+
+**Observed:** exactly once in the 1 630-file stress corpus — `raytk/devel/toolkitEditor/createRopDialog/createRopDialog.tox` (build **2025.30280**, `osname Windows`), at `createRopDialog/set_messageText.text`. The companion `.n` reads `DAT:text` so this is unambiguously a Text DAT, not a misrouted kind. The node has no `.parm` sibling either, suggesting the entire DAT is at TD's factory default with no body assigned — distinct from "explicitly empty body" which still serializes via the 6-u32 form. Hypothesis: TD 2025 introduced a compact serialization for newly-created / never-touched Text DATs.
+
+**Stable through round-trip:** `toecollapse` → `toeexpand` on this `.tox` regenerates the same 19-byte file byte-for-byte. Not a transient or platform-injection artifact — it's a deterministic property of TD 2025's serializer.
+
+**Parser rule:** detect form by remaining-byte count after the `*` marker. ≥ 24 bytes → standard 6-u32 preamble; otherwise → 4-u32 short form. The `Preamble(fields)` container already supports variable field counts, so emit is unchanged; only `body_length` (u32[5]) and `rebuild_lengths()` need to guard for the 4-field case.
+
+### Brace-block-form `.renderpick` (TD 2025.30280+)
+
+Some `.renderpick` files use the **brace-block grammar** (shared with `.logic`, `.hold`, `.ts`, etc.) instead of the binary table form. The discriminator is the byte immediately after the version line:
+
+- `*` → binary table form: `1\n*<u32×4>` + cell stream (the established shape)
+- `{` → brace-block form: `1\n{` + key-value body describing rate/start/tracks
+
+Example brace-block body (`raytk/.../renderpick1.renderpick`, build **2025.30280**):
+
+```
+1
+{
+   rate = 60
+   start = 0
+   tracklength = 1
+   tracks = 5
+   {
+      name = tx
+      data_rle = 0
+   }
+   ...
+}
+```
+
+**Observed:** once in the 1 630-file stress corpus — `raytk/tests/testCases/operators/output/raymarchRender3D_renderComposite_test.tox`. The 22 other corpus `.renderpick` files all use the binary form, so brace-block is rare but real.
+
+**Parser rule:** peek at byte `nl+1`. `{` → store as `BraceBlockBody` (opaque, round-trip via raw bytes); `*` → existing preamble + cell-stream path.
+
 ## Project-only files (full `.toe` roots)
 
 These appear in expansions of `.toe` (whole project) but not `.tox` (single COMP):
@@ -438,7 +522,7 @@ Several CHOP/COMP families emit a body file alongside `.n`/`.parm`. The first li
 | `.pluginstate` | `1\n<XML containing base64 VST3 state>` | Audio VST CHOP plugin state. Not human-editable. |
 | `.learnedparms` | `1\n0\n` | Audio VST CHOP MIDI-learn map. Minimal in samples. |
 | `.pointfilein` | `1\nActive\nZero\nOne\nx\ny\nz\nnx\nny\nnz\nred\n...` | Point File In TOP — attribute-name table. |
-| `.renderpick` | `1\n*<padding>...` | Render Pick TOP cache. `1\n*`-framed binary. |
+| `.renderpick` | `1\n*<padding>...` **or** `1\n{...}` | Render Pick TOP cache. Two forms: binary `1\n*<u32×4>`+cells (most common) or brace-block `1\n{...}` (TD 2025.30280+). See "Brace-block-form `.renderpick`" above. |
 | `.opfind` | `1\n<tab-separated op-reference table>` | OPFind DAT cache — operator-path / family / category rows. Can be tens of KB on large projects. |
 | `.geopaths` | `1\n1\n/fbxNode4/lambert1\n7872\n1\n` | Geometry COMP path/material mapping. |
 | `.textureimports` | `1\n1\n` | Geometry COMP texture-import manifest. |
