@@ -7,4 +7,9 @@ tox_runner_inspect.py:         v1.0.0    19467831a364093deb7c6f338b5d3632155036b
 
 td-snapshot — binary artifact checksum
 
-td-snapshot.tox:               a2ee17be75d16957471faab8a272daaac37340363160493e5fc728ad8041fe92
+td-snapshot.tox:               5b1d719e26e5cf8c28fd1efc4668e4ec655bb371b061398fb05bf42e14ab8a11
+
+td-snapshot — toeexpand toolchain (TouchDesigner 2025.32460)
+
+toeexpand:                     a7bcf116b7314ca82a75e840b58ceb4586ca7da2b7304a87dd23bb41a455bf35
+toecollapse:                   6cc392eefdf1ebae8f82c7be6b1edf07a144168c622f8efd43722333b559e61c

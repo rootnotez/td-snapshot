@@ -25,9 +25,10 @@ src/
   toeexpand/             ← Python package: bit-exact parser/emitter for the toeexpand .tox/.toe format (see "toeexpand parser" below)
 scripts/
   build.sh               ← rebuilds td-snapshot.py AND td-snapshot.tox from src/
-  stamp.sh               ← called by build.sh — stamps version/hash headers, regenerates src/hashes.txt
+  stamp.sh               ← called by build.sh — stamps version/hash headers onto src/*.py
   check.sh               ← called by build.sh — shellcheck on scripts + py_compile on src/*.py
   tox-sync.sh            ← called by build.sh — patches DAT bodies in tox/ from src/*.py, collapses to td-snapshot.tox
+  hashes.sh              ← called by build.sh after tox-sync — regenerates src/hashes.txt (source + .tox + toolchain checksums)
   tox-expand.sh          ← run after a TD GUI export to refresh tox/ for git diffing
 toeexpand/               ← toeexpand format docs + tooling: FORMAT.md, DEVIATIONS.md, _stress/ round-trip framework, and local toeexpand/toecollapse binaries (untracked)
 tests/                   ← toeexpand round-trip baseline corpus + test_toeexpand_roundtrip.py
@@ -36,7 +37,7 @@ td-snapshot.tox          ← BUILT — the distributable component, drop into an
 tox/                     ← canonical text expansion of td-snapshot.tox, for git diffing
 ```
 
-After editing `src/core.py`, run `./scripts/build.sh` to regenerate both `td-snapshot.py` and `td-snapshot.tox` (it calls `stamp.sh` and `tox-sync.sh` automatically). To bump a file's version, edit the corresponding entry in `src/versions.txt` before running the build.
+After editing `src/core.py`, run `./scripts/build.sh` to regenerate both `td-snapshot.py` and `td-snapshot.tox` (it calls `stamp.sh`, `tox-sync.sh`, and `hashes.sh` automatically). To bump a file's version, edit the corresponding entry in `src/versions.txt` before running the build.
 
 The `tox/` directory is a text expansion of `td-snapshot.tox`. It serves two purposes: `build.sh` reads it as the source when rebuilding the binary (patching in updated DAT text), and `git diff tox/` makes binary `.tox` changes reviewable. After making structural changes in the TD GUI and exporting a fresh `td-snapshot.tox`, run `./scripts/tox-expand.sh` to refresh it.
 
@@ -159,7 +160,7 @@ You can also just drop the `.tox` into a project directly from the filesystem wh
 
 ### Scripted build (maintainer note)
 
-This repo can rebuild both `td-snapshot.py` and `td-snapshot.tox` from `src/` without opening TouchDesigner. After editing `src/core.py`, `src/tox_runner_copy.py`, or `src/tox_runner_inspect.py` (and bumping the file's version in `src/versions.txt`), run `./scripts/build.sh`. It lints, stamps version/hash headers, rebuilds `td-snapshot.py`, then calls `tox-sync.sh`, which patches the `.text` DAT bodies in `tox/td_snapshot.tox.dir/` and runs `toecollapse` to rebuild the `.tox`. This requires TouchDesigner installed at `/Applications/TouchDesigner.app` for the `toecollapse` CLI. For structural changes made in the GUI, **Save Component** over `td-snapshot.tox` and run `./scripts/tox-expand.sh` to refresh `tox/` for git diffing.
+This repo can rebuild both `td-snapshot.py` and `td-snapshot.tox` from `src/` without opening TouchDesigner. After editing `src/core.py`, `src/tox_runner_copy.py`, or `src/tox_runner_inspect.py` (and bumping the file's version in `src/versions.txt`), run `./scripts/build.sh`. It lints, stamps version/hash headers onto `src/*.py`, rebuilds `td-snapshot.py`, then calls `tox-sync.sh`, which patches the `.text` DAT bodies in `tox/td_snapshot.tox.dir/` and runs `toecollapse` to rebuild the `.tox`. Finally `hashes.sh` regenerates `src/hashes.txt` — recording the source-file checksums, the freshly built `.tox` checksum, and the `toeexpand`/`toecollapse` toolchain (with the TouchDesigner build) that produced it. This requires TouchDesigner installed at `/Applications/TouchDesigner.app` for the `toecollapse` CLI. For structural changes made in the GUI, **Save Component** over `td-snapshot.tox` and run `./scripts/tox-expand.sh` to refresh `tox/` for git diffing.
 
 
 
