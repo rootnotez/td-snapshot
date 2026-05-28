@@ -22,10 +22,15 @@ src/
   tox_runner_inspect.py  ← Option 2 — script that runs in the TOX's Inspect button (Panel Execute DAT)
   hashes.txt             ← GENERATED — source file checksums, also a Text DAT in the TOX
   versions.txt           ← per-file version numbers — bump individually on changes
+  toeexpand/             ← Python package: bit-exact parser/emitter for the toeexpand .tox/.toe format (see "toeexpand parser" below)
 scripts/
   build.sh               ← rebuilds td-snapshot.py AND td-snapshot.tox from src/
+  stamp.sh               ← called by build.sh — stamps version/hash headers, regenerates src/hashes.txt
+  check.sh               ← called by build.sh — shellcheck on scripts + py_compile on src/*.py
   tox-sync.sh            ← called by build.sh — patches DAT bodies in tox/ from src/*.py, collapses to td-snapshot.tox
   tox-expand.sh          ← run after a TD GUI export to refresh tox/ for git diffing
+toeexpand/               ← toeexpand format docs + tooling: FORMAT.md, DEVIATIONS.md, _stress/ round-trip framework, and local toeexpand/toecollapse binaries (untracked)
+tests/                   ← toeexpand round-trip baseline corpus + test_toeexpand_roundtrip.py
 td-snapshot.py           ← BUILT — do not edit directly
 td-snapshot.tox          ← BUILT — the distributable component, drop into any project
 tox/                     ← canonical text expansion of td-snapshot.tox, for git diffing
@@ -46,24 +51,37 @@ n1 = /project1/noise1 [Noise TOP]
   period = 0.5 (default 1.0)
 
 n2 = /project1/blur1 [Blur TOP]
+  flags: bypass=True
   blury = 5.0 (default 1.0)
   filter = 'gaussian' (default 'box')
   in[0] <- n1
 
 n3 = /project1/feedback1 [Feedback TOP]
+  comment: holds the previous frame
   ref top -> n4
 
 n4 = /project1/render1 [Render TOP]
+
+n5 = /project1/text1 [Text DAT]
+  dat_text:
+    print('hello')
 ```
 
 Within a block:
 
 - The header `nN = <path> [<Label Family>]` introduces the operator and its ID.
 - `<par> = <current> (default <default>[, <mode>][, expr=<text>])` lists each non-default or non-CONSTANT parameter. Mode and expression text are only shown when relevant.
+- `comment:` carries the operator's comment — inline when single-line, or as an indented block when multi-line.
+- `flags:` lists operator flags, but only when one diverges from its type's default: `bypass=True`, `viewer=True`, `display=False`, `render=False`.
 - `in[N] <- src` means input slot N is wired from `src`. Multi-output sources include `[out:K]`.
 - `ref par -> target` means a parameter on this operator references `target` (via an `op()` call in an expression, or by an OP-typed parameter value such as a Feedback TOP's `top` parameter).
+- `dat_text:` reproduces a DAT's text body as an indented block. When a length cap is set it ends with `(truncated, N chars total)`.
 
 Only parameters that differ from their defaults are shown — or any parameter driven by an expression, export, or bind, regardless of value. Stock settings are omitted to keep the output readable.
+
+### Tuning what's captured
+
+`snapshot_patch()` takes keyword toggles, all enabled by default, so you can drop categories you don't need: `include_comment`, `include_bypass`, `include_display`, `include_viewer`, `include_render`, `include_dat_text`, and `dat_text_truncate` (set to an integer to cap each DAT body). For example, `snapshot_patch(include_dat_text=False)` omits DAT text entirely, and `snapshot_patch(dat_text_truncate=2000)` caps long DAT bodies at 2000 characters.
 
 
 
@@ -137,6 +155,64 @@ Then right-click the Container COMP > **Save Component** and save as `td-snapsho
 If you want to keep the live file sync for your own development copy, re-set the File paths after saving — the `.tox` is a separate snapshot and won't be affected.
 
 Drop the `.tox` into any future project from the palette or filesystem.
+
+
+
+## toeexpand parser
+
+A second, independent tool lives in this repo under `src/toeexpand/`: a pure-Python reader/writer for TouchDesigner's on-disk `.tox`/`.toe` expansion format. Where the snapshot script above runs *inside* TouchDesigner and captures a live network, this package works entirely on disk — **no running TouchDesigner process required**.
+
+### What and why
+
+TouchDesigner ships a CLI tool, `toeexpand`, that expands a binary `.toe`/`.tox` into a git-diffable directory tree (`<name>.tox.dir/`) plus a sibling `.toc` index. The `toeexpand` package here parses that tree into typed Python objects and emits it back, holding to a **bit-exact round-trip contract**: for any well-formed input, `parse → emit → diff` is **0 bytes**. Kinds without a dedicated parser are held as raw bytes and still round-trip; their accessors just aren't available. Cases where bit-exactness isn't achievable are recorded in [`toeexpand/DEVIATIONS.md`](toeexpand/DEVIATIONS.md).
+
+The north star is to make `.tox`/`.toe` files **text-first and LLM-readable**, independent of the TD runtime — a complement to the snapshot script, which needs a live TD process.
+
+### Project facade and CLI
+
+The package entry point is the `Project` facade, the in-memory representation of a `.toc` + `.dir/` pair:
+
+```python
+from toeexpand import Project
+
+p = Project.from_dir("path/to/foo.tox.dir")
+p.to_dir("path/to/copy.tox.dir")   # byte-identical to the source
+```
+
+A `verify` CLI confirms the round-trip for a whole tree:
+
+```
+python -m toeexpand verify path/to/foo.tox.dir
+python -m toeexpand verify path/to/foo.tox.toc   # .toc also accepted
+```
+
+Exit code `0` means every file (including the sibling `.toc`) round-trips byte-for-byte; `1` means one or more mismatches (paths printed to stderr); `2` means bad arguments.
+
+### Supported kinds
+
+Each per-kind parser module is exported from `toeexpand`: `Build`, `Chop`, `Cparm`, `Data`, `Fifo`, `Hold`, `Joystick`, `Lod`, `Logic`, `Midiin`, `Mousein`, `N`, `Network`, `Panel`, `Parm`, `Renderpick`, `Script`, `Table`, `Text`, `Timestamp`, `Toc`, and `Ts`. The full on-disk format — file kinds, framing, and per-kind byte layout — is documented in [`toeexpand/FORMAT.md`](toeexpand/FORMAT.md).
+
+### Build-version sensitivity
+
+The format varies by TouchDesigner build. Build `088` content is a separate legacy generation, early `099` content is transitional, and current builds are `2025.x`. Findings in `FORMAT.md` are tagged with the originating build where it matters.
+
+### Stress framework
+
+`toeexpand/_stress/` is a wide-corpus round-trip validator: it walks a directory of `.tox`/`.toe` files, runs the TD `toeexpand` binary on each, then drives `Project.from_dir().to_dir()` and byte-diffs the result against the original expansion.
+
+```
+uv run toeexpand/_stress/run.py                    # default corpus
+uv run toeexpand/_stress/run.py PATH               # any directory
+uv run toeexpand/_stress/run.py PATH --limit 20    # cap for quick checks
+uv run toeexpand/_stress/run.py PATH --fresh       # ignore prior ok rows
+uv run toeexpand/_stress/run.py --report           # regen report.md only
+```
+
+The latest validated run round-trips **1630/1630** files across TD builds `2016.5580` → `2025.31550`. Outputs (`state.db`, `report.md`, `work/`) are gitignored. See [`toeexpand/_stress/README.md`](toeexpand/_stress/README.md) for flags (`--jobs`, `--timeout`, `--toeexpand`/`TOEEXPAND_BIN`).
+
+### The `toeexpand` / `toecollapse` binaries
+
+`toeexpand/toeexpand` and `toeexpand/toecollapse` are local copies of the TouchDesigner CLI tools (from `/Applications/TouchDesigner.app/Contents/MacOS/`). They are untracked — the stress framework and `tox-sync.sh` invoke them, but they ship with TouchDesigner rather than this repo.
 
 
 
