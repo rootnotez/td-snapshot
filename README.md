@@ -107,44 +107,59 @@ result = snapshot_patch('/project1/mycomp')
 A Container COMP saved as a `.tox` that you can drop into any project. Two buttons — **Copy** and **Inspect** — each run the snapshot fresh and either put the result on your clipboard or open it in a floating viewer for reading. You can use the `.tox` direclty form this repo.
 
 ### TOX Development
-
-You don't edit the `.tox` by hand. The repo keeps the component as a text expansion under `tox/`, and scripts move changes between the Python source, that expansion, and the binary `td-snapshot.tox`. Requires TouchDesigner installed at `/Applications/TouchDesigner.app` (the scripts call its `toeexpand`/`toecollapse` CLI tools).
-
-**Editing the scripts (the common case — no TouchDesigner GUI needed):**
-
-1. Edit `src/core.py`, `src/tox_runner_copy.py`, or `src/tox_runner_inspect.py`.
-2. Bump the file's version in `src/versions.txt`.
-3. Run `./scripts/build.sh`.
-
-`build.sh` lints (`check.sh`), stamps version/hash headers (`stamp.sh`), rebuilds `td-snapshot.py`, then calls `tox-sync.sh`, which patches the `.text` DAT bodies inside `tox/td_snapshot.tox.dir/` from the `src/*.py` files and runs `toecollapse` to rebuild `td-snapshot.tox`. Both distributables are regenerated without opening TouchDesigner.
-
-**Making structural changes (in the TouchDesigner GUI):**
-
-For anything beyond the script bodies — adding or removing operators, rewiring, changing parameters — edit the component in TouchDesigner, then **Save Component** as `td-snapshot.tox` over the repo copy. Run `./scripts/tox-expand.sh` to re-expand it into `tox/` so `git diff tox/` shows what changed. Subsequent `./scripts/build.sh` runs then patch the script bodies back into that updated expansion.
-
-### Component structure
-
-For reference, the component is a Container COMP containing these operators:
-
-| Type | Name | Source |
-|---|---|---|
-| Text DAT | `core` | `src/core.py` |
-| Text DAT | `output` | *(empty — receives the snapshot result)* |
-| Button COMP | `copy_btn` | *(Label "Copy", Momentary mode)* |
-| Button COMP | `inspect_btn` | *(Label "Inspect", Momentary mode)* |
-| Panel Execute DAT | `tox_runner_copy` | `src/tox_runner_copy.py` |
-| Panel Execute DAT | `tox_runner_inspect` | `src/tox_runner_inspect.py` |
+If you want to make changes, here is how the project is built.
 
 ![TOX panel](media/tox-panel.png)
 
+Build the component with these operators inside a Container COMP:
+
+| Type | Name | Source file |
+|---|---|---|
+| Text DAT | `core` | `src/core.py` |
+| Text DAT | `output` | *(leave empty)* |
+| Button COMP | `copy_btn` | *(no file — set Label to "Copy")* |
+| Button COMP | `inspect_btn` | *(no file — set Label to "Inspect")* |
+| Panel Execute DAT | `tox_runner_copy` | `src/tox_runner_copy.py` |
+| Panel Execute DAT | `tox_runner_inspect` | `src/tox_runner_inspect.py` |
+
+Set both Button COMPs to **Momentary** mode.
+
+### Loading the scripts
+
+For each DAT that has a source file, go to its **File** tab, set **File** to the absolute path of the corresponding `src/` file, and enable **Sync to File**. The DAT will pull in the file contents automatically. This keeps DATs in sync with the source without copy-pasting.
+
 ![TOX network](media/tox-network.png)
 
-Each Panel Execute DAT's **Panels** parameter points at its button by **relative name** (`copy_btn` / `inspect_btn`, never a full path — absolute paths break when the component is dropped into a different network), with **Panel Value** `select` and **Off to On** `On`.
+### Wiring the buttons
+
+Each Panel Execute DAT needs its **Panels** parameter pointed at its corresponding button using the **relative name** (e.g. `copy_btn`, not a full path — absolute paths break when the component is dropped into a different network), **Panel Value** set to `select`, and **Off to On** set to **On**.
 
 - **Copy** (`src/tox_runner_copy.py`) — runs the snapshot, writes to `output`, copies text to clipboard
 - **Inspect** (`src/tox_runner_inspect.py`) — runs the snapshot, writes to `output`, opens a floating DAT viewer you can select and copy from
 
-Drop the built `td-snapshot.tox` into any project from the palette or filesystem.
+### Saving and reusing
+
+Before saving for distribution, strip the file paths from every DAT that has one (`core`, `tox_runner_copy`, `tox_runner_inspect`):
+
+1. Go to the **File** tab on each DAT
+2. Clear the **File** field
+3. Turn **Sync to File** off
+
+The text content is already embedded — clearing the path just removes the external reference and any personal file system information. Nothing is lost.
+
+Then right-click the Container COMP > **Save Component** and save as `td-snapshot.tox`.
+
+If you want to keep the live file sync for your own development copy, re-set the File paths after saving — the `.tox` is a separate snapshot and won't be affected.
+
+### Adding it to your palette
+
+To make the component available in every project, add it to your palette. Open the **Palette** browser (the panel on the left, or **Alt+L**), then drag `td-snapshot.tox` from your file browser into the **My Components** section — or copy the `.tox` into your palette folder on disk. Once it's in the palette you can drag it into any network without locating the file each time.
+
+You can also just drop the `.tox` into a project directly from the filesystem whenever you need it.
+
+### Scripted build (maintainer note)
+
+This repo can rebuild both `td-snapshot.py` and `td-snapshot.tox` from `src/` without opening TouchDesigner. After editing `src/core.py`, `src/tox_runner_copy.py`, or `src/tox_runner_inspect.py` (and bumping the file's version in `src/versions.txt`), run `./scripts/build.sh`. It lints, stamps version/hash headers, rebuilds `td-snapshot.py`, then calls `tox-sync.sh`, which patches the `.text` DAT bodies in `tox/td_snapshot.tox.dir/` and runs `toecollapse` to rebuild the `.tox`. This requires TouchDesigner installed at `/Applications/TouchDesigner.app` for the `toecollapse` CLI. For structural changes made in the GUI, **Save Component** over `td-snapshot.tox` and run `./scripts/tox-expand.sh` to refresh `tox/` for git diffing.
 
 
 
