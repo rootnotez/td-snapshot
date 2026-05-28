@@ -20,3 +20,5 @@ HEADER
 } > td-snapshot.py
 
 echo "Built td-snapshot.py"
+
+./scripts/tox-sync.sh
