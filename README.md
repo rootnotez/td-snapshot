@@ -27,19 +27,19 @@ scripts/
   build.sh               ← rebuilds td-snapshot.py AND td-snapshot.tox from src/
   stamp.sh               ← called by build.sh — stamps version/hash headers onto src/*.py
   check.sh               ← called by build.sh — shellcheck on scripts + py_compile on src/*.py
-  tox-sync.sh            ← called by build.sh — patches DAT bodies in tox/ from src/*.py, collapses to td-snapshot.tox
-  hashes.sh              ← called by build.sh after tox-sync — regenerates src/hashes.txt (source + .tox + toolchain checksums)
-  tox-expand.sh          ← run after a TD GUI export to refresh tox/ for git diffing
-toeexpand/               ← toeexpand format docs + tooling: FORMAT.md, DEVIATIONS.md, _stress/ round-trip framework, and local toeexpand/toecollapse binaries (untracked)
-tests/                   ← toeexpand round-trip baseline corpus + test_toeexpand_roundtrip.py
+  shrink.sh              ← called by build.sh — tocdir → .tox: patches DAT bodies in tox/ from src/*.py (via `python -m tocdir set-text`), runs toecollapse to rebuild td-snapshot.tox
+  hashes.sh              ← called by build.sh after shrink — regenerates src/hashes.txt (source + .tox + toolchain checksums)
+  grow.sh                ← .tox → tocdir: run after a TD GUI export to refresh tox/ for git diffing
+toeexpand/               ← tocdir format docs + tooling: FORMAT.md, DEVIATIONS.md, _stress/ round-trip framework, and local toeexpand/toecollapse binaries (untracked)
+tests/                   ← tocdir round-trip baseline corpus + test_tocdir_roundtrip.py
 td-snapshot.py           ← BUILT — do not edit directly
 td-snapshot.tox          ← BUILT — the distributable component, drop into any project
 tox/                     ← canonical text expansion of td-snapshot.tox, for git diffing
 ```
 
-After editing `src/core.py`, run `./scripts/build.sh` to regenerate both `td-snapshot.py` and `td-snapshot.tox` (it calls `stamp.sh`, `tox-sync.sh`, and `hashes.sh` automatically). To bump a file's version, edit the corresponding entry in `src/versions.txt` before running the build.
+After editing `src/core.py`, run `./scripts/build.sh` to regenerate both `td-snapshot.py` and `td-snapshot.tox` (it calls `stamp.sh`, `shrink.sh`, and `hashes.sh` automatically). To bump a file's version, edit the corresponding entry in `src/versions.txt` before running the build.
 
-The `tox/` directory is a text expansion of `td-snapshot.tox`. It serves two purposes: `build.sh` reads it as the source when rebuilding the binary (patching in updated DAT text), and `git diff tox/` makes binary `.tox` changes reviewable. After making structural changes in the TD GUI and exporting a fresh `td-snapshot.tox`, run `./scripts/tox-expand.sh` to refresh it.
+The `tox/` directory is a text expansion of `td-snapshot.tox`. It serves two purposes: `build.sh` reads it as the source when rebuilding the binary (patching in updated DAT text), and `git diff tox/` makes binary `.tox` changes reviewable. After making structural changes in the TD GUI and exporting a fresh `td-snapshot.tox`, run `./scripts/grow.sh` to refresh it.
 
 ## What it captures
 
@@ -160,17 +160,17 @@ You can also just drop the `.tox` into a project directly from the filesystem wh
 
 ### Scripted build (maintainer note)
 
-This repo can rebuild both `td-snapshot.py` and `td-snapshot.tox` from `src/` without opening TouchDesigner. After editing `src/core.py`, `src/tox_runner_copy.py`, or `src/tox_runner_inspect.py` (and bumping the file's version in `src/versions.txt`), run `./scripts/build.sh`. It lints, stamps version/hash headers onto `src/*.py`, rebuilds `td-snapshot.py`, then calls `tox-sync.sh`, which patches the `.text` DAT bodies in `tox/td_snapshot.tox.dir/` and runs `toecollapse` to rebuild the `.tox`. Finally `hashes.sh` regenerates `src/hashes.txt` — recording the source-file checksums, the freshly built `.tox` checksum, and the `toeexpand`/`toecollapse` toolchain (with the TouchDesigner build) that produced it. This requires TouchDesigner installed at `/Applications/TouchDesigner.app` for the `toecollapse` CLI. For structural changes made in the GUI, **Save Component** over `td-snapshot.tox` and run `./scripts/tox-expand.sh` to refresh `tox/` for git diffing.
+This repo can rebuild both `td-snapshot.py` and `td-snapshot.tox` from `src/` without opening TouchDesigner. After editing `src/core.py`, `src/tox_runner_copy.py`, or `src/tox_runner_inspect.py` (and bumping the file's version in `src/versions.txt`), run `./scripts/build.sh`. It lints, stamps version/hash headers onto `src/*.py`, rebuilds `td-snapshot.py`, then calls `shrink.sh`, which patches the `.text` DAT bodies in `tox/td_snapshot.tox.dir/` (via `python -m tocdir set-text`) and runs `toecollapse` to rebuild the `.tox`. Finally `hashes.sh` regenerates `src/hashes.txt` — recording the source-file checksums, the freshly built `.tox` checksum, and the `toeexpand`/`toecollapse` toolchain (with the TouchDesigner build) that produced it. This requires TouchDesigner installed at `/Applications/TouchDesigner.app` for the `toecollapse` CLI. For structural changes made in the GUI, **Save Component** over `td-snapshot.tox` and run `./scripts/grow.sh` to refresh `tox/` for git diffing.
 
 
 
 ## toeexpand parser
 
-A second, independent tool lives in this repo under `src/toeexpand/`: a pure-Python reader/writer for TouchDesigner's on-disk `.tox`/`.toe` expansion format. Where the snapshot script above runs *inside* TouchDesigner and captures a live network, this package works entirely on disk — **no running TouchDesigner process required**.
+A second, independent tool lives in this repo under `src/tocdir/`: a pure-Python reader/writer for the **tocdir** format — TouchDesigner's on-disk `.tox`/`.toe` expansion tree. Where the snapshot script above runs *inside* TouchDesigner and captures a live network, this package works entirely on disk — **no running TouchDesigner process required**.
 
 ### What and why
 
-TouchDesigner ships a CLI tool, `toeexpand`, that expands a binary `.toe`/`.tox` into a git-diffable directory tree (`<name>.tox.dir/`) plus a sibling `.toc` index. The `toeexpand` package here parses that tree into typed Python objects and emits it back, holding to a **bit-exact round-trip contract**: for any well-formed input, `parse → emit → diff` is **0 bytes**. Kinds without a dedicated parser are held as raw bytes and still round-trip; their accessors just aren't available. Cases where bit-exactness isn't achievable are recorded in [`toeexpand/DEVIATIONS.md`](toeexpand/DEVIATIONS.md).
+TouchDesigner ships a CLI tool, `toeexpand`, that expands a binary `.toe`/`.tox` into a git-diffable directory tree (`<name>.tox.dir/`) plus a sibling `.toc` index. We call that tree-plus-index the **tocdir** format. The `tocdir` package here parses that tree into typed Python objects and emits it back, holding to a **bit-exact round-trip contract**: for any well-formed input, `parse → emit → diff` is **0 bytes**. Kinds without a dedicated parser are held as raw bytes and still round-trip; their accessors just aren't available. Cases where bit-exactness isn't achievable are recorded in [`toeexpand/DEVIATIONS.md`](toeexpand/DEVIATIONS.md).
 
 The north star is to make `.tox`/`.toe` files **text-first and LLM-readable**, independent of the TD runtime — a complement to the snapshot script, which needs a live TD process.
 
@@ -179,7 +179,7 @@ The north star is to make `.tox`/`.toe` files **text-first and LLM-readable**, i
 The package entry point is the `Project` facade, the in-memory representation of a `.toc` + `.dir/` pair:
 
 ```python
-from toeexpand import Project
+from tocdir import Project
 
 p = Project.from_dir("path/to/foo.tox.dir")
 p.to_dir("path/to/copy.tox.dir")   # byte-identical to the source
@@ -188,15 +188,15 @@ p.to_dir("path/to/copy.tox.dir")   # byte-identical to the source
 A `verify` CLI confirms the round-trip for a whole tree:
 
 ```
-python -m toeexpand verify path/to/foo.tox.dir
-python -m toeexpand verify path/to/foo.tox.toc   # .toc also accepted
+python -m tocdir verify path/to/foo.tox.dir
+python -m tocdir verify path/to/foo.tox.toc   # .toc also accepted
 ```
 
 Exit code `0` means every file (including the sibling `.toc`) round-trips byte-for-byte; `1` means one or more mismatches (paths printed to stderr); `2` means bad arguments.
 
 ### Supported kinds
 
-Each per-kind parser module is exported from `toeexpand`: `Build`, `Chop`, `Cparm`, `Data`, `Fifo`, `Hold`, `Joystick`, `Lod`, `Logic`, `Midiin`, `Mousein`, `N`, `Network`, `Panel`, `Parm`, `Renderpick`, `Script`, `Table`, `Text`, `Timestamp`, `Toc`, and `Ts`. The full on-disk format — file kinds, framing, and per-kind byte layout — is documented in [`toeexpand/FORMAT.md`](toeexpand/FORMAT.md).
+Each per-kind parser module is exported from `tocdir`: `Build`, `Chop`, `Cparm`, `Data`, `Fifo`, `Hold`, `Joystick`, `Lod`, `Logic`, `Midiin`, `Mousein`, `N`, `Network`, `Panel`, `Parm`, `Renderpick`, `Script`, `Table`, `Text`, `Timestamp`, `Toc`, and `Ts`. The full on-disk format — file kinds, framing, and per-kind byte layout — is documented in [`toeexpand/FORMAT.md`](toeexpand/FORMAT.md).
 
 ### Build-version sensitivity
 
@@ -218,7 +218,7 @@ The latest validated run round-trips **1630/1630** files across TD builds `2016.
 
 ### The `toeexpand` / `toecollapse` binaries
 
-`toeexpand/toeexpand` and `toeexpand/toecollapse` are local copies of the TouchDesigner CLI tools (from `/Applications/TouchDesigner.app/Contents/MacOS/`). They are untracked — the stress framework and `tox-sync.sh` invoke them, but they ship with TouchDesigner rather than this repo.
+`toeexpand/toeexpand` and `toeexpand/toecollapse` are local copies of the TouchDesigner CLI tools (from `/Applications/TouchDesigner.app/Contents/MacOS/`). They are untracked — the stress framework and `shrink.sh`/`grow.sh` invoke them, but they ship with TouchDesigner rather than this repo.
 
 
 

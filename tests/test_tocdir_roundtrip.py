@@ -1,4 +1,4 @@
-"""Bit-exact round-trip tests for the toeexpand parser/encoder.
+"""Bit-exact round-trip tests for the tocdir parser/encoder.
 
 Spec: parse(bytes) → model → emit(model) must produce the exact same bytes,
 for every kind we claim to support. Failures here either indicate a parser
@@ -6,9 +6,9 @@ bug or surface a deviation that needs to be recorded in
 `toeexpand/DEVIATIONS.md`.
 
 Run from the worktree root:
-    uv run --no-project pytest tests/test_toeexpand_roundtrip.py -v
+    uv run --no-project pytest tests/test_tocdir_roundtrip.py -v
 or just:
-    python -m pytest tests/test_toeexpand_roundtrip.py -v
+    python -m pytest tests/test_tocdir_roundtrip.py -v
 """
 
 import sys
@@ -18,7 +18,7 @@ HERE = Path(__file__).resolve().parent
 REPO = HERE.parent
 sys.path.insert(0, str(REPO / "src"))
 
-from toeexpand import (  # noqa: E402
+from tocdir import (  # noqa: E402
     Project,
     build,
     chop,
