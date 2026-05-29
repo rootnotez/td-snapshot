@@ -4,7 +4,7 @@ set -e
 # Generates src/hashes.txt: source-file checksums, the built td-snapshot.tox
 # checksum, and the toeexpand toolchain that collapsed it.
 #
-# Run by build.sh AFTER tox-sync.sh, so the recorded td-snapshot.tox hash
+# Run by build.sh AFTER shrink.sh, so the recorded td-snapshot.tox hash
 # matches the binary just rebuilt — not the previous build's. Reads the
 # already-stamped src/*.py bodies (stamp.sh runs earlier in build.sh).
 
@@ -27,6 +27,12 @@ fi
         hash=$(tail -n +2 "$f" | shasum -a 256 | cut -d' ' -f1)
         printf "%-30s v%-8s %s\n" "${name}:" "$version" "$hash"
     done
+    echo ""
+    echo "td-snapshot — tocdir package"
+    echo ""
+    pkg_version=$(awk '$1 == "tocdir" { print $2 }' src/versions.txt)
+    pkg_hash=$(find src/tocdir -name '*.py' | sort | xargs shasum -a 256 | shasum -a 256 | cut -d' ' -f1)
+    printf "%-30s v%-8s %s\n" "tocdir:" "$pkg_version" "$pkg_hash"
     echo ""
     echo "td-snapshot — binary artifact checksum"
     echo ""

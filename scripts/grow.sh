@@ -1,7 +1,10 @@
 #!/bin/bash
 set -e
 
-# Expands td-snapshot.tox into the canonical tox/ tree for git diffing.
+# .tox -> tocdir (the "grow" direction).
+#
+# Runs the toeexpand binary to expand td-snapshot.tox into the canonical
+# tox/ tree for git diffing.
 #
 # Run this after exporting a fresh td-snapshot.tox from TouchDesigner.
 # The updated files in tox/ will show what changed in the GUI via git diff.
