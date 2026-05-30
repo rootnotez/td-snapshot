@@ -16,11 +16,11 @@ so they can be inspected without re-running `toeexpand`.
 ## Run
 
 ```
-uv run toeexpand/_stress/run.py                    # default corpus = toeexpand/resources/
-uv run toeexpand/_stress/run.py PATH               # any directory
-uv run toeexpand/_stress/run.py PATH --limit 20    # cap for quick checks
-uv run toeexpand/_stress/run.py PATH --fresh       # ignore prior ok rows
-uv run toeexpand/_stress/run.py --report           # regen report.md only
+uv run tests/_stress/run.py                    # default corpus = toeexpand/resources/
+uv run tests/_stress/run.py PATH               # any directory
+uv run tests/_stress/run.py PATH --limit 20    # cap for quick checks
+uv run tests/_stress/run.py PATH --fresh       # ignore prior ok rows
+uv run tests/_stress/run.py --report           # regen report.md only
 ```
 
 Flags: `--jobs J` (default `min(cpu, 8)`), `--timeout SECONDS`
@@ -34,7 +34,7 @@ PEP 723 header, nothing installs into the host environment.
 ## Outputs (all gitignored)
 
 ```
-toeexpand/_stress/
+tests/_stress/
 ├── state.db          # sqlite — incremental progress + every sample row
 ├── report.md         # regenerated at end of every run
 ├── work/             # transient per-sample scratch (cleaned on ok)

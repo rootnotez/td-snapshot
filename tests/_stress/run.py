@@ -13,13 +13,13 @@ Pipeline per sample (parallelised across cores):
       -> sha256 every file pair, diff bytes only on hash mismatch
       -> ok: rm -rf scratch ; diff: move into failures/<sha8>/
 
-State + results land in `toeexpand/_stress/state.db`. Re-runs are
+State + results land in `tests/_stress/state.db`. Re-runs are
 incremental — already-ok hashes are skipped. Failures keep the original
 expansion + our re-emission + a copy of the source side-by-side so a
 human can byte-diff without re-running toeexpand.
 
 Usage:
-    uv run toeexpand/_stress/run.py [corpus] [--workdir DIR]
+    uv run tests/_stress/run.py [corpus] [--workdir DIR]
                                     [--limit N] [--fresh] [--jobs J]
                                     [--timeout SECONDS] [--report]
 
@@ -43,11 +43,11 @@ from pathlib import Path
 from typing import Optional
 
 THIS_DIR = Path(__file__).resolve().parent
-REPO = THIS_DIR.parent.parent  # toeexpand/_stress/ -> toeexpand/ -> repo root
+REPO = THIS_DIR.parent.parent  # tests/_stress/ -> tests/ -> repo root
 
 
 def _bootstrap_sys_path() -> None:
-    """Make `from toeexpand import ...` resolve to src/toeexpand without install."""
+    """Make `from tocdir import ...` resolve to src/tocdir without install."""
     src = str(REPO / "src")
     if src not in sys.path:
         sys.path.insert(0, src)
@@ -55,7 +55,7 @@ def _bootstrap_sys_path() -> None:
 
 _bootstrap_sys_path()
 
-from toeexpand import Build, Project, Toc  # noqa: E402
+from tocdir import Build, Project, Toc  # noqa: E402
 
 from state import (  # noqa: E402  (sibling module, same dir on sys.path)
     SampleResult,
@@ -89,7 +89,7 @@ class WorkerArgs:
 def _worker_entry(args: WorkerArgs) -> SampleResult:
     """Process one sample. Imports happen lazily inside the worker process."""
     _bootstrap_sys_path()
-    from toeexpand import Build, Project, Toc  # noqa: F811
+    from tocdir import Build, Project, Toc  # noqa: F811
 
     # Scratch must be unique per invocation so concurrent workers can never
     # contaminate each other's expansion — e.g. two corpus files with the
