@@ -2,4 +2,4 @@ core.py 2.0.1
 quickpaste_runner.py 1.0.0
 tox_runner_copy.py 1.0.1
 tox_runner_inspect.py 1.0.1
-tocdir 0.1.0
+tocdir 0.2.0

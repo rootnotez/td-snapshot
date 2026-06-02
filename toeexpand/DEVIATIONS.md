@@ -60,6 +60,10 @@ Format per entry:
 **Build:** 2025.30280.
 **Resolution:** TD 2025 also emits `.renderpick` files in the brace-block grammar (`1\n{...}`) shared with `.logic` / `.hold` / `.ts`, alongside the established `1\n*<u32×4>` binary table form. `Renderpick.parse` discriminates on the byte after the version line (`*` → binary, `{` → opaque `BraceBlockBody`). Round-trip bit-exact for both forms; all 22 existing binary-form samples still pass.
 
+## Clean sweeps (provenance)
+
+- **Shipped OPSnippets corpus, 2026-06-01 (build 2025.32424, Windows).** `scripts/build-corpus.sh` expanded all 788 install-shipped `.tox`; `python -m tocdir census` ran `Project.verify` over all 788 trees with **0 round-trip mismatches and 0 load errors** (210K `.n` / 197K `.parm` / 565 distinct operator types, full `POP:` family). 16 previously-undocumented kinds appeared (`.oscin`, `.vfs`, `.web`, `.enginemap`, `.enc`, …) and all round-trip byte-exact as raw blobs — see FORMAT.md "Corpus sweep 2026-06-01". No new parser-breaking deviation.
+
 ## Known watch-list (not yet observed as failures)
 
 - **Line endings** — all current samples use LF. If a Windows-exported `.tox`
