@@ -21,7 +21,7 @@ Out of scope (lives in `src/core.py`, runs inside TouchDesigner):
 """
 
 # Kept in sync with the `tocdir` entry in src/versions.txt by scripts/stamp.sh.
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 from .build import Build
 from .chop import Chop
