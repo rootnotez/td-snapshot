@@ -5,8 +5,12 @@
 # Captures the network containing this DAT (me.parent()) by default.
 # To target a different network: snapshot_patch('/project1/some/comp')
 
-# core.py v2.0.1 | sha256:d7adf48ba867bec3cb25004d6f4e50c736fadb26c26da161b7ea5e1cc6a2a8b0
+# core.py v2.1.0 | sha256:586717407bc8a24889e6e0e6a9f969b03cce1b8714a3db6a060c50f0f3457ff9
 import re
+
+# Snapshot script version, surfaced in the output preamble. Synced from the
+# `core.py` entry in src/versions.txt by scripts/stamp.sh — do not edit by hand.
+VERSION = '2.1.0'
 
 def op_display_type(o):
     return '{} {}'.format(o.label, o.family)
@@ -295,7 +299,7 @@ def render_blocks(nodes, wire_edges, ref_edges, op_by_path):
             s += ', expr={!r}'.format(par['expr'])
         return s + ')'
 
-    lines = ['# td-snapshot — each node block: changed pars, "in[N] <- src" for incoming wires, "ref par -> target" for parameter refs.']
+    lines = ['# td-snapshot v{} — each node block: changed pars, "in[N] <- src" for incoming wires, "ref par -> target" for parameter refs.'.format(VERSION)]
 
     for n in nodes:
         nid = id_by_path[n['path']]
