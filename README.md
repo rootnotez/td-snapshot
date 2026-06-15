@@ -47,7 +47,7 @@ The `tox/` directory is a text expansion of `td-snapshot.tox`. It serves two pur
 Output is one block per operator. Each operator gets a sequential ID (`n1`, `n2`, …); incoming wires and parameter references inside the same network use that ID instead of repeating the full path. Out-of-network targets get their own ID block at the bottom of the listing.
 
 ```
-# td-snapshot — each node block: changed pars, "in[N] <- src" for incoming wires, "ref par -> target" for parameter refs.
+# td-snapshot v2.1.0 — each node block: changed pars, "in[N] <- src" for incoming wires, "ref par -> target" for parameter refs.
 
 n1 = /project1/noise1 [Noise TOP]
   period = 0.5 (default 1.0)
