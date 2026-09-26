@@ -219,23 +219,35 @@ The latest validated run round-trips **1630/1630** files across TD builds `2016.
 
 ### The `toeexpand` / `toecollapse` binaries
 
-`toeexpand/toeexpand` and `toeexpand/toecollapse` are local copies of the TouchDesigner CLI tools (from `/Applications/TouchDesigner.app/Contents/MacOS/`). They are untracked — the stress framework and `shrink.sh`/`grow.sh` invoke them, but they ship with TouchDesigner rather than this repo.
+`toeexpand` and `toecollapse` ship inside `TouchDesigner.app` (`Contents/MacOS/`) and are invoked from there directly by every script in this repo (`shrink.sh`, `grow.sh`, `hashes.sh`, `build-corpus.sh`, the `tests/_stress/` framework, and `tests/toolchain/`). There is no local copy to keep in sync: the two binaries are ~60 KB wrapper executables that load their real implementation (`libUT`/`libtools`/`libAV`) via `@rpath` from the bundle's `Contents/Frameworks/`, so a copy outside the bundle fails in `dyld` at launch — they only run from inside an app bundle (installed or a mounted DMG, see `toeexpand/TOOLCHAINS.md`).
 
 ### After updating TouchDesigner
 
-`toeexpand`/`toecollapse` can change behavior between TD builds, so a local TD update is worth recording, not just using silently:
+`toeexpand`/`toecollapse` can change behavior between TD builds, so a local TD update is worth recording and checking, not just using silently. See `tests/toolchain/README.md` for the full regression-workflow contract; this is the runbook.
 
-1. Refresh the local copies from the newly updated app:
+**Before updating:** keep the build you're about to leave available for comparison. Download (or confirm you already have) its DMG into `TD_BUILDS_DIR` (default `~/rootnotez/touch-designer/td-builds`) from the Derivative archive (<https://derivative.ca/download/archive>), and add or verify its row in [`toeexpand/TOOLCHAINS.md`](toeexpand/TOOLCHAINS.md) (build, DMG filename + sha256, toolchain hashes).
+
+**After updating:** run the one-command check:
+
+```
+./scripts/toolchain-check.sh
+```
+
+It resolves the newly-installed toolchain, refreshes `src/hashes.txt`, runs a determinism control (hard gate), records the new toolchain's results against the golden input set and compares them to the newest previously-committed golden build, runs the pytest suite against the new toolchain, and prints a PASS/DIFF/FAIL summary. Pass `--corpus` to also rebuild the shipped `.tox` corpus and census-diff it against a prior build's census (slower, ~5 min).
+
+If it reports differences:
+
+1. Mount the previous build read-only and run a live cross-check:
    ```
-   cd toeexpand
-   rm -f toeexpand toecollapse
-   cp /Applications/TouchDesigner.app/Contents/MacOS/toeexpand .
-   cp /Applications/TouchDesigner.app/Contents/MacOS/toecollapse .
-   chmod +x toeexpand toecollapse
+   PREV_BIN="$(scripts/toolchain.sh bin <previous-build>)"
+   uv run tests/toolchain/tcdiff.py cross --bin "$NEW_BIN" --trees <kept-trees-dir> --against tests/toolchain/golden/<previous-build>
    ```
-2. Run `./scripts/build.sh` from the repo root. Its final step, `hashes.sh`, reads the binaries straight from `/Applications/TouchDesigner.app/Contents/MacOS/` (not the local copies above) and rewrites `src/hashes.txt` with the current TD build number (`CFBundleVersion`) and fresh `toeexpand`/`toecollapse` checksums.
-3. `git diff src/hashes.txt` shows what changed. Since `hashes.txt` is tracked, each commit is a dated checkpoint of which TD build produced which toolchain hashes — `git log -- src/hashes.txt` gives the update history without needing separate notes.
-4. If the toolchain hashes changed, re-run the stress framework (`uv run tests/_stress/run.py`) to confirm round-trips still hold under the new build, and tag any new findings in `FORMAT.md`/`DEVIATIONS.md` with the new build number per "Build-version sensitivity" above.
+2. Run an external-corpus A/B: `tcdiff record --root <corpus>` with both the previous and new toolchains, then `tcdiff compare` the two results.
+3. Regenerate fixtures for the new build inside a live TouchDesigner session (`tests/toolchain/gen/run.sh every_op` / `features`; needs the td-claude-bridge component — see `tests/toolchain/gen/README.md`), then record goldens with both toolchains (`tcdiff record --bin <bin> --out tests/toolchain/golden/<build>/`).
+4. Write up the finding under `toeexpand/toolchain-deltas/<date>_<old>-vs-<new>.md`, and tag anything that changes the on-disk format in `toeexpand/FORMAT.md`/`toeexpand/DEVIATIONS.md` with the new build number, per "Build-version sensitivity" above.
+5. Commit — `src/hashes.txt`, `toeexpand/TOOLCHAINS.md`, any new golden sets/fixtures, and the delta note are all tracked so the update leaves a dated trail.
+
+See [`tests/toolchain/README.md`](tests/toolchain/README.md) for the layout contract, manifest format, and `tcdiff.py` CLI details.
 
 
 
