@@ -687,12 +687,12 @@ against build **2025.32460**'s shipped-`tfs` corpus (788 trees, the
 generated at 2025.33230.
 
 - **`.parm` mode bit `0x1000` (4096) — new, TD-save-time, not
-  toolchain-side.** Absent from the entire 2025.32460 shipped corpus (0/163K
-  records in the 2026-06-01 sweep); present (7 occurrences) in the
+  toolchain-side.** Absent from the entire 2025.32460 shipped corpus (0 of ~1.99M
+  mode-bearing `.parm` rows in the 2026-06-01 sweep); present (7 occurrences) in the
   2025.33230 shipped corpus and in a fresh `every_op` fixture generated at
   2025.33230. Seen on `randomPOP`'s `attr*` pars (that snippet's `.build`
-  stamp says it was re-saved at **2025.33181**, narrowing the introduction
-  window to `(2025.32460, 2025.33181]`) and, in `every_op`, on every 3D
+  stamp says it was re-saved at **2025.33181**, so TD writes it by that
+  build at the latest; whether 2025.32460 already wrote it is unconfirmed) and, in `every_op`, on every 3D
   COMP's `instancetexextendu`/`v`/`w`, `instancetexfilter`,
   `instancetexanisotropy` pars — always **at their default value**
   (`repeat`/`mipmaplinear`/`off`). Doesn't overlap the existing expression
