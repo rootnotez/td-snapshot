@@ -17,3 +17,6 @@ td-snapshot — toeexpand toolchain (TouchDesigner 2025.33230)
 
 toeexpand:                     24a699f0d4d01f5b4db81b50ef15d619e6deefd1c8d37b766861a679e3b490a0
 toecollapse:                   ac5265cf9c4134fa6ce6d9d527604b4bcdbd8ab8345aeac44a9b4d3d53e24611
+libUT.dylib:                   3250b64221f014ad51c4634b01f907570b1c45e39e90de5285ae781a4654dd45
+libtools.dylib:                c4f775ab68b53073c96ce63e5fef976e8bf1df9e8e27fcc6dc50e74cad5658f7
+libAV.dylib:                   8125b1a2ab52ae51f45132208d36a7d8bbe35b5c126ae24513315dcc9acd7d72
