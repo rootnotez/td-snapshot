@@ -51,3 +51,53 @@ def test_render_and_json_smoke():
     j = census_json(c)
     assert j["tree_count"] == 1
     assert "DAT:panelexec" in j["operator_types"]
+
+
+def test_census_build_versions():
+    c = census(TOX)
+    # tox/td_snapshot.tox.dir/.build records `version 099`.
+    assert c.build_versions["099"] > 0
+    assert len(c.build_numbers) > 0
+    j = census_json(c)
+    assert j["build_versions"]["099"] > 0
+    assert j["build_numbers"]
+
+
+def test_census_n_vocab_nonempty():
+    c = census(TOX)
+    # Every `.n` has a `tile` line and (for COMPs) a `flags = ` line.
+    assert c.n_line_keywords["tile"] > 0
+    assert c.n_line_keywords["flags"] > 0
+    assert len(c.n_flag_tokens) > 0
+    j = census_json(c)
+    assert j["n_vocab"]["line_keywords"]["tile"] > 0
+    assert j["n_vocab"]["flag_tokens"]
+
+
+def test_census_parm_and_cparm_vocab_nonempty():
+    c = census(TOX)
+    assert len(c.parm_modes) > 0
+    assert len(c.parm_row_shapes) > 0
+    j = census_json(c)
+    assert j["parm_vocab"]["modes"]
+    assert j["parm_vocab"]["row_shapes"]
+    # cparm_vocab is present even if the snapshot tree has no .cparm files.
+    assert "row_shapes" in j["cparm_vocab"]
+
+
+def test_census_type_pars_known_operator():
+    c = census(TOX)
+    assert "DAT:panelexec" in c.type_pars
+    # `panelexec1.parm` in the snapshot tree carries these par names.
+    assert {"file", "language", "loadonstart"} <= c.type_pars["DAT:panelexec"]
+    j = census_json(c)
+    assert j["type_pars"]["DAT:panelexec"] == sorted(j["type_pars"]["DAT:panelexec"])
+    assert "file" in j["type_pars"]["DAT:panelexec"]
+
+
+def test_census_toc_headers():
+    c = census(TOX)
+    # `.tox.toc` always carries the `# 4 0 0 0 1`-shaped header.
+    assert any(hdr.startswith("# ") for hdr in c.toc_headers if hdr != "<none>")
+    j = census_json(c)
+    assert j["toc_headers"]
