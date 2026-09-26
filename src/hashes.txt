@@ -13,7 +13,7 @@ td-snapshot — binary artifact checksum
 
 td-snapshot.tox:               9c834aedc553901755d17ceccf0ebf196f9e609f4e7f172a17b76f5a8352806e
 
-td-snapshot — toeexpand toolchain (TouchDesigner 2025.32460)
+td-snapshot — toeexpand toolchain (TouchDesigner 2025.33230)
 
-toeexpand:                     a7bcf116b7314ca82a75e840b58ceb4586ca7da2b7304a87dd23bb41a455bf35
-toecollapse:                   6cc392eefdf1ebae8f82c7be6b1edf07a144168c622f8efd43722333b559e61c
+toeexpand:                     24a699f0d4d01f5b4db81b50ef15d619e6deefd1c8d37b766861a679e3b490a0
+toecollapse:                   ac5265cf9c4134fa6ce6d9d527604b4bcdbd8ab8345aeac44a9b4d3d53e24611

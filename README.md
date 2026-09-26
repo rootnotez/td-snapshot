@@ -221,5 +221,21 @@ The latest validated run round-trips **1630/1630** files across TD builds `2016.
 
 `toeexpand/toeexpand` and `toeexpand/toecollapse` are local copies of the TouchDesigner CLI tools (from `/Applications/TouchDesigner.app/Contents/MacOS/`). They are untracked — the stress framework and `shrink.sh`/`grow.sh` invoke them, but they ship with TouchDesigner rather than this repo.
 
+### After updating TouchDesigner
+
+`toeexpand`/`toecollapse` can change behavior between TD builds, so a local TD update is worth recording, not just using silently:
+
+1. Refresh the local copies from the newly updated app:
+   ```
+   cd toeexpand
+   rm -f toeexpand toecollapse
+   cp /Applications/TouchDesigner.app/Contents/MacOS/toeexpand .
+   cp /Applications/TouchDesigner.app/Contents/MacOS/toecollapse .
+   chmod +x toeexpand toecollapse
+   ```
+2. Run `./scripts/build.sh` from the repo root. Its final step, `hashes.sh`, reads the binaries straight from `/Applications/TouchDesigner.app/Contents/MacOS/` (not the local copies above) and rewrites `src/hashes.txt` with the current TD build number (`CFBundleVersion`) and fresh `toeexpand`/`toecollapse` checksums.
+3. `git diff src/hashes.txt` shows what changed. Since `hashes.txt` is tracked, each commit is a dated checkpoint of which TD build produced which toolchain hashes — `git log -- src/hashes.txt` gives the update history without needing separate notes.
+4. If the toolchain hashes changed, re-run the stress framework (`uv run tests/_stress/run.py`) to confirm round-trips still hold under the new build, and tag any new findings in `FORMAT.md`/`DEVIATIONS.md` with the new build number per "Build-version sensitivity" above.
+
 
 
