@@ -93,3 +93,28 @@ uv run tests/toolchain/tcdiff.py control [--bin DIR] [inputs...]
   `--bin`, and compares the result to that toolchain's `collapse_sha256`.
 - `control` records twice with the same bin into temp dirs and requires
   `compare` to report 100 % identical (determinism + harness sanity).
+
+## Running the contract tests
+
+`test_capabilities.py` pins the toeexpand/toecollapse capabilities and
+quirks the rest of this repo relies on (exit-code conventions, the
+collapse fixed point, the shrink-path `set-text` sequence, the `-b` and
+`pattern` arguments, existing-directory refusal, and the raw-kind
+allowlist). It skips itself (not a failure) when no `toeexpand` binary is
+found at the resolved bin dir.
+
+Against the default toolchain:
+
+```
+uv run --no-project --with pytest pytest tests/toolchain -q
+```
+
+Against another installed/mounted build:
+
+```
+TD_TOOLCHAIN_BIN=/path/to/TouchDesigner.app/Contents/MacOS \
+    uv run --no-project --with pytest pytest tests/toolchain -q
+```
+
+Both must pass before relying on a new TD build for `scripts/shrink.sh` /
+`scripts/grow.sh`.
