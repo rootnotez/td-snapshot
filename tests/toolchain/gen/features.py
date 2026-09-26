@@ -167,80 +167,80 @@ try:
             # `size` kwarg exists but not the resulting sub-par name suffix
             # (assumed digit suffixes 1/2/3, the generic-append convention;
             # unverified against a live session).
-            page.appendFloat("FloatMulti", size=3)
-            comp.par.FloatMulti1.val = 1.5
-            comp.par.FloatMulti2.val = 2.5
-            comp.par.FloatMulti3.val = 3.5
+            page.appendFloat("Floatmulti", size=3)
+            comp.par.Floatmulti1.val = 1.5
+            comp.par.Floatmulti2.val = 2.5
+            comp.par.Floatmulti3.val = 3.5
 
         _style("float_multi_size3", _float_multi)
 
         def _int_par():
-            page.appendInt("IntPar")
-            comp.par.IntPar.val = 7
+            page.appendInt("Intpar")
+            comp.par.Intpar.val = 7
 
         _style("int", _int_par)
 
         def _toggle():
-            page.appendToggle("TogglePar")
-            comp.par.TogglePar.val = True
+            page.appendToggle("Togglepar")
+            comp.par.Togglepar.val = True
 
         _style("toggle", _toggle)
 
         def _menu():
-            page.appendMenu("MenuPar")
-            comp.par.MenuPar.menuNames = ["optA", "optB", "optC"]
-            comp.par.MenuPar.menuLabels = ["Option A", "Option B", "Option C"]
-            comp.par.MenuPar.val = "optB"
+            page.appendMenu("Menupar")
+            comp.par.Menupar.menuNames = ["optA", "optB", "optC"]
+            comp.par.Menupar.menuLabels = ["Option A", "Option B", "Option C"]
+            comp.par.Menupar.val = "optB"
 
         _style("menu_names_labels", _menu)
 
         def _str_par():
-            page.appendStr("StrPar")
-            comp.par.StrPar.val = "a custom string value"
+            page.appendStr("Strpar")
+            comp.par.Strpar.val = "a custom string value"
 
         _style("str", _str_par)
 
         def _op_ref():
-            page.appendOP("OpRefPar")
-            comp.par.OpRefPar.val = container
+            page.appendOP("Oprefpar")
+            comp.par.Oprefpar.val = container
 
         _style("op_reference", _op_ref)
 
         def _pulse():
-            page.appendPulse("PulsePar")
+            page.appendPulse("Pulsepar")
 
         _style("pulse", _pulse)
 
         def _rgb():
-            page.appendRGB("RgbPar")
+            page.appendRGB("Rgbpar")
 
         _style("rgb", _rgb)
 
         def _xy():
-            page.appendXY("XyPar")
+            page.appendXY("Xypar")
 
         _style("xy", _xy)
 
         def _xyz():
-            page.appendXYZ("XyzPar")
+            page.appendXYZ("Xyzpar")
 
         _style("xyz", _xyz)
 
         def _file():
-            page.appendFile("FilePar")
-            comp.par.FilePar.val = "/tmp/tc_gen_example.txt"
+            page.appendFile("Filepar")
+            comp.par.Filepar.val = "/tmp/tc_gen_example.txt"
 
         _style("file", _file)
 
         def _expr_float():
-            page.appendFloat("ExprFloat")
-            comp.par.ExprFloat.expr = "absTime.seconds"
+            page.appendFloat("Exprfloat")
+            comp.par.Exprfloat.expr = "absTime.seconds"
 
         _style("expression_mode", _expr_float)
 
         def _clamped_int():
-            page.appendInt("ClampedInt")
-            p = comp.par.ClampedInt
+            page.appendInt("Clampedint")
+            p = comp.par.Clampedint
             p.default = 5
             p.min = 0
             p.max = 10

@@ -1,0 +1,163 @@
+{
+  "app_build": "2025.33230",
+  "app_version": "099",
+  "features": {
+    "annotate_comp": {
+      "applied": true,
+      "error": null
+    },
+    "case_collision_probe": {
+      "applied": true,
+      "error": null,
+      "names": {
+        "first": "caseProbe",
+        "second": "caseprobe"
+      }
+    },
+    "clone_par": {
+      "applied": true,
+      "error": null
+    },
+    "color_node_size": {
+      "applied": true,
+      "error": null
+    },
+    "comment_multi": {
+      "applied": true,
+      "error": null
+    },
+    "comment_single": {
+      "applied": true,
+      "error": null
+    },
+    "custom_pars_page": {
+      "applied": true,
+      "error": null,
+      "styles": {
+        "expression_mode": {
+          "applied": true,
+          "error": null
+        },
+        "file": {
+          "applied": true,
+          "error": null
+        },
+        "float_multi_size3": {
+          "applied": true,
+          "error": null
+        },
+        "int": {
+          "applied": true,
+          "error": null
+        },
+        "menu_names_labels": {
+          "applied": true,
+          "error": null
+        },
+        "non_default_default_min_max_clamp": {
+          "applied": true,
+          "error": null
+        },
+        "op_reference": {
+          "applied": true,
+          "error": null
+        },
+        "pulse": {
+          "applied": true,
+          "error": null
+        },
+        "rgb": {
+          "applied": true,
+          "error": null
+        },
+        "str": {
+          "applied": true,
+          "error": null
+        },
+        "toggle": {
+          "applied": true,
+          "error": null
+        },
+        "xy": {
+          "applied": true,
+          "error": null
+        },
+        "xyz": {
+          "applied": true,
+          "error": null
+        }
+      }
+    },
+    "dat_table": {
+      "applied": true,
+      "error": null
+    },
+    "dat_text": {
+      "applied": true,
+      "error": null
+    },
+    "extension": {
+      "applied": true,
+      "error": null
+    },
+    "flag_bypass": {
+      "applied": true,
+      "error": null
+    },
+    "flag_display_render": {
+      "applied": true,
+      "error": null
+    },
+    "flag_lock": {
+      "applied": true,
+      "error": null
+    },
+    "flag_viewer": {
+      "applied": true,
+      "error": null
+    },
+    "nested_comps": {
+      "applied": true,
+      "error": null
+    },
+    "op_storage": {
+      "applied": true,
+      "error": null
+    },
+    "par_mode_bind": {
+      "applied": true,
+      "error": null
+    },
+    "par_mode_constant": {
+      "applied": true,
+      "error": null
+    },
+    "par_mode_export": {
+      "applied": true,
+      "error": null
+    },
+    "par_mode_expression": {
+      "applied": true,
+      "error": null
+    },
+    "tags": {
+      "applied": true,
+      "error": null
+    },
+    "wiring_chain": {
+      "applied": true,
+      "error": null
+    },
+    "wiring_multi_input": {
+      "applied": true,
+      "error": null
+    },
+    "wiring_op_ref_pars": {
+      "applied": true,
+      "error": null
+    }
+  },
+  "os": "macOS-15.7.7-arm64-arm-64bit",
+  "save_error": null,
+  "saved": true
+}
