@@ -19,3 +19,32 @@ opfind        # OPFind DAT operator-index cache (tab-separated op table)
 replicator    # Replicator COMP cache (trivial in samples)
 root          # root-viewport state: `v <x> <y> <zoom>` + `end`
 start         # project startup settings (key/value lines)
+
+# Added 2026-09-26 with the every_op fixtures (tests/toolchain/fixtures/
+# 2025.33230/every_op_*.tox): operator-body kinds of ops that no committed
+# input exercised before. All but the last four were already seen in the
+# shipped-.tox corpus (see toeexpand/FORMAT.md); identical bytes from the
+# 2025.32460 and 2025.33230 toolchains.
+actorType         # Actor COMP body
+assetnames        # asset-name table (fbx/usd-style import COMPs)
+bind              # Bind CHOP body
+cacheable         # cache-state flag body
+enginemap         # Engine COMP parameter/IO map
+feedback          # Feedback CHOP/TOP body
+geopaths          # import-COMP geometry path list
+learnedparms      # learned-parameter state (MIDI/mapping ops)
+mergedpaths       # import-COMP merged path list
+particle          # Particle SOP state
+pluginstate       # plugin state blob (C++/device ops)
+record            # Record CHOP body
+subFiles          # import-COMP sub-file list
+textureimports    # import-COMP texture import list
+timeStateSetting  # Time COMP state
+timer             # Timer CHOP body
+# First observed 2026-09-26 (not in the shipped corpus: hardware ops without
+# OPSnippets). Newline-separated numeric/text device state records; the ops
+# already existed at 2025.32460. See FORMAT.md "2025.33230 fixture sweep".
+freed             # FreeD In CHOP — 12 numeric lines
+ncam              # Ncam CHOP — numeric header + UT_DMatrix3 text records
+oakdevice         # OAK Device CHOP — 11 numeric lines
+stype             # Stype In CHOP — 3 numeric lines

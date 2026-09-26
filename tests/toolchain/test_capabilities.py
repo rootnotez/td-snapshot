@@ -360,14 +360,16 @@ def test_case_collision_suffix_disambiguation(tmp_path):
         pytest.skip("no tests/toolchain/fixtures/*/features.tox yet (generated later)")
 
     fixture = fixtures[0]
-    staged = tmp_path / fixture.name
-    shutil.copy(fixture, staged)
-
-    er = c.expand(c.bin_dir(), staged, tmp_path, timeout=120)
+    # common.expand stages its own copy into the workdir.
+    er = c.expand(c.bin_dir(), fixture, tmp_path, timeout=120)
     assert er.ok
 
     toc_text = er.toc.read_text()
-    dup_lines = [line for line in toc_text.splitlines() if re.search(r" \d+$", line)]
+    # The `.toc` header (`# 4 0 0 0 1`) also ends in ` <digit>`; skip it.
+    dup_lines = [
+        line for line in toc_text.splitlines()
+        if not line.startswith("#") and re.search(r" \d+$", line)
+    ]
     assert dup_lines, "expected a case-collision ` N` .toc entry (caseProbe/caseprobe)"
 
     for line in dup_lines:
