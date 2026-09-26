@@ -1,0 +1,7 @@
+# Golden input set for tests/toolchain — repo-relative globs, one per line.
+# Every matching .toe/.tox is expanded/collapsed by `tcdiff record`.
+td-snapshot.tox
+tests/*.toe
+tests/baselines/*.toe
+tests/toolchain/fixtures/**/*.tox
+tests/toolchain/fixtures/**/*.toe

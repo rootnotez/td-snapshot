@@ -10,3 +10,6 @@ toeexpand/resources/
 # Working samples used for one-off binary-kind analysis.
 toeexpand/2026-05-17__datlab-classified-v1/
 datlab-classified-v1.zip
+
+# tests/toolchain ad-hoc records (external corpora)
+tests/toolchain/runs/
