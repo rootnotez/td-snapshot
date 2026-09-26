@@ -14,6 +14,8 @@ or just:
 import sys
 from pathlib import Path
 
+import pytest
+
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parent
 sys.path.insert(0, str(REPO / "src"))
@@ -248,7 +250,9 @@ def test_parm_accessor_smoke():
         / "classifier.tox.dir" / "classifier.parm"
     )
     if not sample.exists():
-        return
+        # TODO: repoint at a committed .parm fixture with custom pages and
+        # expressions (tests/toolchain/fixtures/*/features.tox provides both).
+        pytest.skip("classifier.parm sample corpus not present")
     parsed = parm.Parm.parse(sample.read_bytes())
     page_markers = [r for r in parsed.rows if r.is_page_marker]
     assert page_markers, "expected at least one ? page marker"
