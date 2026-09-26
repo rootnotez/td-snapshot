@@ -239,8 +239,10 @@ If it reports differences:
 
 1. Mount the previous build read-only and run a live cross-check:
    ```
+   NEW_BIN="$(scripts/toolchain.sh bin current)"
    PREV_BIN="$(scripts/toolchain.sh bin <previous-build>)"
-   uv run tests/toolchain/tcdiff.py cross --bin "$NEW_BIN" --trees <kept-trees-dir> --against tests/toolchain/golden/<previous-build>
+   uv run tests/toolchain/tcdiff.py record --bin "$PREV_BIN" --out tests/toolchain/runs/prev --keep-trees tests/toolchain/runs/prev-trees
+   uv run tests/toolchain/tcdiff.py cross --bin "$NEW_BIN" --trees tests/toolchain/runs/prev-trees --against tests/toolchain/runs/prev
    ```
 2. Run an external-corpus A/B: `tcdiff record --root <corpus>` with both the previous and new toolchains, then `tcdiff compare` the two results.
 3. Regenerate fixtures for the new build inside a live TouchDesigner session (`tests/toolchain/gen/run.sh every_op` / `features`; needs the td-claude-bridge component — see `tests/toolchain/gen/README.md`), then record goldens with both toolchains (`tcdiff record --bin <bin> --out tests/toolchain/golden/<build>/`).
