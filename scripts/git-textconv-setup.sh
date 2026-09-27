@@ -13,6 +13,10 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 SRC_DIR="$REPO_ROOT/src"
+if [ ! -f "$SRC_DIR/tocdir/__main__.py" ]; then
+    echo "ERROR: tocdir not found at $SRC_DIR/tocdir" >&2
+    exit 1
+fi
 
 if ! command -v uv >/dev/null 2>&1; then
     echo "ERROR: uv not found (see https://docs.astral.sh/uv/)" >&2
@@ -24,7 +28,12 @@ fi
 # tocdir subcommand name. PYTHONPATH is set to this clone's src/ (an
 # absolute path, so it resolves correctly no matter what cwd git invokes
 # it from) since `uv run --no-project` does not install the repo itself.
-TEXTCONV_CMD="PYTHONPATH=\"$SRC_DIR\" uv run --no-project python -m tocdir textconv"
+# Relative on purpose: git runs textconv from the top of whichever working
+# tree is being diffed (checked 2026-09-27, including from a subdirectory),
+# so each worktree uses its own src/tocdir. An absolute path would pin every
+# worktree to one checkout and turn `git diff` into an error once that
+# checkout is deleted -- the config is shared across worktrees.
+TEXTCONV_CMD="PYTHONPATH=src uv run --no-project --quiet python -m tocdir textconv"
 
 git config diff.tocdir.textconv "$TEXTCONV_CMD"
 git config diff.tocdir.cachetextconv true
