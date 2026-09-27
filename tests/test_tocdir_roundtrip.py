@@ -317,12 +317,17 @@ def test_table_dimensions_accessor():
         / "classifier.tox.dir" / "classifier" / "stats_table.table"
     )
     if not sample.exists():
-        return
+        # Skip visibly: a bare return here reported PASS with nothing checked.
+        pytest.skip(f"corpus sample not present: {sample}")
     parsed = table.Table.parse(sample.read_bytes())
     assert parsed.version == 1
-    # stats_table is a 2-column × 9-row key/value table.
-    assert parsed.row_count == 9
-    assert parsed.column_count == 2
+    # stats_table is 2 rows x 9 columns: a header row of 9 labels (status,
+    # num_samples, ...) and one row of values. Preamble (1, 2, 9, 0). The
+    # earlier comment said "2-column x 9-row", read through the swapped
+    # accessors; decoded on 2026-09-27 (build 2025.33230 toeexpand).
+    assert parsed.preamble.fields == (1, 2, 9, 0)
+    assert parsed.row_count == 2
+    assert parsed.column_count == 9
 
 
 def test_table_row_col_order_tabledemo():
