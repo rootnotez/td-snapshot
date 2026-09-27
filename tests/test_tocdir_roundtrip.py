@@ -317,12 +317,77 @@ def test_table_dimensions_accessor():
         / "classifier.tox.dir" / "classifier" / "stats_table.table"
     )
     if not sample.exists():
-        return
+        # Skip visibly: a bare return here reported PASS with nothing checked.
+        pytest.skip(f"corpus sample not present: {sample}")
     parsed = table.Table.parse(sample.read_bytes())
     assert parsed.version == 1
-    # stats_table is a 2-column × 9-row key/value table.
-    assert parsed.column_count == 2
-    assert parsed.row_count == 9
+    # stats_table is 2 rows x 9 columns: a header row of 9 labels (status,
+    # num_samples, ...) and one row of values. Preamble (1, 2, 9, 0). The
+    # earlier comment said "2-column x 9-row", read through the swapped
+    # accessors; decoded on 2026-09-27 (build 2025.33230 toeexpand).
+    assert parsed.preamble.fields == (1, 2, 9, 0)
+    assert parsed.row_count == 2
+    assert parsed.column_count == 9
+
+
+def test_table_row_col_order_tabledemo():
+    # Pins the preamble row/col order using tests/toolchain/gen/features.py's
+    # tableDemo fixture: a new tableDAT (1 empty row) + appendRows of 4 rows
+    # x 3 columns = 5 rows x 3 columns, 15 cells total.
+    #
+    # Verified 2026-09-27 against build 2025.33230: FORMAT.md and this
+    # module previously documented u32[1]/u32[2] as column_count/row_count;
+    # measurement on this fixture (and several shipped-corpus tables with
+    # distinct row/col counts, e.g. an 18-row x 4-col colDefine.table and a
+    # 1-row x 8-col currentTracks.table) shows the opposite — u32[1] is
+    # row_count, u32[2] is column_count.
+    sample = (
+        REPO / "tests" / "baselines" / "toeexpand_kinds" / "table"
+        / "features_2025.33230_tableDemo.table"
+    )
+    assert sample.exists(), f"missing fixture: {sample}"
+    parsed = table.Table.parse(sample.read_bytes())
+    assert parsed.version == 1
+    assert parsed.preamble.fields == (1, 5, 3, 0)
+    assert parsed.row_count == 5
+    assert parsed.column_count == 3
+
+    cells = _decode_table_cells(parsed.body)
+    assert len(cells) == parsed.row_count * parsed.column_count == 15
+    rows = [cells[i:i + parsed.column_count] for i in range(0, len(cells), parsed.column_count)]
+    assert rows == [
+        ["", "", ""],
+        ["col1", "col2", "col3"],
+        ["a1", "", "c1"],
+        ["", "b2", ""],
+        ["a3", "b3", "c3"],
+    ]
+
+    # No trailing NUL terminator per cell: consecutive cell records are
+    # tag+length+bytes with the next tag immediately following.
+    import struct
+    pos = 0
+    for cell in cells:
+        tag = struct.unpack_from(">I", parsed.body, pos)[0]
+        assert tag == 2
+        length = struct.unpack_from(">I", parsed.body, pos + 4)[0]
+        assert length == len(cell.encode("utf-8"))
+        pos += 8 + length
+    assert pos == len(parsed.body)
+
+
+def _decode_table_cells(body: bytes) -> list:
+    import struct
+    cells = []
+    pos = 0
+    while pos < len(body):
+        tag = struct.unpack_from(">I", body, pos)[0]
+        assert tag == 2
+        length = struct.unpack_from(">I", body, pos + 4)[0]
+        pos += 8
+        cells.append(body[pos:pos + length].decode("utf-8"))
+        pos += length
+    return cells
 
 
 def test_fifo_roundtrip_fixtures():

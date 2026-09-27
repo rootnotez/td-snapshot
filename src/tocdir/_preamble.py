@@ -13,15 +13,17 @@ about the preamble width being uniform):
 The preamble u32 count is **kind-dependent**:
 
     .text       6 u32s  (4 sentinels + end-marker + body_length)
-    .table      4 u32s  (sentinel + col_count + row_count + reserved)
+    .table      4 u32s  (sentinel + row_count + col_count + reserved)
     .renderpick 4 u32s  (mirrors .table)
     .fifo       4 u32s
     .data       4 u32s  (no version line; preamble starts at offset 0)
 
 After the preamble, `.table` / `.renderpick` / `.fifo` / `.data` carry a
 cell stream where each cell is: tag `\\x00\\x00\\x00\\x02` + u32 length +
-content bytes + `\\x00` terminator. `.text` carries the raw DAT body
-directly.
+content bytes, with **no** trailing terminator byte — the next cell's tag
+follows immediately (corrected 2026-09-27 against build 2025.33230; an
+earlier draft claimed a `\\x00` terminator per cell). `.text` carries the
+raw DAT body directly.
 """
 
 from __future__ import annotations

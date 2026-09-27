@@ -339,21 +339,21 @@ end
 ```
 
 - Line 1: `1\n` (version) — same convention as `.text`/`.script`.
-- Line 2: `*` then 24-byte binary header (six big-endian u32s). **Decoded preamble fields:**
+- Line 2: `*` then a **4-u32** binary preamble (16 bytes), followed directly by the cell stream (see the "Important correction" note below — earlier drafts of this section showed a 6-u32 header borrowed from `.text`; that was wrong). **Decoded preamble fields:**
 
   | u32 | meaning |
   |---|---|
   | u32[0] | `0x00000001` (sentinel) |
-  | u32[1] | **column count** |
-  | u32[2] | **row count** |
+  | u32[1] | **row count** |
+  | u32[2] | **column count** |
   | u32[3] | `0x00000000` (reserved) |
-  | u32[4] | `0x00000002` (cell tag — start of cell stream) |
-  | u32[5] | length of first cell |
-- Each subsequent cell: tag `\x00\x00\x00\x02`, then `\x00\x00\x00<LEN>` big-endian length, then `<LEN>` bytes of UTF-8 text, then `\x00` terminator.
+- Each cell: tag `\x00\x00\x00\x02`, then `\x00\x00\x00<LEN>` big-endian length, then `<LEN>` bytes of UTF-8 text — **no** trailing terminator byte; the next cell's tag follows immediately. The cell stream holds `row_count * column_count` cells in row-major order.
 
-The same `1\n*<u32×6>` framing is also used by **`.renderpick`** (col/row counts of the pick buffer), **`.fifo`** (with an extra ASCII field-count line before the `*`), and **`.data`** (no version line at all — header starts at offset 0, but the same tabular u32 layout). The `1\n*<u32×6>` shape is effectively a generic DAT-cell preamble shared across these kinds.
+The same `1\n*<u32×4>` framing is also used by **`.renderpick`** (row/col counts of the pick buffer, binary form), **`.fifo`** (with an extra ASCII field-count line before the `*`), and **`.data`** (no version line at all — header starts at offset 0, but the same tabular u32 layout).
 
 Binary, but predictable; cells are still human-readable in a hex dump, and small table changes produce small diffs.
+
+**Correction — row/col order and cell terminator (2026-09-27, build 2025.33230):** the table above previously listed u32[1] as column count and u32[2] as row count, and stated each cell ends with a `\x00` terminator. Both were wrong, and `src/tocdir/table.py`'s `column_count`/`row_count` accessors inherited the row/col swap. Evidence: `tests/baselines/toeexpand_kinds/table/features_2025.33230_tableDemo.table` has preamble `(1, 5, 3, 0)` followed by 15 cells; `tests/toolchain/gen/features.py` builds that fixture as a tableDAT with `appendRows` of 4 rows × 3 columns (plus the DAT's initial empty row) = 5 rows × 3 columns, so u32[1]=5=rows, u32[2]=3=cols. Cross-checked against several asymmetric tables in `toeexpand/resources/shipped-2025.33230/`, all consistent with u32[1]=rows, u32[2]=cols: `.../signalingClient/listerConfig1/colDefine.table` (18, 4) = 18 rows × 4 cols of column-attribute definitions; `.../lister/colDefaults.table` (17, 2) = 17 attribute rows × 2 cols; `.../lister/autoColDefine.table` (18, 1) = 18 rows × 1 col; `.../webRTC/currentTracks.table` (1, 8) = 1 header row × 8 cols (`id, connectionId, label, direction, type, source, family, cloneMaster`); `.../webRTC/currentConnections.table` (1, 3) = 1 header row × 3 cols. On the terminator: hex-dumping the tableDemo cell stream shows each cell's UTF-8 bytes (e.g. `col1`) immediately followed by the next cell's `00 00 00 02` tag, with no intervening `\x00` — and the file's total length matches `sum(8 + len(cell))` over all 15 cells exactly, with no extra byte per cell.
 
 ## `.panel` — panel layout
 
@@ -418,7 +418,9 @@ lradioname scopy_btn         # root container only
 
 The binary header makes `.text` files slightly harder to diff than the other artifacts, but the bulk content is plain text and diffs cleanly in practice.
 
-**Important correction discovered during parser implementation:** previous FORMAT.md drafts described `.table` as sharing the 6-u32 preamble. It does **not** — `.table` and the table-shaped kinds (`.renderpick`, `.fifo`, `.data`) use a **4-u32** preamble (`sentinel, col_count, row_count, reserved`) followed directly by a cell stream. The bytes that looked like u32[4]/u32[5] are actually the start of the first cell record. Wide-corpus testing (20,207 `.table` files + 22 `.renderpick` + 256 `.fifo` + 3,166 `.data`) confirms 4-u32 universally.
+**Important correction discovered during parser implementation:** previous FORMAT.md drafts described `.table` as sharing the 6-u32 preamble. It does **not** — `.table` and the table-shaped kinds (`.renderpick`, `.fifo`, `.data`) use a **4-u32** preamble (`sentinel, row_count, column_count, reserved`) followed directly by a cell stream. The bytes that looked like u32[4]/u32[5] are actually the start of the first cell record. Wide-corpus testing (20,207 `.table` files + 22 `.renderpick` + 256 `.fifo` + 3,166 `.data`) confirms 4-u32 universally.
+
+**Further correction (2026-09-27, build 2025.33230):** the paragraph above, and the `.table` section earlier in this document, originally listed the 4-u32 preamble as `sentinel, col_count, row_count, reserved` (u32[1]=cols, u32[2]=rows) and stated cells end with a `\x00` terminator. Both details were backwards/wrong; the field order is `sentinel, row_count, column_count, reserved` (u32[1]=rows, u32[2]=cols) and cells have no terminator byte. See the "Correction — row/col order and cell terminator" note under the `.table` section above for the evidence (the `tableDemo` fixture plus several asymmetric shipped-corpus tables). `src/tocdir/table.py` and `src/tocdir/renderpick.py` accessors were fixed to match.
 
 ### Short-form `.text` — 4-u32 preamble (TD 2025.30280+)
 
