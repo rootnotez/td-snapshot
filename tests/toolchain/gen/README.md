@@ -52,6 +52,19 @@ applied/failed (+ error string) rather than aborting the run. Check that
 JSON after running — a generator printing a clean summary can still have
 individually failed entries worth looking at.
 
+## Errata probes
+
+`probe_*.py` scripts re-check entries in
+[`toeexpand/ERRATA.md`](../../../toeexpand/ERRATA.md) (suspected
+TouchDesigner-side bugs) and are meant to be re-run on every build:
+
+```bash
+tests/toolchain/gen/run.sh probe_parm_flags   # ERRATA E1 (.parm bit 0x1000) + E2 (Phong typo)
+```
+
+Output goes to the gitignored `tests/toolchain/runs/<probe>-<build>/`, not to
+`fixtures/`, so the frozen-fixture rule below does not apply to them.
+
 ## Frozen-fixture rule
 
 Fixtures already committed under `tests/toolchain/fixtures/<build>/` are

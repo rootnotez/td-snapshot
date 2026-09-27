@@ -1,7 +1,7 @@
 #!/bin/bash
 # Host-side runner for the tests/toolchain/gen fixture generators.
 #
-#   tests/toolchain/gen/run.sh <every_op|features> [OUT_DIR] [--force]
+#   tests/toolchain/gen/run.sh <every_op|features|probe_parm_flags> [OUT_DIR] [--force]
 #
 # Sends the matching generator script (every_op.py / features.py) to a live
 # TouchDesigner session through td-claude-bridge's /exec, with
@@ -21,7 +21,7 @@
 set -euo pipefail
 
 usage() {
-  echo "usage: $0 <every_op|features> [OUT_DIR] [--force]" >&2
+  echo "usage: $0 <every_op|features|probe_parm_flags> [OUT_DIR] [--force]" >&2
   exit 2
 }
 
@@ -30,8 +30,8 @@ GEN="$1"
 shift
 
 case "$GEN" in
-  every_op|features) ;;
-  *) echo "unknown generator: $GEN (expected 'every_op' or 'features')" >&2; exit 2 ;;
+  every_op|features|probe_parm_flags) ;;
+  *) echo "unknown generator: $GEN (expected 'every_op', 'features' or 'probe_parm_flags')" >&2; exit 2 ;;
 esac
 
 FORCE=0
@@ -105,7 +105,12 @@ else
     echo "ERROR: got an empty build string from the bridge" >&2
     exit 1
   fi
-  OUT_DIR="$REPO/tests/toolchain/fixtures/$BUILD"
+  case "$GEN" in
+    # Errata probes are re-run on every build; their output is scratch, not a
+    # frozen fixture, so it goes to the gitignored runs/ tree.
+    probe_*) OUT_DIR="$REPO/tests/toolchain/runs/$GEN-$BUILD" ;;
+    *)       OUT_DIR="$REPO/tests/toolchain/fixtures/$BUILD" ;;
+  esac
 fi
 
 echo "generator: $GEN" >&2

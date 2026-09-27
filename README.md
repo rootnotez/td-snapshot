@@ -247,6 +247,7 @@ If it reports differences:
 2. Run an external-corpus A/B: `tcdiff record --root <corpus>` with both the previous and new toolchains, then `tcdiff compare` the two results.
 3. Regenerate fixtures for the new build inside a live TouchDesigner session (`tests/toolchain/gen/run.sh every_op` / `features`; needs the td-claude-bridge component — see `tests/toolchain/gen/README.md`), then record goldens with both toolchains (`tcdiff record --bin <bin> --out tests/toolchain/golden/<build>/`).
 4. Write up the finding under `toeexpand/toolchain-deltas/<date>_<old>-vs-<new>.md`, and tag anything that changes the on-disk format in `toeexpand/FORMAT.md`/`toeexpand/DEVIATIONS.md` with the new build number, per "Build-version sensitivity" above.
+   Re-check every entry in [`toeexpand/ERRATA.md`](toeexpand/ERRATA.md) (suspected TouchDesigner-side bugs — e.g. `tests/toolchain/gen/run.sh probe_parm_flags`) and add a History row per entry for the new build, even when nothing changed.
 5. Commit — `src/hashes.txt`, `toeexpand/TOOLCHAINS.md`, any new golden sets/fixtures, and the delta note are all tracked so the update leaves a dated trail.
 
 See [`tests/toolchain/README.md`](tests/toolchain/README.md) for the layout contract, manifest format, and `tcdiff.py` CLI details.

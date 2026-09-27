@@ -233,6 +233,7 @@ scaletofit 49 onlyshrink "parent().par[me.curPar.name] or me.curPar.val"
 
     **Confirmed bit-field rules** (validated against 163K parameter records, builds 2017–2025):
     - `(mode & 0x30) != 0` → row carries a trailing expression (100% correlation).
+    - With `0x10` set: `(mode & 0x01) != 0` → EXPRESSION is the active mode; clear → expression text retained but a constant value is in use (confirmed by bridge probe, build 2025.33230 — see [2025.33230 update sweep](#202533230-update-sweep-2026-09-26)).
     - `(mode & 0xC0) == 0xC0` → menu/enum value, expression forbidden.
     - `(mode & 0x04000000) != 0` → parameter sits on a custom-parameter page (low-byte semantics unchanged).
     - `(mode & 0x0C000000) == 0x0C000000` → OP-typed reference (operator-path value or expression yielding an OP).
@@ -597,7 +598,7 @@ With the grammar above, round-tripping is byte-exact: `parser/lod.py` walks reco
   - With high byte `0x04...`: same low-byte patterns but the parameter sits on a custom page.
   - With high byte `0x0C...`: OP-typed values + extended bind (seen on parms whose value resolves to an operator).
   The high bits `0x04000000` / `0x08000000` correspond roughly to "is custom parameter" / "is OP-typed value", but specific bit-to-TD-ParMode mapping is still inferred. Build a one-par-per-mode fixture to lock it down.
-  - **`0x1000` (4096)** — new bit, first observed in files saved by TD builds after 2025.32460 (build 2025.33181 onward; confirmed present at 2025.33230). Unconfirmed hypothesis: marks a value written despite equaling a computed/dynamic default. Doesn't overlap the expression bits (`0x30`). See [2025.33230 update sweep](#202533230-update-sweep-2026-09-26) for evidence and the confirmation step.
+  - **`0x1000` (4096)** — "always written" flag on specific parameter definitions (texture-map sampling blocks, POP attribute-creation blocks); set regardless of value, invisible to TD's Python API. First seen in files saved by 2025.33181, present at 2025.33230, never in ≤2025.32424 saves. Tracked as [ERRATA E1](ERRATA.md#e1--parm-mode-bit-0x1000-always-written-flag-on-some-parameter-groups) (cause unknown, possibly unintentional).
 - `.lod` length encoding: needs more samples and a careful hex inspection to nail down whether the per-record length is 1-byte, 2-byte, or 4-byte big-endian with the padding interpretation above.
 - Operator-body files (`.chop`, `.feedback`, `.beat`, `.gnode`, `.ts`, `.replicator`, `.oldacbo`) — only minimal samples decoded. A targeted sweep with non-trivial CHOPs (loaded buffers, recorded channels) would expose richer payloads.
 - `.cparm` column layout: the seven numeric fields in positions 5–11 (clamp flags, defaults, min/max, "section") are inferred, not proven. Build a fixture with one custom par per type to lock the schema down.
@@ -686,24 +687,32 @@ against build **2025.32460**'s shipped-`tfs` corpus (788 trees, the
 2026-06-01 sweep above) and against a fresh `every_op`/`features` fixture
 generated at 2025.33230.
 
-- **`.parm` mode bit `0x1000` (4096) — new, TD-save-time, not
-  toolchain-side.** Absent from the entire 2025.32460 shipped corpus (0 of ~1.99M
-  mode-bearing `.parm` rows in the 2026-06-01 sweep); present (7 occurrences) in the
-  2025.33230 shipped corpus and in a fresh `every_op` fixture generated at
-  2025.33230. Seen on `randomPOP`'s `attr*` pars (that snippet's `.build`
-  stamp says it was re-saved at **2025.33181**, so TD writes it by that
-  build at the latest; whether 2025.32460 already wrote it is unconfirmed) and, in `every_op`, on every 3D
-  COMP's `instancetexextendu`/`v`/`w`, `instancetexfilter`,
-  `instancetexanisotropy` pars — always **at their default value**
-  (`repeat`/`mipmaplinear`/`off`). Doesn't overlap the existing expression
-  bits (`mode & 0x30`). **Working hypothesis (unconfirmed):** marks a value
-  TD wrote out even though it equals a computed/dynamic default, distinct
-  from "changed from default." Both toolchain builds pass the bit through
-  byte-identically; `tocdir`'s `.parm` parser round-trips it as an opaque
-  integer, no special-casing needed. Confirmation step: generate `every_op`
-  under TD 2025.32460 itself and diff modes against the committed
-  2025.33230 fixture — not yet done. Full evidence in the delta report
-  above.
+- **`.parm` mode bit `0x1000` (4096) — "always written" parameter flag,
+  TD-save-time, not toolchain-side.** Absent from the entire 2025.32460-era
+  shipped corpus (0 of ~1.99M mode-bearing `.parm` rows); first seen in a
+  snippet saved by **2025.33181**, and at 2025.33230 on 43 op types in the
+  `every_op` fixture: texture-map sampling blocks (`…extendu/v/w`, `…filter`,
+  `…anisotropy`, `…coord*`, `…samplingmode`, `…channelsource` — every 3D
+  COMP's `instancetex*`, Light COMP `projmap*`/`envmap*`, PBR/Phong/Constant/
+  Point Sprite MAT map slots) and POP attribute-creation blocks
+  (`overrideautoattr`, `attrtype`, `attrnumcomps`, `attrdefaultval0–3`).
+  A bridge probe (`tests/toolchain/gen/probe_parm_flags.py`, 2025.33230)
+  shows the bit is set on those parameters whether the value is default,
+  changed, restored or `reset()` — a static per-parameter property that makes
+  the row always present — while TD's Python API reports them
+  `isDefault=True` / `CONSTANT`. Consequence: a row's presence in `.parm` is
+  **not** evidence of a user change for `0x1000` rows. Both toolchains pass it
+  through byte-identically; `tocdir` round-trips it as an opaque integer.
+  Cause unknown, possibly unintentional — tracked as
+  [ERRATA E1](ERRATA.md#e1--parm-mode-bit-0x1000-always-written-flag-on-some-parameter-groups).
+- **Low bits `0x10` / `0x01` decoded** (same probe, build 2025.33230): on a
+  parameter with a stored expression, `0x10` = expression text is stored and
+  `0x01` = EXPRESSION is the *active* mode. Pattern POP `attrnumcomps` saves
+  as `4113` (`0x1011`) at default (TD: `mode=EXPRESSION`) and as `4112`
+  (`0x1010`) once its value is set (TD: `mode=CONSTANT`, expression text still
+  stored). Consistent with `panels 16 copy_btn parent()` (constant value in
+  use, expression retained) vs `clone 17 "" op.TDTox.op(...)` (expression
+  active).
 - **Four raw operator-body kinds observed for the first time**, all on
   hardware-facing CHOPs that already existed at 2025.32460 (newly
   *exercised*, not new operators), from the 2025.33230 `every_op` fixture.
