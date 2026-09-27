@@ -5,10 +5,8 @@ for every kind we claim to support. Failures here either indicate a parser
 bug or surface a deviation that needs to be recorded in
 `toeexpand/DEVIATIONS.md`.
 
-Run from the worktree root:
-    uv run --no-project pytest tests/test_tocdir_roundtrip.py -v
-or just:
-    python -m pytest tests/test_tocdir_roundtrip.py -v
+Run from the repo root:
+    uvx pytest tests/test_tocdir_roundtrip.py -v
 """
 
 import sys

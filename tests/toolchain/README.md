@@ -106,14 +106,14 @@ found at the resolved bin dir.
 Against the default toolchain:
 
 ```
-uv run --no-project --with pytest pytest tests/toolchain -q
+uvx pytest tests/toolchain -q
 ```
 
 Against another installed/mounted build:
 
 ```
 TD_TOOLCHAIN_BIN=/path/to/TouchDesigner.app/Contents/MacOS \
-    uv run --no-project --with pytest pytest tests/toolchain -q
+    uvx pytest tests/toolchain -q
 ```
 
 Both must pass before relying on a new TD build for `scripts/shrink.sh` /

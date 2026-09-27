@@ -5,8 +5,8 @@ present in the repo, so the walker is guarded without needing the full
 shipped corpus (that is regenerable via scripts/build-corpus.sh and
 gitignored).
 
-Run from the worktree root:
-    uv run --no-project pytest tests/test_tocdir_census.py -v
+Run from the repo root:
+    uvx pytest tests/test_tocdir_census.py -v
 """
 
 import sys
