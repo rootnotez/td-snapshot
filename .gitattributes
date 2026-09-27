@@ -1,0 +1,26 @@
+# tocdir/toeexpand expansion trees committed to this repo.
+#
+# `.text` (Text DAT body) and `.table` (Table DAT cells) files carry a
+# binary length-prefixed preamble with embedded NUL bytes (see
+# toeexpand/FORMAT.md), so git treats them as opaque binary and
+# `git diff` / `git log -p` show only "Binary files differ" — hiding the
+# most important content in the tree (e.g. td_snapshot/core.text, the
+# snapshot script's own source). Route them through tocdir's textconv
+# renderer instead (`python -m tocdir textconv <file>`).
+#
+# textconv commands live in `.git/config`, which is not committed — run
+# scripts/git-textconv-setup.sh once per clone to configure the driver
+# (`diff.tocdir.textconv`) before this attribute has any visible effect;
+# without it git falls back to its normal binary-file handling.
+#
+# `-text` disables git's own text/EOL handling on every file in these
+# trees (not just .text/.table) so no autocrlf/renormalization can ever
+# corrupt the length-prefixed binary framing tocdir round-trips bit-exact.
+
+tox/**/*.text diff=tocdir
+tox/**/*.table diff=tocdir
+tox/** -text
+
+tests/baselines/toeexpand_kinds/**/*.text diff=tocdir
+tests/baselines/toeexpand_kinds/**/*.table diff=tocdir
+tests/baselines/toeexpand_kinds/** -text
