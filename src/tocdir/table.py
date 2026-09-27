@@ -4,12 +4,16 @@ Layout (FORMAT.md):
 
     1\\n             # format version
     *               # marker byte
-    <u32×6>         # preamble: [1, col_count, row_count, 0, 2, first_cell_len]
-    <cell stream>   # cells: tag(0x00000002) + u32 length + utf-8 bytes + 0x00
+    <u32×4>         # preamble: [1, row_count, col_count, 0]
+    <cell stream>   # cells: tag(0x00000002) + u32 length + utf-8 bytes (no terminator)
 
 The cell stream after the preamble holds `row_count * col_count` cells.
 For bit-exact we keep the cell stream as opaque bytes — accessors decode
 on demand.
+
+Corrected 2026-09-27 against build 2025.33230: earlier drafts (and this
+module) had u32[1]/u32[2] swapped as column_count/row_count. See the
+"Important correction" note in FORMAT.md for the evidence.
 """
 
 from __future__ import annotations
@@ -19,7 +23,7 @@ from pathlib import Path
 
 from ._preamble import Preamble
 
-# .table uses 4 u32s: [1, col_count, row_count, 0]. The cell stream follows.
+# .table uses 4 u32s: [1, row_count, col_count, 0]. The cell stream follows.
 PREAMBLE_FIELDS = 4
 
 
@@ -47,11 +51,11 @@ class Table:
         return int(self.version_line.decode("ascii").rstrip("\n"))
 
     @property
-    def column_count(self) -> int:
+    def row_count(self) -> int:
         return self.preamble.fields[1]
 
     @property
-    def row_count(self) -> int:
+    def column_count(self) -> int:
         return self.preamble.fields[2]
 
 

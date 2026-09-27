@@ -22,7 +22,9 @@ from typing import Optional
 from ._brace_block import BraceBlockBody
 from ._preamble import Preamble
 
-PREAMBLE_FIELDS = 4  # same shape as .table
+# same shape as .table: [1, row_count, col_count, 0]. Fixed 2026-09-27
+# alongside table.py's row/col swap — see FORMAT.md "Important correction".
+PREAMBLE_FIELDS = 4
 
 
 @dataclass
@@ -54,11 +56,11 @@ class Renderpick:
         return int(self.version_line.decode("ascii").rstrip("\n"))
 
     @property
-    def column_count(self) -> Optional[int]:
+    def row_count(self) -> Optional[int]:
         return self.preamble.fields[1] if self.preamble is not None else None
 
     @property
-    def row_count(self) -> Optional[int]:
+    def column_count(self) -> Optional[int]:
         return self.preamble.fields[2] if self.preamble is not None else None
 
 
