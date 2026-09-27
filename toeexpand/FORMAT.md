@@ -228,6 +228,8 @@ scaletofit 49 onlyshrink "parent().par[me.curPar.name] or me.curPar.val"
     | 67109184 | `0x04000140` | `Version 67109184 1.0.1` | real | no |
     | 201326673 | `0x0C000051` | `Emb0data ... "" op('./stats_table')[...]` | empty | yes |
     | 201326912 | `0x0C000140` | `Emb0active 201326912 off` | real | no |
+    | 4096 | `0x00001000` | `instancetexextendu 4096 repeat` | real | no |
+    | 4113 | `0x00001011` | `attrnumcomps 4113 1 me.par.vecsize` | real | yes |
 
     **Confirmed bit-field rules** (validated against 163K parameter records, builds 2017–2025):
     - `(mode & 0x30) != 0` → row carries a trailing expression (100% correlation).
@@ -595,6 +597,7 @@ With the grammar above, round-tripping is byte-exact: `parser/lod.py` walks reco
   - With high byte `0x04...`: same low-byte patterns but the parameter sits on a custom page.
   - With high byte `0x0C...`: OP-typed values + extended bind (seen on parms whose value resolves to an operator).
   The high bits `0x04000000` / `0x08000000` correspond roughly to "is custom parameter" / "is OP-typed value", but specific bit-to-TD-ParMode mapping is still inferred. Build a one-par-per-mode fixture to lock it down.
+  - **`0x1000` (4096)** — new bit, first observed in files saved by TD builds after 2025.32460 (build 2025.33181 onward; confirmed present at 2025.33230). Unconfirmed hypothesis: marks a value written despite equaling a computed/dynamic default. Doesn't overlap the expression bits (`0x30`). See [2025.33230 update sweep](#202533230-update-sweep-2026-09-26) for evidence and the confirmation step.
 - `.lod` length encoding: needs more samples and a careful hex inspection to nail down whether the per-record length is 1-byte, 2-byte, or 4-byte big-endian with the padding interpretation above.
 - Operator-body files (`.chop`, `.feedback`, `.beat`, `.gnode`, `.ts`, `.replicator`, `.oldacbo`) — only minimal samples decoded. A targeted sweep with non-trivial CHOPs (loaded buffers, recorded channels) would expose richer payloads.
 - `.cparm` column layout: the seven numeric fields in positions 5–11 (clamp flags, defaults, min/max, "section") are inferred, not proven. Build a fixture with one custom par per type to lock the schema down.
@@ -674,6 +677,72 @@ All round-trip byte-exact as raw blobs; first-byte signatures recorded for follo
 - **The C++ operator is NOT characterizable from the shipped corpus.** `grep` for any `^(TOP|CHOP|SOP|DAT|POP):cplusplus*` node across all 788 trees returns **nothing**: the `cplusplus*` snippets are `COMP:base` wrapper stubs that merely link to Derivative's external *CustomOperatorSamples* GitHub repo (the operator name survives only as a `cplusplusTOP` value in an `Optype` custom-par). **No real C++ operator instance, and no plugin-path parameter, exists in the corpus.** A loaded C++ operator's `.n`/`.parm` structure remains undocumented — so the Phase-2 scanner must keep its **conservative-inclusive** native-binary detection (flag any param value ending `.dll`/`.dylib`/`.so`/`.plugin`, plus the `cplusplus*` type token if/when one appears) until a real instance is captured and documented here.
 - **`.vfs` and `.web` are new code/data-smuggling surfaces** worth flagging: VFS embeds arbitrary files in the component; a `.web` body means an operator that fetches remote URLs. `.enc` blobs are opaque and should be surfaced as un-inspectable.
 - High-frequency auto/event executors confirmed present at scale: `DAT:execute` ×465, `DAT:panelexec` ×8303, `DAT:parexec` ×7653, `DAT:eval` ×7451, plus `web`/`webclient`/`webserver`/`websocket`/`webrtc`/`tcpip`/`udpin`/`udpout`/`serial`/`oscin` I/O DATs.
+
+## 2025.33230 update sweep (2026-09-26)
+
+Delta report: [`toeexpand/toolchain-deltas/2026-09-26_32460-vs-33230.md`](toolchain-deltas/2026-09-26_32460-vs-33230.md).
+Toolchain build **2025.33230** unless otherwise noted; comparisons are
+against build **2025.32460**'s shipped-`tfs` corpus (788 trees, the
+2026-06-01 sweep above) and against a fresh `every_op`/`features` fixture
+generated at 2025.33230.
+
+- **`.parm` mode bit `0x1000` (4096) — new, TD-save-time, not
+  toolchain-side.** Absent from the entire 2025.32460 shipped corpus (0 of ~1.99M
+  mode-bearing `.parm` rows in the 2026-06-01 sweep); present (7 occurrences) in the
+  2025.33230 shipped corpus and in a fresh `every_op` fixture generated at
+  2025.33230. Seen on `randomPOP`'s `attr*` pars (that snippet's `.build`
+  stamp says it was re-saved at **2025.33181**, so TD writes it by that
+  build at the latest; whether 2025.32460 already wrote it is unconfirmed) and, in `every_op`, on every 3D
+  COMP's `instancetexextendu`/`v`/`w`, `instancetexfilter`,
+  `instancetexanisotropy` pars — always **at their default value**
+  (`repeat`/`mipmaplinear`/`off`). Doesn't overlap the existing expression
+  bits (`mode & 0x30`). **Working hypothesis (unconfirmed):** marks a value
+  TD wrote out even though it equals a computed/dynamic default, distinct
+  from "changed from default." Both toolchain builds pass the bit through
+  byte-identically; `tocdir`'s `.parm` parser round-trips it as an opaque
+  integer, no special-casing needed. Confirmation step: generate `every_op`
+  under TD 2025.32460 itself and diff modes against the committed
+  2025.33230 fixture — not yet done. Full evidence in the delta report
+  above.
+- **Four raw operator-body kinds observed for the first time**, all on
+  hardware-facing CHOPs that already existed at 2025.32460 (newly
+  *exercised*, not new operators), from the 2025.33230 `every_op` fixture.
+  Round-trip byte-exact as opaque blobs, same as the other raw kinds in
+  this doc:
+
+  | kind | shape |
+  |---|---|
+  | `.freed` | 12 numeric lines |
+  | `.ncam` | numeric header + `UT_DMatrix3` text |
+  | `.oakdevice` | 11 numeric lines |
+  | `.stype` | 3 numeric lines |
+
+- **Case-collision suffix mismatch reproduced on macOS.** The
+  [Case-collision suffix mismatch](#case-collision-suffix-mismatch-toeexpand-bug)
+  section above documents this only on Windows-authored samples. The
+  2025.33230 `features` fixture's `case_collision_probe` (`caseProbe` next to
+  `caseprobe`), generated and expanded **on macOS**, reproduces the same
+  mismatch: `.toc` records `caseprobe.n 2`, disk has `caseprobe.n.2`. Not
+  platform-specific to the authoring OS — the bug is in `toeexpand`'s TOC
+  writer regardless of which OS produced the source `.tox`.
+- **`.parm` has a second, brace-delimited sub-format** (pre-existing, not
+  build-specific — first noticed while cross-checking the 2025.32460
+  shipped-`tfs` census): `Config/System/derivativep.tox.dir/derivativep/controls.parm`
+  is a `{ key ( value ) }` + `version` grammar, not the `?`-bracketed
+  page/row format documented above. `Parm` keeps the raw bytes (round-trips
+  fine) but `Row.name` takes the first whitespace-delimited token, which for
+  this file is `{`/`}` — so census's `type_pars` picks up brace noise for
+  this one type. Not decoded further; flag it as a second `.parm` grammar
+  rather than a parser bug.
+- **Toolchain CLI quirks, reconfirmed on both 2025.32460 and 2025.33230**
+  (unchanged across the update — see the delta report for the full A/B
+  sweep): `toeexpand` exits `1` on success and `0` on failure (inverse of
+  convention; judge success by `.dir/` presence); `-b` prints the *input
+  file's* `.build` stamp, not the running toolchain's own build; the
+  `pattern` argument (`toeexpand <file> <pattern>`) writes the full `.toc`
+  but never produces `.dir/` — effectively non-functional on both builds;
+  expanding into an already-existing `.dir` is a no-op (exit 0, tree
+  untouched).
 
 ## Legacy generation: TD 088
 

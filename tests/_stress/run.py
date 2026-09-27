@@ -189,7 +189,7 @@ def _worker_entry(args: WorkerArgs) -> SampleResult:
     ours_toc = reemitted_dir.parent / toc_filename
 
     pairs: list[tuple[str, Path, Path]] = [(toc_filename, orig_toc, ours_toc)]
-    from toeexpand.project import _toc_to_disk  # local to keep top-level import surface tight
+    from tocdir.project import _toc_to_disk  # local to keep top-level import surface tight
     for rel in toc.paths:
         disk_rel = _toc_to_disk(rel)
         pairs.append((rel, expanded_dir / disk_rel, reemitted_dir / disk_rel))

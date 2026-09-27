@@ -7,13 +7,16 @@ tox_runner_inspect.py:         v1.0.1    19467831a364093deb7c6f338b5d3632155036b
 
 td-snapshot — tocdir package
 
-tocdir:                        v0.2.0    bfeb193abefebfa4a1c160061d34b5cac840e45c70ae1224cb4c36f83ed03d24
+tocdir:                        v0.3.0    740c58287181a0395212ecefdf4c024303814827fb1d5c1ae263065814392ef2
 
 td-snapshot — binary artifact checksum
 
 td-snapshot.tox:               9c834aedc553901755d17ceccf0ebf196f9e609f4e7f172a17b76f5a8352806e
 
-td-snapshot — toeexpand toolchain (TouchDesigner 2025.32460)
+td-snapshot — toeexpand toolchain (TouchDesigner 2025.33230)
 
-toeexpand:                     a7bcf116b7314ca82a75e840b58ceb4586ca7da2b7304a87dd23bb41a455bf35
-toecollapse:                   6cc392eefdf1ebae8f82c7be6b1edf07a144168c622f8efd43722333b559e61c
+toeexpand:                     24a699f0d4d01f5b4db81b50ef15d619e6deefd1c8d37b766861a679e3b490a0
+toecollapse:                   ac5265cf9c4134fa6ce6d9d527604b4bcdbd8ab8345aeac44a9b4d3d53e24611
+libUT.dylib:                   3250b64221f014ad51c4634b01f907570b1c45e39e90de5285ae781a4654dd45
+libtools.dylib:                c4f775ab68b53073c96ce63e5fef976e8bf1df9e8e27fcc6dc50e74cad5658f7
+libAV.dylib:                   8125b1a2ab52ae51f45132208d36a7d8bbe35b5c126ae24513315dcc9acd7d72

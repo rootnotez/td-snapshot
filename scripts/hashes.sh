@@ -54,6 +54,15 @@ fi
             printf "%-30s %s\n" "${bin_name}:" "(not found)"
         fi
     done
+    for dylib in "$TD_APP/Contents/Frameworks/libUT.dylib" "$TD_APP/Contents/Frameworks/libtools.dylib" "$TD_APP/Contents/Frameworks/libAV.dylib"; do
+        dylib_name=$(basename "$dylib")
+        if [ -f "$dylib" ]; then
+            dylib_hash=$(shasum -a 256 "$dylib" | cut -d' ' -f1)
+            printf "%-30s %s\n" "${dylib_name}:" "$dylib_hash"
+        else
+            printf "%-30s %s\n" "${dylib_name}:" "(not found)"
+        fi
+    done
 } > src/hashes.txt
 
 echo "Generated src/hashes.txt"

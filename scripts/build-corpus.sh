@@ -22,11 +22,12 @@ set -e
 #   TD_APP     TouchDesigner.app path (default /Applications/TouchDesigner.app)
 #   TOEEXPAND  toeexpand binary (default $TD_APP/Contents/MacOS/toeexpand)
 #   SRC_ROOT   source directory to scan (default $TD_APP/Contents/Resources/tfs)
+#   DEST_ROOT  destination root (default toeexpand/resources/shipped)
 
 TD_APP="${TD_APP:-/Applications/TouchDesigner.app}"
 TOEEXPAND="${TOEEXPAND:-$TD_APP/Contents/MacOS/toeexpand}"
 SRC_ROOT="${SRC_ROOT:-$TD_APP/Contents/Resources/tfs}"
-DEST_ROOT="toeexpand/resources/shipped"
+DEST_ROOT="${DEST_ROOT:-toeexpand/resources/shipped}"
 
 FORCE=0
 [ "${1:-}" = "--force" ] && FORCE=1
