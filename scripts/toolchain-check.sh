@@ -92,6 +92,12 @@ EOF
     else
         echo "No compare step showed a difference against a golden set."
     fi
+    # Errata (suspected TD-side bugs) are re-checked on every build, diff or not.
+    if ! grep -q "| $NEW_BUILD |" toeexpand/ERRATA.md 2>/dev/null; then
+        echo ""
+        echo "toeexpand/ERRATA.md has no History row for $NEW_BUILD yet: re-check each"
+        echo "entry (e.g. tests/toolchain/gen/run.sh probe_parm_flags) and record the result."
+    fi
     if [ "$OTHER_FAIL" -eq 1 ]; then
         echo "One or more non-compare steps (pytest / corpus build / census) failed above — see their output."
     fi
