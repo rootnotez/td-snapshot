@@ -207,7 +207,7 @@ fi
 # ---------------------------------------------------------------------------
 note "f. pytest (tests/) against NEW"
 set +e
-TD_TOOLCHAIN_BIN="$NEW_BIN" uv run --no-project --with pytest pytest tests -q
+TD_TOOLCHAIN_BIN="$NEW_BIN" uvx pytest tests -q
 PYTEST_RC=$?
 set -e
 if [ "$PYTEST_RC" -eq 0 ]; then

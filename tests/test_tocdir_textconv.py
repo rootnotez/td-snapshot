@@ -4,8 +4,8 @@ textconv renders a tocdir `.text`/`.table` file as readable text for git's
 `diff.<driver>.textconv`. It must never raise or hide a diff — anything it
 can't confidently parse is written through unchanged.
 
-Run from the worktree root:
-    uv run --no-project pytest tests/test_tocdir_textconv.py -v
+Run from the repo root:
+    uvx pytest tests/test_tocdir_textconv.py -v
 """
 
 import struct

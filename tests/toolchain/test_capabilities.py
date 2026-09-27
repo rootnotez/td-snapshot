@@ -7,12 +7,12 @@ scripts/shrink.sh, scripts/grow.sh, or the tocdir parser.
 Run against the default toolchain (from TD_TOOLCHAIN_BIN, else
 /Applications/TouchDesigner.app/Contents/MacOS):
 
-    uv run --no-project --with pytest pytest tests/toolchain -q
+    uvx pytest tests/toolchain -q
 
 Run against another installed/mounted build:
 
     TD_TOOLCHAIN_BIN=/path/to/TouchDesigner.app/Contents/MacOS \\
-        uv run --no-project --with pytest pytest tests/toolchain -q
+        uvx pytest tests/toolchain -q
 
 The whole module is skipped (not failed) when no toeexpand binary is found at
 the resolved bin dir, so this suite is a no-op on a machine without
