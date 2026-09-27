@@ -17,7 +17,7 @@
 # <generator>.json files for that build unless --force is given.
 #
 # TD_BRIDGE overrides the td-claude-bridge checkout
-# (default: /Users/arid/rootnotez/touch-designer/td-claude-bridge).
+# (default: ../td-claude-bridge, a sibling checkout of this repo).
 set -euo pipefail
 
 usage() {
@@ -46,7 +46,7 @@ done
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO="$(cd "$HERE/../../.." && pwd)"
-TD_BRIDGE="${TD_BRIDGE:-/Users/arid/rootnotez/touch-designer/td-claude-bridge}"
+TD_BRIDGE="${TD_BRIDGE:-$REPO/../td-claude-bridge}"
 
 if [ ! -x "$TD_BRIDGE/td.sh" ]; then
   echo "ERROR: $TD_BRIDGE/td.sh not found or not executable (set TD_BRIDGE to override)" >&2

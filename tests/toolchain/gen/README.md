@@ -25,7 +25,7 @@ only exist inside TD's own interpreter, and `run.sh` prepends the
 1. Start a TouchDesigner session with the bridge component already in it:
 
    ```bash
-   open -a TouchDesigner /Users/arid/rootnotez/touch-designer/work/td-bridge-dev/bridge_dev.toe
+   open -a TouchDesigner <path-to>/bridge_dev.toe   # any .toe containing the tdClaudeBridge component
    ```
 
 2. Run a generator:
@@ -42,8 +42,8 @@ only exist inside TD's own interpreter, and `run.sh` prepends the
    tests/toolchain/gen/run.sh every_op tests/toolchain/fixtures/2025.99999
    ```
 
-   `TD_BRIDGE` overrides the td-claude-bridge checkout if it isn't at
-   `/Users/arid/rootnotez/touch-designer/td-claude-bridge`.
+   `TD_BRIDGE` overrides the td-claude-bridge checkout if it isn't a sibling
+   of this repo (`../td-claude-bridge`).
 
 Each generator is defensive about its own failures: every operator create
 (`every_op.py`) and every named feature (`features.py`) is wrapped in its
