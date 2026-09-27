@@ -4,6 +4,7 @@ Usage:
     python -m tocdir verify <path-to-.dir-or-.toc>
     python -m tocdir set-text <target.text> <body-source-file>
     python -m tocdir census <corpus-root> [--json]
+    python -m tocdir textconv <file>
 
 `verify` checks bit-exact round-trip across a whole tree.
 
@@ -16,6 +17,13 @@ inject `src/*.py` into the tree before `toecollapse` repacks it.
 kind-suffix histogram (flagging kinds with no parser), the operator-type
 histogram, and per-tree round-trip results. Use it to find format-coverage
 gaps across a corpus (e.g. the shipped expansion from build-corpus.sh).
+
+`textconv` writes a human-readable rendering of one tocdir file to stdout,
+for use as a git `diff.<driver>.textconv` command (see
+`scripts/git-textconv-setup.sh`): `.text` files render as their DAT body,
+`.table` files render as one line per row with tab-separated cells. Any
+other file, or one that fails to parse, is written through unchanged — a
+textconv must never hide a diff by crashing.
 
 Exit codes:
     0  success
@@ -31,6 +39,7 @@ from pathlib import Path
 
 from .census import census, census_json, render_census
 from .project import Project
+from .table import Table
 from .text import Text, write_text
 
 
@@ -83,6 +92,77 @@ def _census(root: str, as_json: bool) -> int:
     return 1 if c.roundtrip_fail or c.load_errors else 0
 
 
+def _decode_cell_stream(body: bytes) -> list[bytes] | None:
+    """Decode a `.table`-style cell stream: repeated `tag(u32=2) + length(u32)
+    + bytes`, no terminator (see FORMAT.md / `_preamble.py`). Returns `None`
+    on any structural inconsistency (bad tag, truncated cell, trailing
+    bytes) rather than raising, so callers can fall back cleanly."""
+    cells: list[bytes] = []
+    i = 0
+    n = len(body)
+    while i < n:
+        if i + 8 > n:
+            return None
+        tag = int.from_bytes(body[i:i + 4], "big")
+        length = int.from_bytes(body[i + 4:i + 8], "big")
+        i += 8
+        if tag != 2 or i + length > n:
+            return None
+        cells.append(body[i:i + length])
+        i += length
+    return cells if i == n else None
+
+
+def _textconv_text(raw: bytes) -> bytes:
+    # Reuse the real parser so the rendering tracks the format exactly
+    # (including the 19-byte short-form stub, which parses to an empty body).
+    return Text.parse(raw).body
+
+
+def _textconv_table(raw: bytes) -> bytes:
+    t = Table.parse(raw)
+    # preamble.fields = [sentinel, row_count, col_count, reserved]. NOTE:
+    # fields[1] is the ROW count and fields[2] is the COLUMN count —
+    # FORMAT.md and the Table.row_count/column_count properties currently
+    # have these swapped (being fixed separately on fix/table-rows-cols), so
+    # read the raw fields directly here rather than via those properties.
+    rows = t.preamble.fields[1]
+    cols = t.preamble.fields[2]
+    cells = _decode_cell_stream(t.body)
+    if cells is None:
+        raise ValueError("malformed .table cell stream")
+    lines: list[str]
+    if cols > 0 and len(cells) == rows * cols:
+        lines = [
+            "\t".join(c.decode("utf-8", "replace") for c in cells[r * cols:(r + 1) * cols])
+            for r in range(rows)
+        ]
+    else:
+        # Cell count disagrees with rows*cols — fall back to one cell per line
+        # rather than guessing at a grid shape.
+        lines = [c.decode("utf-8", "replace") for c in cells]
+    return ("\n".join(lines) + "\n").encode("utf-8") if lines else b""
+
+
+def _textconv(arg: str) -> int:
+    path = Path(arg)
+    try:
+        raw = path.read_bytes()
+    except OSError as exc:
+        print(f"textconv: cannot read {arg}: {exc}", file=sys.stderr)
+        return 2
+    out = raw
+    try:
+        if path.name.endswith(".text"):
+            out = _textconv_text(raw)
+        elif path.name.endswith(".table"):
+            out = _textconv_table(raw)
+    except Exception:  # noqa: BLE001 - a textconv must never hide a diff by crashing
+        out = raw
+    sys.stdout.buffer.write(out)
+    return 0
+
+
 def main(argv: list[str]) -> int:
     if len(argv) < 2 or argv[1] in {"-h", "--help"}:
         print(__doc__, file=sys.stderr)
@@ -106,6 +186,11 @@ def main(argv: list[str]) -> int:
             print("census: expected <corpus-root> [--json]", file=sys.stderr)
             return 2
         return _census(positional[0], as_json)
+    if cmd == "textconv":
+        if len(argv) != 3:
+            print("textconv: expected <file>", file=sys.stderr)
+            return 2
+        return _textconv(argv[2])
     print(f"unknown command: {cmd}", file=sys.stderr)
     return 2
 

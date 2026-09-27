@@ -30,17 +30,27 @@ scripts/
   shrink.sh              ← called by build.sh — tocdir → .tox: patches DAT bodies in tox/ from src/*.py (via `python -m tocdir set-text`), runs toecollapse to rebuild td-snapshot.tox
   hashes.sh              ← called by build.sh after shrink — regenerates src/hashes.txt (source + .tox + toolchain checksums)
   grow.sh                ← .tox → tocdir: run after a TD GUI export to refresh tox/ for git diffing
+  git-textconv-setup.sh  ← one-time per-clone setup: configures the `tocdir` git diff driver (see below)
 toeexpand/               ← tocdir format docs + tooling: FORMAT.md, DEVIATIONS.md, resources/ corpus (untracked), and local toeexpand/toecollapse binaries (untracked)
 tests/                   ← tocdir round-trip baseline corpus + test_tocdir_roundtrip.py, _stress/ wide-corpus round-trip framework, BlankProject.toe sample
 media/                   ← screenshots used by this README
 td-snapshot.py           ← BUILT — do not edit directly
 td-snapshot.tox          ← BUILT — the distributable component, drop into any project
 tox/                     ← canonical text expansion of td-snapshot.tox, for git diffing
+.gitattributes           ← routes tox/ and tests/baselines/toeexpand_kinds/ .text/.table files to the tocdir textconv diff driver
 ```
 
 After editing `src/core.py`, run `./scripts/build.sh` to regenerate both `td-snapshot.py` and `td-snapshot.tox` (it calls `stamp.sh`, `shrink.sh`, and `hashes.sh` automatically). To bump a file's version, edit the corresponding entry in `src/versions.txt` before running the build.
 
 The `tox/` directory is a text expansion of `td-snapshot.tox`. It serves two purposes: `build.sh` reads it as the source when rebuilding the binary (patching in updated DAT text), and `git diff tox/` makes binary `.tox` changes reviewable. After making structural changes in the TD GUI and exporting a fresh `td-snapshot.tox`, run `./scripts/grow.sh` to refresh it.
+
+### Readable diffs for `.text` / `.table` files
+
+Within `tox/`, individual `.text` (Text DAT body) and `.table` (Table DAT cells) files carry a binary length-prefixed preamble with embedded NUL bytes, so git treats them as opaque binary by default — `git diff` / `git log -p` on them normally just says `Binary files ... differ`, even though `.text` files hold the actual Python/GLSL source of every DAT in the snapshot tool (e.g. `tox/td_snapshot.tox.dir/td_snapshot/core.text`).
+
+`.gitattributes` at the repo root routes `*.text`/`*.table` under `tox/` (and under `tests/baselines/toeexpand_kinds/`) through a `diff=tocdir` driver backed by `python -m tocdir textconv <file>` (see `src/tocdir/__main__.py`), which renders `.text` files as their DAT body and `.table` files as one tab-separated line per row; anything it can't parse is passed through unchanged rather than hiding the diff. The same trees also get `-text` so no EOL normalization can ever corrupt the binary framing.
+
+The textconv driver command itself lives in `.git/config`, which is never committed, so **every clone needs to run `./scripts/git-textconv-setup.sh` once** (it also works from any worktree of this repo, since worktrees share the parent's `.git/config`). After that, `git log -p -- tox/td_snapshot.tox.dir/td_snapshot/core.text` shows real source lines instead of a binary-diff notice.
 
 ## What it captures
 
@@ -194,6 +204,13 @@ python -m tocdir verify path/to/foo.tox.toc   # .toc also accepted
 ```
 
 Exit code `0` means every file (including the sibling `.toc`) round-trips byte-for-byte; `1` means one or more mismatches (paths printed to stderr); `2` means bad arguments.
+
+A `textconv` CLI renders one `.text`/`.table` file to stdout as readable text, for use as a git diff driver (see "Readable diffs for `.text` / `.table` files" above):
+
+```
+python -m tocdir textconv path/to/foo.text
+python -m tocdir textconv path/to/foo.table
+```
 
 ### Supported kinds
 
