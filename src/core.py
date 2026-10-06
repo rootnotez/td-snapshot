@@ -1,9 +1,9 @@
-# core.py v2.1.0 | sha256:586717407bc8a24889e6e0e6a9f969b03cce1b8714a3db6a060c50f0f3457ff9
+# core.py v2.2.0 | sha256:36a6452640c5aec04a9745aba3df18fe87327f6221c524e94ae45352e6cbd1ff
 import re
 
 # Snapshot script version, surfaced in the output preamble. Synced from the
 # `core.py` entry in src/versions.txt by scripts/stamp.sh — do not edit by hand.
-VERSION = '2.1.0'
+VERSION = '2.2.0'
 
 def op_display_type(o):
     return '{} {}'.format(o.label, o.family)
@@ -13,6 +13,7 @@ def op_label(o):
 
 def walk_patch(root=None,
                include_comment=True,
+               include_storage=True,
                include_bypass=True,
                include_display=True,
                include_viewer=True,
@@ -210,6 +211,14 @@ def walk_patch(root=None,
         if flags:
             node['flags'] = flags
 
+        if include_storage:
+            try:
+                st = o.storage
+                if st:
+                    node['storage'] = [(str(k), _storage_summary(st[k])) for k in sorted(st, key=str)]
+            except:
+                pass
+
         if include_dat_text:
             try:
                 if o.family == 'DAT':
@@ -229,6 +238,65 @@ def walk_patch(root=None,
         nodes.append(node)
 
     return nodes, wire_edges, ref_edges, op_by_path
+
+
+STORAGE_ITEM_MAX = 80
+STORAGE_LINE_MAX = 300
+
+
+def _unwrap_dependency(v):
+    # tdu.Dependency wraps the real value, sometimes many layers deep.
+    for _ in range(100):
+        if type(v).__name__ != 'Dependency' or not hasattr(v, 'val'):
+            break
+        v = v.val
+    return v
+
+
+def _storage_scalar(v):
+    """One short, deterministic text for a stored value; None for containers."""
+    v = _unwrap_dependency(v)
+    if hasattr(v, 'path') and hasattr(v, 'OPType'):
+        return 'op({!r})'.format(v.path)
+    if hasattr(v, 'items') or isinstance(v, (list, tuple, set, frozenset)):
+        return None
+    # Drop memory addresses so the same object prints the same way every run.
+    s = re.sub(r' at 0x[0-9A-Fa-f]+', '', repr(v))
+    return s if len(s) <= STORAGE_ITEM_MAX else s[:STORAGE_ITEM_MAX] + '…'
+
+
+def _storage_count(v):
+    v = _unwrap_dependency(v)
+    try:
+        n = len(v)
+    except:
+        return '{...}'
+    text = '{} item{}'.format(n, '' if n == 1 else 's')
+    return '{' + text + '}' if hasattr(v, 'items') else '[' + text + ']'
+
+
+def _storage_summary(v):
+    """A stored value in one line: mappings show their scalar fields and
+    count nested containers; long text is cut, with its full length given."""
+    v = _unwrap_dependency(v)
+    one = _storage_scalar(v)
+    if one is not None:
+        return one
+    if hasattr(v, 'items'):
+        parts = []
+        for k in sorted(v.keys(), key=str):
+            item = _storage_scalar(v[k])
+            parts.append('{}: {}'.format(k, item if item is not None else _storage_count(v[k])))
+        s = '{' + ', '.join(parts) + '}'
+    else:
+        items = sorted(v, key=lambda x: str(_storage_scalar(x))) if isinstance(v, (set, frozenset)) else list(v)
+        texts = [_storage_scalar(x) for x in items]
+        if any(t is None for t in texts):
+            return _storage_count(v)
+        s = '[' + ', '.join(texts) + ']'
+    if len(s) > STORAGE_LINE_MAX:
+        s = '{}… ({} chars)'.format(s[:STORAGE_LINE_MAX], len(s))
+    return s
 
 
 def _fmt_flags(flags):
@@ -292,7 +360,7 @@ def render_blocks(nodes, wire_edges, ref_edges, op_by_path):
             s += ', expr={!r}'.format(par['expr'])
         return s + ')'
 
-    lines = ['# td-snapshot v{} — each node block: changed pars, "in[N] <- src" for incoming wires, "ref par -> target" for parameter refs.'.format(VERSION)]
+    lines = ['# td-snapshot v{} — each node block: changed pars, "in[N] <- src" for incoming wires, "ref par -> target" for parameter refs, "storage key = value" for op.store() data.'.format(VERSION)]
 
     for n in nodes:
         nid = id_by_path[n['path']]
@@ -302,6 +370,8 @@ def render_blocks(nodes, wire_edges, ref_edges, op_by_path):
             lines.extend(_fmt_comment_block(n['comment']))
         if 'flags' in n:
             lines.append('  flags: ' + _fmt_flags(n['flags']))
+        for key, summary in n.get('storage', []):
+            lines.append('  storage {} = {}'.format(key, summary))
         for par in n['pars']:
             lines.append(fmt_par(par))
         for in_idx, src_path, out_idx in sorted(wires_by_dst.get(n['path'], [])):
@@ -326,6 +396,7 @@ def render_blocks(nodes, wire_edges, ref_edges, op_by_path):
 
 def snapshot_patch(root=None,
                    include_comment=True,
+                   include_storage=True,
                    include_bypass=True,
                    include_display=True,
                    include_viewer=True,
@@ -335,6 +406,7 @@ def snapshot_patch(root=None,
     nodes, wire_edges, ref_edges, op_by_path = walk_patch(
         root,
         include_comment=include_comment,
+        include_storage=include_storage,
         include_bypass=include_bypass,
         include_display=include_display,
         include_viewer=include_viewer,

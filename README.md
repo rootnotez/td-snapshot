@@ -57,13 +57,14 @@ The textconv driver command itself lives in `.git/config`, which is never commit
 Output is one block per operator. Each operator gets a sequential ID (`n1`, `n2`, …); incoming wires and parameter references inside the same network use that ID instead of repeating the full path. Out-of-network targets get their own ID block at the bottom of the listing.
 
 ```
-# td-snapshot v2.1.0 — each node block: changed pars, "in[N] <- src" for incoming wires, "ref par -> target" for parameter refs.
+# td-snapshot v2.2.0 — each node block: changed pars, "in[N] <- src" for incoming wires, "ref par -> target" for parameter refs, "storage key = value" for op.store() data.
 
 n1 = /project1/noise1 [Noise TOP]
   period = 0.5 (default 1.0)
 
 n2 = /project1/blur1 [Blur TOP]
   flags: bypass=True
+  storage tuned = {by: 'ari', pass: 2}
   blury = 5.0 (default 1.0)
   filter = 'gaussian' (default 'box')
   in[0] <- n1
@@ -85,6 +86,7 @@ Within a block:
 - `<par> = <current> (default <default>[, <mode>][, expr=<text>])` lists each non-default or non-CONSTANT parameter. Mode and expression text are only shown when relevant.
 - `comment:` carries the operator's comment — inline when single-line, or as an indented block when multi-line.
 - `flags:` lists operator flags, but only when one diverges from its type's default: `bypass=True`, `viewer=True`, `display=False`, `render=False`.
+- `storage key = value` lists the operator's storage (`op.store()`), one key per line, sorted. Values are summarised on one line: a mapping shows its scalar fields and counts nested containers (`{3 items}`), an operator shows as `op('/path')`, `tdu.Dependency` wrappers are unwrapped, and long text is cut with its full length given. Memory addresses are dropped so the same storage prints the same way every run.
 - `in[N] <- src` means input slot N is wired from `src`. Multi-output sources include `[out:K]`.
 - `ref par -> target` means a parameter on this operator references `target` (via an `op()` call in an expression, or by an OP-typed parameter value such as a Feedback TOP's `top` parameter).
 - `dat_text:` reproduces a DAT's text body as an indented block. When a length cap is set it ends with `(truncated, N chars total)`.
@@ -93,7 +95,7 @@ Only parameters that differ from their defaults are shown — or any parameter d
 
 ### Tuning what's captured
 
-`snapshot_patch()` takes keyword toggles, all enabled by default, so you can drop categories you don't need: `include_comment`, `include_bypass`, `include_display`, `include_viewer`, `include_render`, `include_dat_text`, and `dat_text_truncate` (set to an integer to cap each DAT body). For example, `snapshot_patch(include_dat_text=False)` omits DAT text entirely, and `snapshot_patch(dat_text_truncate=2000)` caps long DAT bodies at 2000 characters.
+`snapshot_patch()` takes keyword toggles, all enabled by default, so you can drop categories you don't need: `include_comment`, `include_storage`, `include_bypass`, `include_display`, `include_viewer`, `include_render`, `include_dat_text`, and `dat_text_truncate` (set to an integer to cap each DAT body). For example, `snapshot_patch(include_dat_text=False)` omits DAT text entirely, and `snapshot_patch(dat_text_truncate=2000)` caps long DAT bodies at 2000 characters.
 
 
 
