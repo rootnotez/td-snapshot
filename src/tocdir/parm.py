@@ -17,10 +17,21 @@ between them. A row is `<name> <mode> <value> [<expr>]` where:
       an empty quoted "".
     - expr is optional Python source, sometimes quoted, sometimes bare.
 
-Round-trip strategy: each row keeps the raw line text. Accessors split
-on whitespace at read time for the leading `name`/`mode` tokens, but the
-value/expr remainder is exposed as raw_rest — we do NOT re-quote or
-re-tokenize, because the canonical source of truth is the source line.
+A quoted value may span lines: TD writes a Text parameter's newlines raw
+inside the quotes (escaping only `\\` and `"`), e.g.
+
+    Text 67108945 "I'M NOT
+    READY
+    TO DIE" 'That\\ngirl'
+
+so a row is a logical row, not a physical line: `split_rows` ends one only
+at a newline outside quotes.
+
+Round-trip strategy: each row keeps the raw row text (quoted newlines
+included). Accessors split on whitespace at read time for the leading
+`name`/`mode` tokens, but the value/expr remainder is exposed as raw_rest —
+we do NOT re-quote or re-tokenize, because the canonical source of truth is
+the source row.
 """
 
 from dataclasses import dataclass, field
@@ -32,7 +43,7 @@ from typing import Optional
 class Row:
     """One parameter line OR a `?` page-marker line, preserving raw bytes."""
 
-    raw: str  # exact line text, no trailing newline
+    raw: str  # exact row text, no trailing newline; may contain quoted newlines
 
     @property
     def is_page_marker(self) -> bool:
@@ -99,10 +110,7 @@ class Parm:
     def parse(cls, raw: bytes) -> "Parm":
         text = raw.decode("latin-1")
         trailing_newline = text.endswith("\n")
-        lines = text.split("\n")
-        if trailing_newline:
-            lines = lines[:-1]
-        rows = [Row(raw=line) for line in lines]
+        rows = [Row(raw=line) for line in split_rows(text[:-1] if trailing_newline else text)]
         return cls(rows=rows, trailing_newline=trailing_newline)
 
     def emit(self) -> bytes:
@@ -122,6 +130,36 @@ class Parm:
     def parameter_rows(self) -> list[Row]:
         """Just the parameter rows, skipping `?` page markers."""
         return [r for r in self.rows if not r.is_page_marker]
+
+
+def split_rows(text: str) -> list[str]:
+    """Split on newlines that are outside a quoted token.
+
+    A quote opens only at the start of a token (after whitespace or at the
+    start of a row), so a bare expression with a `"` inside it, such as
+    f"x", does not open one; inside quotes a backslash escapes the next
+    character. "\\n".join(split_rows(t)) == t for any t.
+    """
+    rows: list[str] = []
+    start = 0
+    i = 0
+    n = len(text)
+    in_quote = False
+    while i < n:
+        c = text[i]
+        if in_quote:
+            if c == "\\":
+                i += 1
+            elif c == '"':
+                in_quote = False
+        elif c == "\n":
+            rows.append(text[start:i])
+            start = i + 1
+        elif c == '"' and (i == start or text[i - 1] in " \t"):
+            in_quote = True
+        i += 1
+    rows.append(text[start:])
+    return rows
 
 
 def read_parm(path: Path) -> Parm:

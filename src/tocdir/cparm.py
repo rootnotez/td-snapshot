@@ -22,6 +22,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
 
+from .parm import split_rows
+
 
 @dataclass
 class CparmRow:
@@ -64,10 +66,7 @@ class Cparm:
     def parse(cls, raw: bytes) -> "Cparm":
         text = raw.decode("latin-1")
         trailing_newline = text.endswith("\n")
-        lines = text.split("\n")
-        if trailing_newline:
-            lines = lines[:-1]
-        rows = [CparmRow(raw=line) for line in lines]
+        rows = [CparmRow(raw=line) for line in split_rows(text[:-1] if trailing_newline else text)]
         return cls(rows=rows, trailing_newline=trailing_newline)
 
     def emit(self) -> bytes:

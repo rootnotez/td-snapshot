@@ -7,7 +7,7 @@ tox_runner_inspect.py:         v1.0.1    19467831a364093deb7c6f338b5d3632155036b
 
 td-snapshot — tocdir package
 
-tocdir:                        v0.4.0    2af40044f135cfeeb432d7273654ce08d75e921785a8911e328d1340e3c61b64
+tocdir:                        v0.4.1    b142206626fdf52f4c3bd34c07c3440e37cf4fd7986fcb8b04221f7f287e74b6
 
 td-snapshot — binary artifact checksum
 
