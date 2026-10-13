@@ -154,3 +154,73 @@ pinned by `test_case_collision_suffix_disambiguation` against the
 | Build checked | Date | Result |
 |---|---|---|
 | 2025.33230 | 2026-09-26 | Present (`caseprobe.n 2` ↔ `caseprobe.n.2`) |
+
+---
+
+## E5 — `toecollapse` output is never byte-identical to a file TD saved
+
+**Status:** watching · **First seen:** 2025.32460; checked at 2025.33230
+
+A file saved by TouchDesigner and the same file after
+`toeexpand` → `toecollapse` differ in bytes, though both expand to an
+identical tree. The cause is the **writer**: TD's in-app save and
+`toecollapse` pack the same tree into different archive bytes. The saving
+platform and build are *not* the cause: TD saves made on macOS with the
+same build as the `toecollapse` binary differ just as much as a
+Windows-authored file does.
+
+**Evidence (toolchain 2025.33230, macOS, 2026-10-13):**
+
+| Input | Written by | Size → after collapse |
+|---|---|---|
+| `every_op_CHOP.tox` | TD 2025.33230 save, macOS | 8,222 → 8,334 |
+| `features.tox` | TD 2025.33230 save, macOS | 10,622 → 10,782 |
+| `BlankProject.toe` | TD 2025.32460 save, macOS | 3,418 → 3,426 |
+| `Keyframer.toe` (external) | TD 2025.32050 save, Windows | 92,394 → 96,594 |
+| `Keyframer.toe` re-saved | TD 2025.33230 save, macOS | 92,370 → 96,578 |
+| `td-snapshot.tox` | `toecollapse` (`scripts/shrink.sh`) | 7,262 → 7,262 (identical) |
+
+In the golden set, 13 of 14 inputs have `collapse_equals_input: false`. The
+only `true` is `td-snapshot.tox`, which `toecollapse` wrote. All 14 have
+`refixed_point: true`.
+
+**What is known about the difference:**
+- `toecollapse` is deterministic: 5 parallel runs, `TZ=UTC`, and a tree whose
+  file mtimes were all set to 2000-01-01 produced the same sha256. Run order,
+  clock, timezone and file dates are not inputs.
+- After one collapse it is a fixed point: expand → collapse reproduces the
+  same bytes on every later round.
+- TD's saves of the same project on two platforms came out within 24 bytes of
+  each other (92,394 vs 92,370); `toecollapse` output was ~4.5 % larger.
+- A `.toe` starts `31 30 | <u32 BE payload length> | <u16>`; the payload
+  length equals file size − 10. The trailing u16 is `0x0008` on both TD saves
+  of `Keyframer.toe` and `0x0009` on both collapses of it, but `0x0000` on
+  `BlankProject.toe` and its collapse alike, so it doesn't mark the writer.
+  It may be part of a wider field (e.g. an unpacked size). A `.tox` starts
+  `00 00 00 01 31 30 …`, so the header layout differs by file type.
+- The payload is ~8 bits/byte of entropy and none of zlib, raw deflate, gzip,
+  xz or bz2 decodes it at offsets 0–15, so the bytes can't be compared
+  directly outside TD.
+- Two TD saves of the same project list the same `.toc` entries in a
+  different order. TD's serialization order varies between saves.
+
+**Impact on us.** Byte equality of a `.toe`/`.tox` against its rebuild is not
+a usable check. Compare expanded trees instead (`tocdir verify`, or
+expand → `diff -r`). Don't treat a rebuilt binary as a reproduction of the
+original file, and don't commit the binary expecting a stable diff.
+
+**Caveat on the re-save test.** Opening a `.toe` in TD and saving it also
+writes runtime state: window and panel sizes (`w`/`h` in `.parm`,
+`screenw`/`screenh` in `.panel`), expression-driven values, timeline `.ts`
+state, `.start`'s `#expectednodes`. A re-saved tree is therefore not
+expected to match the original tree, and that comparison can't show whether
+`toeexpand` drops anything.
+
+**Open questions.** Does `toecollapse` follow the `.toc` order, and is the
+size gap from ordering, compression settings or padding? What does the
+header u16 mean? Does TD load a `toecollapse`-written file and save
+it back to the TD-save size?
+
+| Build checked | Date | Result |
+|---|---|---|
+| 2025.33230 | 2026-10-13 | Present: TD saves (macOS + Windows) ≠ `toecollapse` output; collapse deterministic |
