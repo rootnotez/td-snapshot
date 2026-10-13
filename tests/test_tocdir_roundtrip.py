@@ -538,3 +538,18 @@ def test_project_entries_match_toc_order():
         return
     project = Project.from_dir(root)
     assert list(project.entries.keys()) == project.toc.paths
+
+
+def test_parm_multiline_quoted_value():
+    """A Text parameter's newlines are written raw inside the quotes; the
+    row must not be split there (the continuation lines are not rows)."""
+    raw = (b'?\nText 67108945 "I\'M NOT\nREADY\nTO DIE" \'That\\\\ngirl\'\n'
+           b'Alignx 67108928 left\nQuote 67108928 "say \\"hi\\"\nthere"\n'
+           b'file 48 "" f"scripts/{me.name}.py"\n?\n')
+    parsed = parm.Parm.parse(raw)
+    assert parsed.emit() == raw
+    names = [r.name for r in parsed.parameter_rows()]
+    assert names == ["Text", "Alignx", "Quote", "file"]
+    assert parsed.named("Text").raw_rest == '"I\'M NOT\nREADY\nTO DIE" \'That\\\\ngirl\''
+    assert parsed.named("Text").has_expression
+    assert parm.split_rows("a \"b\nc\" d\ne") == ['a "b\nc" d', "e"]
