@@ -1,9 +1,9 @@
-# core.py v2.2.0 | sha256:36a6452640c5aec04a9745aba3df18fe87327f6221c524e94ae45352e6cbd1ff
+# core.py v3.0.0 | sha256:dabd4f011e5f327fa951690623402e643395ca5982da5c1d9e92da8e9cef219d
 import re
 
 # Snapshot script version, surfaced in the output preamble. Synced from the
 # `core.py` entry in src/versions.txt by scripts/stamp.sh — do not edit by hand.
-VERSION = '2.2.0'
+VERSION = '3.0.0'
 
 def op_display_type(o):
     return '{} {}'.format(o.label, o.family)
@@ -324,22 +324,23 @@ def _fmt_comment_block(comment, indent='    '):
 
 def render_blocks(nodes, wire_edges, ref_edges, op_by_path):
     # Per-node-block format. See project_per_node_block_format memory for design rationale.
-    # Sequential IDs (n1, n2, ...) assigned in walk order; out-of-network ref/wire targets
-    # get IDs continuing past in-network nodes, declared as bare lines at the bottom.
+    # Operators are named by their path relative to the root (the first block, which
+    # keeps its absolute path), in headers, wires and refs alike. Positional IDs
+    # (n1, n2, ...) renumbered every later block when one operator was added, so most
+    # of a snapshot diff was renumbering; a path only changes when its operator moves.
+    # An absolute path is the root or outside it; <unresolved X> is an op('X') in an
+    # expression that resolved to no operator.
 
-    id_by_path = {n['path']: 'n{}'.format(i + 1) for i, n in enumerate(nodes)}
+    root_path = nodes[0]['path'] if nodes else ''
+    prefix = root_path.rstrip('/') + '/'
+    in_network = {n['path'] for n in nodes}
 
-    in_network = set(id_by_path)
-    extra_paths = set()
-    for src, dst, _, _ in wire_edges:
-        if src not in in_network: extra_paths.add(src)
-        if dst not in in_network: extra_paths.add(dst)
-    for src, dst, _ in ref_edges:
-        if src not in in_network: extra_paths.add(src)
-        if dst not in in_network: extra_paths.add(dst)
-    extra_sorted = sorted(extra_paths)
-    for i, p in enumerate(extra_sorted):
-        id_by_path[p] = 'n{}'.format(len(nodes) + 1 + i)
+    def name_for(path):
+        if path != root_path and path in in_network and path.startswith(prefix):
+            return path[len(prefix):]
+        if path.startswith('/'):
+            return path
+        return '<unresolved {}>'.format(path)
 
     wires_by_dst = {}
     for src, dst, in_idx, out_idx in wire_edges:
@@ -347,10 +348,6 @@ def render_blocks(nodes, wire_edges, ref_edges, op_by_path):
     refs_by_src = {}
     for src, dst, par_name in ref_edges:
         refs_by_src.setdefault(src, []).append((par_name, dst))
-
-    def label_for(path):
-        o = op_by_path.get(path)
-        return op_label(o) if o else path
 
     def fmt_par(par):
         s = '  {} = {!r} (default {!r}'.format(par['name'], par['current'], par['default'])
@@ -360,12 +357,11 @@ def render_blocks(nodes, wire_edges, ref_edges, op_by_path):
             s += ', expr={!r}'.format(par['expr'])
         return s + ')'
 
-    lines = ['# td-snapshot v{} — each node block: changed pars, "in[N] <- src" for incoming wires, "ref par -> target" for parameter refs, "storage key = value" for op.store() data.'.format(VERSION)]
+    lines = ['# td-snapshot v{} — each node block: "path [type]" (relative to the first block\'s path), changed pars, "in[N] <- src" for incoming wires, "ref par -> target" for parameter refs, "storage key = value" for op.store() data.'.format(VERSION)]
 
     for n in nodes:
-        nid = id_by_path[n['path']]
         lines.append('')
-        lines.append('{} = {}'.format(nid, n['label']))
+        lines.append(name_for(n['path']) + n['label'][len(n['path']):])
         if 'comment' in n:
             lines.extend(_fmt_comment_block(n['comment']))
         if 'flags' in n:
@@ -374,22 +370,16 @@ def render_blocks(nodes, wire_edges, ref_edges, op_by_path):
             lines.append('  storage {} = {}'.format(key, summary))
         for par in n['pars']:
             lines.append(fmt_par(par))
-        for in_idx, src_path, out_idx in sorted(wires_by_dst.get(n['path'], [])):
-            src_id = id_by_path.get(src_path, src_path)
+        for in_idx, src_path, out_idx in sorted(wires_by_dst.get(n['path'], []), key=lambda w: (w[0], w[1], w[2] or 0)):
             if out_idx is not None and out_idx != 0:
-                lines.append('  in[{}] <- {} [out:{}]'.format(in_idx, src_id, out_idx))
+                lines.append('  in[{}] <- {} [out:{}]'.format(in_idx, name_for(src_path), out_idx))
             else:
-                lines.append('  in[{}] <- {}'.format(in_idx, src_id))
+                lines.append('  in[{}] <- {}'.format(in_idx, name_for(src_path)))
         for par_name, target_path in sorted(refs_by_src.get(n['path'], [])):
-            target_id = id_by_path.get(target_path, target_path)
-            lines.append('  ref {} -> {}'.format(par_name, target_id))
+            lines.append('  ref {} -> {}'.format(par_name, name_for(target_path)))
         if 'dat_text' in n:
             lines.append('  dat_text:')
             lines.extend(_fmt_dat_text_block(n['dat_text']))
-
-    for p in extra_sorted:
-        lines.append('')
-        lines.append('{} = {}'.format(id_by_path[p], label_for(p)))
 
     return '\n'.join(lines)
 
