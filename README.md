@@ -54,35 +54,38 @@ The textconv driver command itself lives in `.git/config`, which is never commit
 
 ## What it captures
 
-Output is one block per operator. Each operator gets a sequential ID (`n1`, `n2`, …); incoming wires and parameter references inside the same network use that ID instead of repeating the full path. Out-of-network targets get their own ID block at the bottom of the listing.
+Output is one block per operator. The first block is the root, under its absolute path; every other operator is named by its path relative to the root, in its header and wherever a wire or reference points at it. Adding or removing an operator therefore changes only its own block and the lines that point at it. A target outside the root keeps its absolute path; an `op('X')` in an expression that resolved to no operator is shown as `<unresolved X>`.
 
 ```
-# td-snapshot v2.2.0 — each node block: changed pars, "in[N] <- src" for incoming wires, "ref par -> target" for parameter refs, "storage key = value" for op.store() data.
+# td-snapshot v3.0.0 — each node block: "path [type]" (relative to the first block's path), changed pars, "in[N] <- src" for incoming wires, "ref par -> target" for parameter refs, "storage key = value" for op.store() data.
 
-n1 = /project1/noise1 [Noise TOP]
+/project1 [Container COMP]
+
+noise1 [Noise TOP]
   period = 0.5 (default 1.0)
 
-n2 = /project1/blur1 [Blur TOP]
+blur1 [Blur TOP]
   flags: bypass=True
   storage tuned = {by: 'ari', pass: 2}
   blury = 5.0 (default 1.0)
   filter = 'gaussian' (default 'box')
-  in[0] <- n1
+  in[0] <- noise1
 
-n3 = /project1/feedback1 [Feedback TOP]
+feedback1 [Feedback TOP]
   comment: holds the previous frame
-  ref top -> n4
+  ref top -> fx/render1
 
-n4 = /project1/render1 [Render TOP]
+fx/render1 [Render TOP]
+  ref camera -> /scenes/cam1
 
-n5 = /project1/text1 [Text DAT]
+text1 [Text DAT]
   dat_text:
     print('hello')
 ```
 
 Within a block:
 
-- The header `nN = <path> [<Label Family>]` introduces the operator and its ID.
+- The header `<path> [<Label Family>]` introduces the operator: the root's absolute path for the first block, a root-relative path for the rest.
 - `<par> = <current> (default <default>[, <mode>][, expr=<text>])` lists each non-default or non-CONSTANT parameter. Mode and expression text are only shown when relevant.
 - `comment:` carries the operator's comment — inline when single-line, or as an indented block when multi-line.
 - `flags:` lists operator flags, but only when one diverges from its type's default: `bypass=True`, `viewer=True`, `display=False`, `render=False`.
