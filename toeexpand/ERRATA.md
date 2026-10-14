@@ -157,13 +157,18 @@ pinned by `test_case_collision_suffix_disambiguation` against the
 
 ---
 
-## E5 — `toecollapse` output is never byte-identical to a file TD saved
+## E5 — `toecollapse` output does not byte-match TD's own save
 
 **Status:** watching · **First seen:** 2025.32460; checked at 2025.33230
 
-A file saved by TouchDesigner and the same file after
-`toeexpand` → `toecollapse` differ in bytes, though both expand to an
-identical tree. The cause is the **writer**: TD's in-app save and
+**Claim (general, observed on 15 files, not proven):** a `.toe`/`.tox`
+saved by TouchDesigner is not reproduced byte-for-byte by `toeexpand` →
+`toecollapse`, although the rebuild expands to the identical tree. It
+held for every file tested that `toecollapse` did not write itself: 13 of
+the 14 inputs in the 2025.33230 golden set (the 14th, `td-snapshot.tox`,
+was written by `toecollapse`), plus the Windows original and a macOS
+re-save of an external project, `Keyframer.toe`. No counterexample is
+known. The cause is the **writer**: TD's in-app save and
 `toecollapse` pack the same tree into different archive bytes. The saving
 platform and build are *not* the cause: TD saves made on macOS with the
 same build as the `toecollapse` binary differ just as much as a
