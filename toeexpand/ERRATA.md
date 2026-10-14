@@ -157,19 +157,68 @@ pinned by `test_case_collision_suffix_disambiguation` against the
 
 ---
 
-## E5 — `toecollapse` output is never byte-identical to a file TD saved
+## E5 — `toecollapse` usually does not reproduce a TD save byte-for-byte
 
-**Status:** watching · **First seen:** 2025.32460; checked at 2025.33230
+**Status:** open · **First seen:** 2025.32460; checked at 2025.33230 ·
+**Research:** [#35](https://github.com/rootnotez/td-snapshot/issues/35)
 
-A file saved by TouchDesigner and the same file after
-`toeexpand` → `toecollapse` differ in bytes, though both expand to an
-identical tree. The cause is the **writer**: TD's in-app save and
-`toecollapse` pack the same tree into different archive bytes. The saving
-platform and build are *not* the cause: TD saves made on macOS with the
-same build as the `toecollapse` binary differ just as much as a
-Windows-authored file does.
+**What we observed (1,025 files, 2025.33230 toolchain):** expanding a
+`.toe`/`.tox` with `toeexpand` and collapsing it with `toecollapse` gives
+a file that expands to the identical tree, but usually not the same bytes.
 
-**Evidence (toolchain 2025.33230, macOS, 2026-10-13):**
+| Corpus | Byte-identical after round trip |
+|---|---|
+| `CurriculumExamples` ([2026-09-26 delta report](toolchain-deltas/2026-09-26_32460-vs-33230.md), Question A) | 0 / 199 |
+| Golden set, excluding `td-snapshot.tox` | 0 / 13 |
+| `td-snapshot.tox` (written by `toecollapse`: `scripts/build.sh` → `scripts/shrink.sh`) | 1 / 1 |
+| `Keyframer.toe`, external project (Windows original + macOS re-save) | 0 / 2 |
+| Shipped `tfs` in the 2025.33230 app bundle (2026-10-13 sweep) | **8 / 804** |
+| Fresh TD saves in a throwaway project (2026-10-14) | **1 / 6** (`empty.tox`) |
+
+**Counterexamples.** These 8 shipped files come back byte-identical:
+
+| File (under `Contents/Resources/tfs/`) | `.build` says |
+|---|---|
+| `Config/System/midi.tox` | 2017.20, Windows |
+| `Config/System/dialog_bookmarks.tox` | 2021.38420, Windows |
+| `Config/System/dialog_importfile.tox` | 2021.40650, Windows |
+| `Config/System/dialog_winplacement.tox` | 2022.29850, Windows |
+| `Config/System/keymanager.tox` | 2023.11469, macOS |
+| `Config/System/ui.tox` (1.1 MB) | 2025.32191, Windows |
+| `Samples/Setup/Base/NewProject.toe` | 2023.11290, `time` exactly `12:00:00` |
+| `Samples/Setup/Example/NewProject.toe` | 2023.11290, `time` exactly `12:00:00` |
+
+So "a TD save never round-trips" is **false as a general rule**: an empty
+Base COMP saved by TD on 2026-10-14 comes back byte-identical, and so do
+the 8 shipped files above.
+
+**Two writers, two encodings (2026-10-14, fresh saves).** For the same
+tree, TD's save and `toecollapse` usually write different bytes. What we
+can see is sizes and bytes; the payload can't be decoded outside TD, so
+*what* differs (entry order, compression settings, padding) is unknown.
+
+- **TD's save is deterministic apart from the save time.** `COMP.save()`
+  twice gave identical bytes (5/5 `.tox`); `project.save()` twice within
+  one second gave an identical `.toe`.
+- **TD re-encodes a `toecollapse` file its own way.** TD saved `ops` (398
+  bytes); expand → collapse gave 406 bytes; `loadTox` of that file in TD
+  and `save()` again gave 398 bytes, with a tree identical to the original
+  except the `.build` `time` line. Same for `code` (510 → 518 → 510) and
+  `big` (1,326 → 1,318 → 1,326). The re-save still differs from the
+  original in 248–1,301 bytes. We attribute this to the changed save time,
+  but that is not proven ([#35](https://github.com/rootnotez/td-snapshot/issues/35), item 1).
+- **The size gap goes both ways.** `ops` +8, `code` +8, `all` +48 bytes,
+  but `big` (60 Text DATs) −8.
+- **For some content the two writers agree.** That includes the empty COMP,
+  so the 8 shipped counterexamples don't require that Derivative packed them
+  with `toecollapse`. Which content makes them agree is unknown
+  ([#35](https://github.com/rootnotez/td-snapshot/issues/35), item 2).
+- The saving platform and build don't explain the difference: TD saves made
+  on macOS with the same build as the `toecollapse` binary
+  (`every_op_*.tox`, `features.tox`, the `Keyframer.toe` re-save) differ
+  from their rebuild just as Windows-authored files do.
+
+**Size evidence (toolchain 2025.33230, macOS, 2026-10-13):**
 
 | Input | Written by | Size → after collapse |
 |---|---|---|
@@ -182,7 +231,10 @@ Windows-authored file does.
 
 In the golden set, 13 of 14 inputs have `collapse_equals_input: false`. The
 only `true` is `td-snapshot.tox`, which `toecollapse` wrote. All 14 have
-`refixed_point: true`.
+`refixed_point: true`. The 2026-09-26 sweep already noted this split
+("only `td-snapshot.tox` (toecollapse-produced) satisfies
+`collapse==input`"); this entry adds that the saving platform and build
+don't change it.
 
 **What is known about the difference:**
 - `toecollapse` is deterministic: 5 parallel runs, `TZ=UTC`, and a tree whose
@@ -216,11 +268,13 @@ state, `.start`'s `#expectednodes`. A re-saved tree is therefore not
 expected to match the original tree, and that comparison can't show whether
 `toeexpand` drops anything.
 
-**Open questions.** Does `toecollapse` follow the `.toc` order, and is the
-size gap from ordering, compression settings or padding? What does the
-header u16 mean? Does TD load a `toecollapse`-written file and save
-it back to the TD-save size?
+**Open questions** (tracked in [#35](https://github.com/rootnotez/td-snapshot/issues/35)).
+Is the save time the only difference between a TD save and its TD re-save?
+Which content makes the two writers agree? Does `toecollapse` follow the
+`.toc` order, and is the size gap from ordering, compression settings or
+padding? What does the header u16 mean?
 
 | Build checked | Date | Result |
 |---|---|---|
-| 2025.33230 | 2026-10-13 | Present: TD saves (macOS + Windows) ≠ `toecollapse` output; collapse deterministic |
+| 2025.33230 | 2026-10-13 | 0/214 non-`tfs` files (excluding `toecollapse`-written `td-snapshot.tox`) and 796/804 shipped `tfs` files differ from their rebuild; 8 shipped files identical (writer unknown); collapse deterministic |
+| 2025.33230 | 2026-10-14 | Fresh TD saves: 1/6 identical after round trip (`empty.tox`); TD save deterministic apart from save time; TD re-save of `toecollapse` output returns to TD's original size |
