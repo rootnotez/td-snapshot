@@ -161,14 +161,24 @@ pinned by `test_case_collision_suffix_disambiguation` against the
 
 **Status:** watching · **First seen:** 2025.32460; checked at 2025.33230
 
-**Claim (general, observed on 15 files, not proven):** a `.toe`/`.tox`
+**Claim (general, observed on 214 files, not proven):** a `.toe`/`.tox`
 saved by TouchDesigner is not reproduced byte-for-byte by `toeexpand` →
-`toecollapse`, although the rebuild expands to the identical tree. It
-held for every file tested that `toecollapse` did not write itself: 13 of
-the 14 inputs in the 2025.33230 golden set (the 14th, `td-snapshot.tox`,
-was written by `toecollapse`), plus the Windows original and a macOS
-re-save of an external project, `Keyframer.toe`. No counterexample is
-known. The cause is the **writer**: TD's in-app save and
+`toecollapse`, although the rebuild expands to the identical tree. No file
+we have recorded is a counterexample:
+
+- 0 of 199 `CurriculumExamples` files
+  ([2026-09-26 delta report](toolchain-deltas/2026-09-26_32460-vs-33230.md), Question A);
+- 0 of 13 golden-set inputs. The 14th, `td-snapshot.tox`, does round-trip,
+  but `toecollapse` wrote it (`scripts/build.sh` → `scripts/shrink.sh`);
+- 0 of 2 saves of an external project, `Keyframer.toe` (Windows original,
+  macOS re-save).
+
+Not yet checked: the ~1,600 shipped `tfs` files from the same sweep, which
+recorded tree and collapse-output equality across toolchains but not
+`collapse == input`. A TD-saved file that round-trips byte-for-byte would
+disprove this entry; check that sweep first.
+
+The cause is the **writer**: TD's in-app save and
 `toecollapse` pack the same tree into different archive bytes. The saving
 platform and build are *not* the cause: TD saves made on macOS with the
 same build as the `toecollapse` binary differ just as much as a
@@ -187,7 +197,10 @@ Windows-authored file does.
 
 In the golden set, 13 of 14 inputs have `collapse_equals_input: false`. The
 only `true` is `td-snapshot.tox`, which `toecollapse` wrote. All 14 have
-`refixed_point: true`.
+`refixed_point: true`. The 2026-09-26 sweep already noted this split
+("only `td-snapshot.tox` (toecollapse-produced) satisfies
+`collapse==input`"); this entry adds that the saving platform and build
+don't change it.
 
 **What is known about the difference:**
 - `toecollapse` is deterministic: 5 parallel runs, `TZ=UTC`, and a tree whose
