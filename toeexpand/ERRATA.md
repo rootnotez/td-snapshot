@@ -157,34 +157,55 @@ pinned by `test_case_collision_suffix_disambiguation` against the
 
 ---
 
-## E5 — `toecollapse` output does not byte-match TD's own save
+## E5 — `toecollapse` usually does not reproduce a TD save byte-for-byte
 
-**Status:** watching · **First seen:** 2025.32460; checked at 2025.33230
+**Status:** open · **First seen:** 2025.32460; checked at 2025.33230
 
-**Claim (general, observed on 214 files, not proven):** a `.toe`/`.tox`
-saved by TouchDesigner is not reproduced byte-for-byte by `toeexpand` →
-`toecollapse`, although the rebuild expands to the identical tree. No file
-we have recorded is a counterexample:
+**What we observed (1,019 files, 2025.33230 toolchain):** expanding a
+`.toe`/`.tox` with `toeexpand` and collapsing it with `toecollapse` gives
+a file that expands to the identical tree, but usually not the same bytes.
 
-- 0 of 199 `CurriculumExamples` files
-  ([2026-09-26 delta report](toolchain-deltas/2026-09-26_32460-vs-33230.md), Question A);
-- 0 of 13 golden-set inputs. The 14th, `td-snapshot.tox`, does round-trip,
-  but `toecollapse` wrote it (`scripts/build.sh` → `scripts/shrink.sh`);
-- 0 of 2 saves of an external project, `Keyframer.toe` (Windows original,
-  macOS re-save).
+| Corpus | Byte-identical after round trip |
+|---|---|
+| `CurriculumExamples` ([2026-09-26 delta report](toolchain-deltas/2026-09-26_32460-vs-33230.md), Question A) | 0 / 199 |
+| Golden set, excluding `td-snapshot.tox` | 0 / 13 |
+| `td-snapshot.tox` (written by `toecollapse`: `scripts/build.sh` → `scripts/shrink.sh`) | 1 / 1 |
+| `Keyframer.toe`, external project (Windows original + macOS re-save) | 0 / 2 |
+| Shipped `tfs` in the 2025.33230 app bundle (2026-10-13 sweep) | **8 / 804** |
 
-Not yet checked: the ~1,600 shipped `tfs` files from the same sweep, which
-recorded tree and collapse-output equality across toolchains but not
-`collapse == input`. A TD-saved file that round-trips byte-for-byte would
-disprove this entry; check that sweep first.
+**Counterexamples.** These 8 shipped files come back byte-identical:
 
-The cause is the **writer**: TD's in-app save and
-`toecollapse` pack the same tree into different archive bytes. The saving
-platform and build are *not* the cause: TD saves made on macOS with the
-same build as the `toecollapse` binary differ just as much as a
-Windows-authored file does.
+| File (under `Contents/Resources/tfs/`) | `.build` says |
+|---|---|
+| `Config/System/midi.tox` | 2017.20, Windows |
+| `Config/System/dialog_bookmarks.tox` | 2021.38420, Windows |
+| `Config/System/dialog_importfile.tox` | 2021.40650, Windows |
+| `Config/System/dialog_winplacement.tox` | 2022.29850, Windows |
+| `Config/System/keymanager.tox` | 2023.11469, macOS |
+| `Config/System/ui.tox` (1.1 MB) | 2025.32191, Windows |
+| `Samples/Setup/Base/NewProject.toe` | 2023.11290, `time` exactly `12:00:00` |
+| `Samples/Setup/Example/NewProject.toe` | 2023.11290, `time` exactly `12:00:00` |
 
-**Evidence (toolchain 2025.33230, macOS, 2026-10-13):**
+So "a TD save never round-trips" is **false as a general rule**. What we
+can't tell from the bytes is who wrote these 8. `.build` survives a
+collapse verbatim, so it records the TD build that last saved the tree, not
+whether TD or `toecollapse` packed the file. They are all system or template
+files, which Derivative may produce through `toecollapse` in its build
+process. The hand-set-looking `12:00:00` on both `NewProject.toe` files
+points that way, but it isn't proof.
+
+**Working hypothesis (not established):** the bytes depend on which
+program packed the file. TD's in-app save and `toecollapse` pack the same
+tree differently, and the 8 counterexamples were packed by `toecollapse`.
+What supports it: files known to be TD saves made on macOS with the same
+build as the `toecollapse` binary (`every_op_*.tox`, `features.tox`, the
+`Keyframer.toe` re-save) differ from their rebuild just as Windows-authored
+files do, so the saving platform and build don't explain it. What would
+settle it: save fresh `.tox`/`.toe` files from TD in a throwaway project
+(not one in use), round-trip each, and check whether any comes back
+identical.
+
+**Size evidence (toolchain 2025.33230, macOS, 2026-10-13):**
 
 | Input | Written by | Size → after collapse |
 |---|---|---|
@@ -234,11 +255,12 @@ state, `.start`'s `#expectednodes`. A re-saved tree is therefore not
 expected to match the original tree, and that comparison can't show whether
 `toeexpand` drops anything.
 
-**Open questions.** Does `toecollapse` follow the `.toc` order, and is the
-size gap from ordering, compression settings or padding? What does the
+**Open questions.** Were the 8 counterexamples packed by `toecollapse`
+(fresh-save test above)? Does `toecollapse` follow the `.toc` order, and is
+the size gap from ordering, compression settings or padding? What does the
 header u16 mean? Does TD load a `toecollapse`-written file and save
 it back to the TD-save size?
 
 | Build checked | Date | Result |
 |---|---|---|
-| 2025.33230 | 2026-10-13 | Present: TD saves (macOS + Windows) ≠ `toecollapse` output; collapse deterministic |
+| 2025.33230 | 2026-10-13 | 0/214 non-`tfs` files (excluding `toecollapse`-written `td-snapshot.tox`) and 796/804 shipped `tfs` files differ from their rebuild; 8 shipped files identical (writer unknown); collapse deterministic |
