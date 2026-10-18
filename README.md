@@ -31,12 +31,15 @@ scripts/
   hashes.sh              ← called by build.sh after shrink — regenerates src/hashes.txt (source + .tox + toolchain checksums)
   grow.sh                ← .tox → tocdir: run after a TD GUI export to refresh tox/ for git diffing
   git-textconv-setup.sh  ← one-time per-clone setup: configures the `tocdir` git diff driver (see below)
+  capture-dat-templates.sh ← run once per new TD build, with TD live: records its default DAT texts into dat-templates/ and regenerates core.py's template table
+  dat_templates.py       ← used by capture-dat-templates.sh: assembles a dat-templates/ record; regenerates/checks the table in src/core.py
 toeexpand/               ← tocdir format docs + tooling: FORMAT.md, DEVIATIONS.md, resources/ corpus (untracked), and local toeexpand/toecollapse binaries (untracked)
 tests/                   ← tocdir round-trip baseline corpus + test_tocdir_roundtrip.py, _stress/ wide-corpus round-trip framework, BlankProject.toe sample
 media/                   ← screenshots used by this README
 td-snapshot.py           ← BUILT — do not edit directly
 td-snapshot.tox          ← BUILT — the distributable component, drop into any project
 tox/                     ← canonical text expansion of td-snapshot.tox, for git diffing
+dat-templates/           ← running record of TD's default DAT texts, one <build>.json per TD build (see its README)
 .gitattributes           ← routes tox/ and tests/baselines/toeexpand_kinds/ .text/.table files to the tocdir textconv diff driver
 ```
 
@@ -94,12 +97,13 @@ Within a block:
 - `in[N] <- src` means input slot N is wired from `src`. Multi-output sources include `[out:K]`.
 - `ref par -> target` means a parameter on this operator references `target` (via an `op()` call in an expression, or by an OP-typed parameter value such as a Feedback TOP's `top` parameter).
 - `dat_text:` reproduces a DAT's text body as an indented block. When a length cap is set it ends with `(truncated, N chars total)`.
+- A DAT still holding the exact default text TouchDesigner gave it (a docked callbacks DAT, an Execute DAT's body) shows as one line, `dat_text: (unchanged <type> template, N chars)`. The texts are recorded per TouchDesigner build in [`dat-templates/`](dat-templates/README.md).
 
 Only parameters that differ from their defaults are shown — or any parameter driven by an expression, export, or bind, regardless of value. Stock settings are omitted to keep the output readable.
 
 ### Tuning what's captured
 
-`snapshot_patch()` takes keyword toggles, all enabled by default, so you can drop categories you don't need: `include_comment`, `include_tags`, `include_storage`, `include_bypass`, `include_display`, `include_viewer`, `include_render`, `include_dat_text`, and `dat_text_truncate` (set to an integer to cap each DAT body). For example, `snapshot_patch(include_dat_text=False)` omits DAT text entirely, and `snapshot_patch(dat_text_truncate=2000)` caps long DAT bodies at 2000 characters.
+`snapshot_patch()` takes keyword toggles, all enabled by default, so you can drop categories you don't need: `include_comment`, `include_tags`, `include_storage`, `include_bypass`, `include_display`, `include_viewer`, `include_render`, `include_dat_text`, `dat_text_truncate` (set to an integer to cap each DAT body), and `collapse_dat_templates` (set to `False` to show unchanged template text in full). For example, `snapshot_patch(include_dat_text=False)` omits DAT text entirely, and `snapshot_patch(dat_text_truncate=2000)` caps long DAT bodies at 2000 characters.
 
 
 
@@ -269,6 +273,8 @@ The latest validated run round-trips **1630/1630** files across TD builds `2016.
 
 It resolves the newly-installed toolchain, refreshes `src/hashes.txt`, runs a determinism control (hard gate), records the new toolchain's results against the golden input set and compares them to the newest previously-committed golden build, runs the pytest suite against the new toolchain, and prints a PASS/DIFF/FAIL summary. Pass `--corpus` to also rebuild the shipped `.tox` corpus and census-diff it against a prior build's census (slower, ~5 min).
 
+**Then, for every new build, whatever the check reports:** record its default DAT texts. With the new TD running the td-claude-bridge component, run `scripts/capture-dat-templates.sh`. It writes `dat-templates/<build>.json` and regenerates the template table in `src/core.py`. Add the build's row (and what changed since the previous build) to the table in [`dat-templates/README.md`](dat-templates/README.md), bump `core.py` in `src/versions.txt`, and run `./scripts/build.sh`. Until a build is recorded, untouched default DATs created in it are shown in full rather than collapsed. `toolchain-check.sh` reminds you when the record is missing.
+
 If it reports differences:
 
 1. Mount the previous build read-only and run a live cross-check:
@@ -282,7 +288,7 @@ If it reports differences:
 3. Regenerate fixtures for the new build inside a live TouchDesigner session (`tests/toolchain/gen/run.sh every_op` / `features`; needs the td-claude-bridge component — see `tests/toolchain/gen/README.md`), then record goldens with both toolchains (`tcdiff record --bin <bin> --out tests/toolchain/golden/<build>/`).
 4. Write up the finding under `toeexpand/toolchain-deltas/<date>_<old>-vs-<new>.md`, and tag anything that changes the on-disk format in `toeexpand/FORMAT.md`/`toeexpand/DEVIATIONS.md` with the new build number, per "Build-version sensitivity" above.
    Re-check every entry in [`toeexpand/ERRATA.md`](toeexpand/ERRATA.md) (suspected TouchDesigner-side bugs — e.g. `tests/toolchain/gen/run.sh probe_parm_flags`) and add a History row per entry for the new build, even when nothing changed.
-5. Commit — `src/hashes.txt`, `toeexpand/TOOLCHAINS.md`, any new golden sets/fixtures, and the delta note are all tracked so the update leaves a dated trail.
+5. Commit — `src/hashes.txt`, `toeexpand/TOOLCHAINS.md`, any new golden sets/fixtures, the delta note and the `dat-templates/` record are all tracked so the update leaves a dated trail.
 
 See [`tests/toolchain/README.md`](tests/toolchain/README.md) for the layout contract, manifest format, and `tcdiff.py` CLI details.
 
