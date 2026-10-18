@@ -5,12 +5,12 @@
 # Captures the network containing this DAT (me.parent()) by default.
 # To target a different network: snapshot_patch('/project1/some/comp')
 
-# core.py v3.0.0 | sha256:dabd4f011e5f327fa951690623402e643395ca5982da5c1d9e92da8e9cef219d
+# core.py v3.1.0 | sha256:5ef5dd3561ccf006c40c4623ac1c871ee48becf6add929a71e48e03b526f356b
 import re
 
 # Snapshot script version, surfaced in the output preamble. Synced from the
 # `core.py` entry in src/versions.txt by scripts/stamp.sh — do not edit by hand.
-VERSION = '3.0.0'
+VERSION = '3.1.0'
 
 def op_display_type(o):
     return '{} {}'.format(o.label, o.family)
@@ -18,8 +18,26 @@ def op_display_type(o):
 def op_label(o):
     return '{} [{}]'.format(o.path, op_display_type(o))
 
+# Display/Render exist as attributes on every OP, so hasattr() cannot tell whether
+# a flag is meaningful. Per the TD docs (Display_Flag, Render_Flag, Flag; build
+# 2025.33230): Display is on TOPs, CHOPs, SOPs, POPs and Object COMPs (Geometry,
+# Camera, Light, Null, ...); Render is on SOPs, POPs and Object COMPs. Plain
+# Container/Base COMPs, DATs and MATs have neither. Object COMPs are detected via
+# op.isObject, not by family (their family is just 'COMP').
+_DISPLAY_FAMILIES = ('TOP', 'CHOP', 'SOP', 'POP')
+_RENDER_FAMILIES = ('SOP', 'POP')
+
+
+def _flag_applies(o, families):
+    try:
+        return o.family in families or bool(o.isObject)
+    except:
+        return False
+
+
 def walk_patch(root=None,
                include_comment=True,
+               include_tags=True,
                include_storage=True,
                include_bypass=True,
                include_display=True,
@@ -27,18 +45,26 @@ def walk_patch(root=None,
                include_render=True,
                include_dat_text=True,
                dat_text_truncate=None):
+    # `me` only exists when run from a DAT script; callers elsewhere (textport,
+    # extensions, external exec) must pass a root and get no self-exclusion.
+    try:
+        self_op = me
+    except NameError:
+        self_op = None
     if root is None:
-        root_op = me.parent()
+        if self_op is None:
+            raise ValueError('walk_patch: no `me` available, pass a root path, e.g. snapshot_patch(\'/project1\')')
+        root_op = self_op.parent()
     else:
         root_op = op(root)
-    ops = [root_op] + list(root_op.findChildren(includeUtility=True))
+    # A non-COMP root (e.g. a single MAT) has no children to walk.
+    ops = [root_op] + (list(root_op.findChildren(includeUtility=True)) if root_op.isCOMP else [])
 
     # Exclude the component containing this script from the snapshot.
     # Walk up from me to find its direct child of root_op, then drop that subtree.
-    self_op = me
-    while self_op.parent() is not None and self_op.parent() != root_op:
+    while self_op is not None and self_op.parent() is not None and self_op.parent() != root_op:
         self_op = self_op.parent()
-    if self_op.parent() == root_op:
+    if self_op is not None and self_op.parent() == root_op:
         exclude = {self_op.path}
         try:
             for child in self_op.findChildren(includeUtility=True):
@@ -54,12 +80,17 @@ def walk_patch(root=None,
     nodes = []
 
     # Regex-scan an expression string for op('name') patterns and resolve each
-    # to a full operator path. Tries owner-relative, then absolute resolution.
+    # to a full operator path. TD evaluates a bare op('X') in a parameter
+    # expression against the network containing the owner (its siblings), so
+    # try the owner's parent first. A COMP owner's own children must not
+    # shadow a sibling of the same name. owner.op() keeps '../x' style paths
+    # resolving as before; op(raw) handles absolute paths and shortcuts.
     def op_refs_from_expr(expr, owner):
         refs = []
         for m in re.finditer(r"op\((['\"])(.*?)\1\)", expr):
             raw = m.group(2)
-            target = op(owner.path + '/' + raw) or owner.op(raw) or op(raw)
+            par = owner.parent()
+            target = (par.op(raw) if par is not None else None) or owner.op(raw) or op(raw)
             refs.append(target.path if target is not None else raw)
         return sorted(set(refs))
 
@@ -188,6 +219,14 @@ def walk_patch(root=None,
             except:
                 pass
 
+        if include_tags:
+            try:
+                tags = sorted(str(t) for t in o.tags)
+                if tags:
+                    node['tags'] = tags
+            except:
+                pass
+
         flags = {}
         # Each flag emits only when diverged from the type's default:
         # bypass/viewer default False (emit when True); display/render default True (emit when False).
@@ -205,13 +244,13 @@ def walk_patch(root=None,
                 pass
         if include_display:
             try:
-                if hasattr(o, 'display') and o.display is False:
+                if _flag_applies(o, _DISPLAY_FAMILIES) and o.display is False:
                     flags['display'] = False
             except:
                 pass
         if include_render:
             try:
-                if hasattr(o, 'render') and o.render is False:
+                if _flag_applies(o, _RENDER_FAMILIES) and o.render is False:
                     flags['render'] = False
             except:
                 pass
@@ -329,6 +368,13 @@ def _fmt_comment_block(comment, indent='    '):
     return out
 
 
+def _fmt_tags(tags):
+    # Tags are comma-separated; a tag with whitespace, a comma or a quote is shown
+    # as a Python repr so the list stays unambiguous. Plain tags stay bare.
+    return ', '.join(t if t and not any(c.isspace() or c in ',\'"' for c in t) else repr(t)
+                     for t in tags)
+
+
 def render_blocks(nodes, wire_edges, ref_edges, op_by_path):
     # Per-node-block format. See project_per_node_block_format memory for design rationale.
     # Operators are named by their path relative to the root (the first block, which
@@ -364,13 +410,15 @@ def render_blocks(nodes, wire_edges, ref_edges, op_by_path):
             s += ', expr={!r}'.format(par['expr'])
         return s + ')'
 
-    lines = ['# td-snapshot v{} — each node block: "path [type]" (relative to the first block\'s path), changed pars, "in[N] <- src" for incoming wires, "ref par -> target" for parameter refs, "storage key = value" for op.store() data.'.format(VERSION)]
+    lines = ['# td-snapshot v{} — each node block: "path [type]" (relative to the first block\'s path), changed pars, "in[N] <- src" for incoming wires, "ref par -> target" for parameter refs, "storage key = value" for op.store() data, "tags: a, b" for operator tags (a tag with spaces, commas or quotes is shown quoted).'.format(VERSION)]
 
     for n in nodes:
         lines.append('')
         lines.append(name_for(n['path']) + n['label'][len(n['path']):])
         if 'comment' in n:
             lines.extend(_fmt_comment_block(n['comment']))
+        if n.get('tags'):
+            lines.append('  tags: ' + _fmt_tags(n['tags']))
         if 'flags' in n:
             lines.append('  flags: ' + _fmt_flags(n['flags']))
         for key, summary in n.get('storage', []):
@@ -393,6 +441,7 @@ def render_blocks(nodes, wire_edges, ref_edges, op_by_path):
 
 def snapshot_patch(root=None,
                    include_comment=True,
+                   include_tags=True,
                    include_storage=True,
                    include_bypass=True,
                    include_display=True,
@@ -403,6 +452,7 @@ def snapshot_patch(root=None,
     nodes, wire_edges, ref_edges, op_by_path = walk_patch(
         root,
         include_comment=include_comment,
+        include_tags=include_tags,
         include_storage=include_storage,
         include_bypass=include_bypass,
         include_display=include_display,

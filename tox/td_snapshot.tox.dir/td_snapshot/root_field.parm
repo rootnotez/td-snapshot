@@ -1,0 +1,27 @@
+?
+text 515 Derivative parent().par.Rootpath
+editmode 0 editable
+placeholdertext 0 "Root path (empty = this network)"
+placeholdercolorr 0 0.55
+placeholdercolorg 0 0.55
+placeholdercolorb 0 0.55
+callbacks 0 root_field_callbacks
+fontsize 0 10
+textpaddingl 0 8
+textpaddingr 0 0
+textpaddingb 0 0
+textpaddingt 0 0
+alignx 0 left
+x 0 50
+y 0 100
+w 0 300
+h 0 50
+bgcolorr 0 0.2
+bgcolorg 0 0.2
+bgcolorb 0 0.2
+bgalpha 0 1
+leftborder 0 bordera
+rightborder 0 bordera
+bottomborder 0 bordera
+topborder 0 bordera
+?

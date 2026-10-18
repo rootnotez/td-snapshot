@@ -1,6 +1,7 @@
 # 4 0 0 0 1
 .build
 td_snapshot.n
+td_snapshot.cparm
 td_snapshot.parm
 td_snapshot.panel
 td_snapshot/core.n
@@ -24,6 +25,9 @@ td_snapshot/copy_btn/parexec1.text
 td_snapshot/copy_btn/panelexec1.n
 td_snapshot/copy_btn/panelexec1.parm
 td_snapshot/copy_btn/panelexec1.text
+td_snapshot/root_field.n
+td_snapshot/root_field.parm
+td_snapshot/root_field.panel
 td_snapshot/inspect_btn.n
 td_snapshot/inspect_btn.parm
 td_snapshot/inspect_btn.panel
@@ -45,3 +49,6 @@ td_snapshot/tox_runner_copy.text
 td_snapshot/tox_runner_inspect.n
 td_snapshot/tox_runner_inspect.parm
 td_snapshot/tox_runner_inspect.text
+td_snapshot/root_field_callbacks.n
+td_snapshot/root_field_callbacks.parm
+td_snapshot/root_field_callbacks.text

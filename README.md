@@ -88,6 +88,7 @@ Within a block:
 - The header `<path> [<Label Family>]` introduces the operator: the root's absolute path for the first block, a root-relative path for the rest.
 - `<par> = <current> (default <default>[, <mode>][, expr=<text>])` lists each non-default or non-CONSTANT parameter. Mode and expression text are only shown when relevant.
 - `comment:` carries the operator's comment — inline when single-line, or as an indented block when multi-line.
+- `tags:` lists the operator's tags (`op.tags`), sorted and comma-separated; a tag containing whitespace, a comma or a quote is shown in quotes, e.g. `tags: effect, 'image filter'`.
 - `flags:` lists operator flags, but only when one diverges from its type's default: `bypass=True`, `viewer=True`, `display=False`, `render=False`.
 - `storage key = value` lists the operator's storage (`op.store()`), one key per line, sorted. Values are summarised on one line: a mapping shows its scalar fields and counts nested containers (`{3 items}`), an operator shows as `op('/path')`, `tdu.Dependency` wrappers are unwrapped, and long text is cut with its full length given. Memory addresses are dropped so the same storage prints the same way every run.
 - `in[N] <- src` means input slot N is wired from `src`. Multi-output sources include `[out:K]`.
@@ -98,7 +99,7 @@ Only parameters that differ from their defaults are shown — or any parameter d
 
 ### Tuning what's captured
 
-`snapshot_patch()` takes keyword toggles, all enabled by default, so you can drop categories you don't need: `include_comment`, `include_storage`, `include_bypass`, `include_display`, `include_viewer`, `include_render`, `include_dat_text`, and `dat_text_truncate` (set to an integer to cap each DAT body). For example, `snapshot_patch(include_dat_text=False)` omits DAT text entirely, and `snapshot_patch(dat_text_truncate=2000)` caps long DAT bodies at 2000 characters.
+`snapshot_patch()` takes keyword toggles, all enabled by default, so you can drop categories you don't need: `include_comment`, `include_tags`, `include_storage`, `include_bypass`, `include_display`, `include_viewer`, `include_render`, `include_dat_text`, and `dat_text_truncate` (set to an integer to cap each DAT body). For example, `snapshot_patch(include_dat_text=False)` omits DAT text entirely, and `snapshot_patch(dat_text_truncate=2000)` caps long DAT bodies at 2000 characters.
 
 
 
@@ -118,10 +119,21 @@ result = snapshot_patch('/project1/mycomp')
 ```
 
 
+## Calling it from your own code (no side effects)
+
+`snapshot_patch(root)` returns the snapshot as a string and creates or modifies nothing in the network, so you can snapshot before and after a change and diff the two without extra DATs appearing. Pass an explicit root path:
+
+```python
+text = mod('core').snapshot_patch('/project1/geo1')   # TOX: `core` Text DAT beside you
+```
+
+`mod('core')` works from a textport, extension or other script wherever a `core` DAT is reachable (the TOX ships one; or paste `src/core.py` into a Text DAT named `core`). The runners are the ones with GUI side effects: `td-snapshot.py` is `core.py` with `quickpaste_runner.py` appended, so it always creates a Text DAT and opens a viewer. Use it only for Option 1.
+
+With a root given, `me` is not needed, so this works outside DAT scripts. When `me` is available, the component running the snapshot is still excluded. With no `me` and no root, it raises `ValueError` asking for a root.
 
 ## Usage Option 2: TOX component (reusable, button-triggered)
 
-A Container COMP saved as a `.tox` that you can drop into any project. Two buttons — **Copy** and **Inspect** — each run the snapshot fresh and either put the result on your clipboard or open it in a floating viewer for reading. You can use the `.tox` direclty form this repo.
+A Container COMP saved as a `.tox` that you can drop into any project. Two buttons — **Copy** and **Inspect** — each run the snapshot fresh and either put the result on your clipboard or open it in a floating viewer for reading. You can use the `.tox` directly from this repo.
 
 ### TOX Development
 If you want to make changes, here is how the project is built.

@@ -1,6 +1,6 @@
 1
 3
-9
+13
 u 0.496241
 v 0.311037
 trueu 0.496241
@@ -9,4 +9,8 @@ rollu 1
 rollv 0.113712
 radioname scopy_btn
 lradioname scopy_btn
-children 2
+children 3
+screenw 400
+screenh 300
+screenwm 400
+screenhm 300
