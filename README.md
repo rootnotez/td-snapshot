@@ -121,7 +121,7 @@ result = snapshot_patch('/project1/mycomp')
 
 ## Usage Option 2: TOX component (reusable, button-triggered)
 
-A Container COMP saved as a `.tox` that you can drop into any project. Two buttons — **Copy** and **Inspect** — each run the snapshot fresh and either put the result on your clipboard or open it in a floating viewer for reading. You can use the `.tox` direclty form this repo.
+A Container COMP saved as a `.tox` that you can drop into any project. Two buttons — **Copy** and **Inspect** — each run the snapshot fresh and either put the result on your clipboard or open it in a floating viewer for reading. You can use the `.tox` directly from this repo.
 
 ### TOX Development
 If you want to make changes, here is how the project is built.
