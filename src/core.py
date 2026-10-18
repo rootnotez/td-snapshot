@@ -1,9 +1,10 @@
-# core.py v3.1.0 | sha256:5ef5dd3561ccf006c40c4623ac1c871ee48becf6add929a71e48e03b526f356b
+# core.py v3.2.0 | sha256:908c0cf6bf3e6b4118a2158f40b74c8c2717eb3d6c169a45b959a3d6c0c9cc6f
+import hashlib
 import re
 
 # Snapshot script version, surfaced in the output preamble. Synced from the
 # `core.py` entry in src/versions.txt by scripts/stamp.sh — do not edit by hand.
-VERSION = '3.1.0'
+VERSION = '3.2.0'
 
 def op_display_type(o):
     return '{} {}'.format(o.label, o.family)
@@ -28,6 +29,82 @@ def _flag_applies(o, families):
         return False
 
 
+# BEGIN GENERATED DAT TEMPLATES
+# Default DAT texts TouchDesigner creates, keyed by the first 16 hex chars of
+# the sha256 of the text (\r\n normalised to \n). Builds: 2025.33230.
+# Generated from dat-templates/*.json by scripts/dat_templates.py gen-core.
+_DAT_TEMPLATES = {
+    '048965a931724b49': 'tcpipDAT callbacks',
+    '08af9bf3bb043ba2': 'annotateCOMP/annotation/title/dragger/help',
+    '0f6a4187266b806a': 'scriptTOP callbacks',
+    '1165c7f6bab54649': 'webclientDAT callbacks',
+    '14fd60afdc8d14f2': 'udpinDAT callbacks',
+    '16f93718b2691cd3': 'oscinDAT callbacks',
+    '1b8e965b5d5f1859': 'listCOMP callbacks',
+    '2190983ebc7eb440': 'multitouchinDAT callbacks',
+    '22fa94db72627f2e': 'bindCHOP callbacks',
+    '232b9898e47e1920': 'glslCOMP pixel',
+    '28468dd8f6c98ef2': 'buttonCOMP/parexec1',
+    '28be8b0e5ef903b8': 'glslMAT pixel',
+    '2977ebaad7fce510': 'glslTOP pixel or glslmultiTOP pixel',
+    '29ef464313f2d50a': 'glslPOP compute',
+    '2beb69cdd0ad0371': 'errorDAT callbacks',
+    '2fed1a31ddf5ce49': 'usdCOMP callbacks',
+    '306c2ff6e3b7a34a': 'artnetDAT callbacks',
+    '3316734c1dd8995c': 'socketioDAT callbacks',
+    '3376ef27d863fa3c': 'tuioinDAT callbacks',
+    '358ac709021be29b': 'datexecuteDAT',
+    '3cd4906b485996c4': 'bulletsolverCOMP callbacks',
+    '3d0f0322e167cffe': 'folderDAT callbacks',
+    '492380a939fc24c3': 'annotateCOMP/annotation/parexec1',
+    '4c4ce3f41a44d2d3': 'timerCHOP callbacks',
+    '545f517e56ea0566': 'scriptDAT callbacks',
+    '5d520bdc200332c7': 'glslMAT vertex',
+    '6916addd111d5bfc': 'scriptCHOP callbacks',
+    '6942ad520c6ad42e': 'pargroupexecuteDAT',
+    '759db7ee5c662e49': 'sliderCOMP/panelexec1',
+    '8c98ec01bb4c94d4': 'opfindDAT callbacks',
+    '8ca100258ec66e93': 'fbxCOMP callbacks',
+    '9296b0d8ee312141': 'textCOMP callbacks',
+    '9414eba391561cf7': 'renderpickCHOP callbacks',
+    '979eb764f0fb785d': 'eventCHOP callbacks',
+    'a4d2852d52bea3a4': 'blobtrackTOP callbacks',
+    'a7aefd001170e0f5': 'glslTOP compute or glslmultiTOP compute',
+    'a998dbb5b960826b': 'scriptSOP callbacks',
+    'ad37af1f2347512a': 'annotateCOMP/annotation/title/titleText_callbacks',
+    'b05115595e920e70': 'mqttclientDAT callbacks',
+    'b3e4f3311c5c86bb': 'chopexecuteDAT',
+    'b3e54a6759e37d62': 'websocketDAT callbacks',
+    'b4c362529b3996ad': 'scriptPOP callbacks',
+    'bf42c8039655af5a': 'glslcopyPOP ptCompute',
+    'c0075fe5b7c1c613': 'buttonCOMP/panelexec1',
+    'c85a1b89ce96ca5d': 'performDAT callbacks',
+    'c9d07fd774d28fde': 'webserverDAT callbacks',
+    'ce091c4ed0553904': 'ndiDAT callbacks',
+    'd6dcdc48156b3310': 'keyboardinDAT callbacks',
+    'd8a953673ac6b2bd': 'renderpickDAT callbacks',
+    'd9db560ea1f01da4': 'glslcopyPOP primCompute',
+    'da1091e23e691441': 'glslcopyPOP vertCompute',
+    'e19644fa6814f860': 'gltfinCOMP callbacks',
+    'e20357cd44efc512': 'lsystemSOP rules',
+    'e482945cf4ff25c0': 'glsladvancedPOP compute',
+    'e58d677cbc1ca00e': 'annotateCOMP/annotation/panelexec1',
+    'e9cb5330c992259f': 'replicatorCOMP callbacks',
+    'ea7c2148e863cbd5': 'executeDAT',
+    'ee926991d760920d': 'panelexecuteDAT',
+    'f02c7d8495121ec7': 'annotateCOMP/annotation/title/buttons/text1_callbacks',
+    'f10d23e0629180cc': 'fifoDAT callbacks',
+    'f1338b72138e4780': 'parameterexecuteDAT',
+    'f4c1503a2b84f7d4': 'opexecuteDAT',
+}
+# END GENERATED DAT TEMPLATES
+
+
+def _dat_template_hash(text):
+    # Must match text_hash in scripts/dat_templates.py.
+    return hashlib.sha256(text.replace('\r\n', '\n').encode('utf-8')).hexdigest()[:16]
+
+
 def walk_patch(root=None,
                include_comment=True,
                include_tags=True,
@@ -37,7 +114,8 @@ def walk_patch(root=None,
                include_viewer=True,
                include_render=True,
                include_dat_text=True,
-               dat_text_truncate=None):
+               dat_text_truncate=None,
+               collapse_dat_templates=True):
     # `me` only exists when run from a DAT script; callers elsewhere (textport,
     # extensions, external exec) must pass a root and get no self-exclusion.
     try:
@@ -262,7 +340,12 @@ def walk_patch(root=None,
             try:
                 if o.family == 'DAT':
                     txt = o.text
-                    if txt:
+                    template = _DAT_TEMPLATES.get(_dat_template_hash(txt)) if txt and collapse_dat_templates else None
+                    if template:
+                        # Unchanged default text: name it instead of repeating it.
+                        # The full text is in dat-templates/<build>.json.
+                        node['dat_text'] = {'template': template, 'full_len': len(txt)}
+                    elif txt:
                         if dat_text_truncate is not None and len(txt) > dat_text_truncate:
                             node['dat_text'] = {
                                 'text': txt[:dat_text_truncate],
@@ -403,7 +486,7 @@ def render_blocks(nodes, wire_edges, ref_edges, op_by_path):
             s += ', expr={!r}'.format(par['expr'])
         return s + ')'
 
-    lines = ['# td-snapshot v{} — each node block: "path [type]" (relative to the first block\'s path), changed pars, "in[N] <- src" for incoming wires, "ref par -> target" for parameter refs, "storage key = value" for op.store() data, "tags: a, b" for operator tags (a tag with spaces, commas or quotes is shown quoted).'.format(VERSION)]
+    lines = ['# td-snapshot v{} — each node block: "path [type]" (relative to the first block\'s path), changed pars, "in[N] <- src" for incoming wires, "ref par -> target" for parameter refs, "storage key = value" for op.store() data, "tags: a, b" for operator tags (a tag with spaces, commas or quotes is shown quoted), "dat_text: (unchanged X template, N chars)" for DAT text identical to the default TouchDesigner gives X (texts listed in dat-templates/ in the td-snapshot repo).'.format(VERSION)]
 
     for n in nodes:
         lines.append('')
@@ -425,7 +508,10 @@ def render_blocks(nodes, wire_edges, ref_edges, op_by_path):
                 lines.append('  in[{}] <- {}'.format(in_idx, name_for(src_path)))
         for par_name, target_path in sorted(refs_by_src.get(n['path'], [])):
             lines.append('  ref {} -> {}'.format(par_name, name_for(target_path)))
-        if 'dat_text' in n:
+        if 'dat_text' in n and 'template' in n['dat_text']:
+            lines.append('  dat_text: (unchanged {} template, {} chars)'.format(
+                n['dat_text']['template'], n['dat_text']['full_len']))
+        elif 'dat_text' in n:
             lines.append('  dat_text:')
             lines.extend(_fmt_dat_text_block(n['dat_text']))
 
@@ -441,7 +527,8 @@ def snapshot_patch(root=None,
                    include_viewer=True,
                    include_render=True,
                    include_dat_text=True,
-                   dat_text_truncate=None):
+                   dat_text_truncate=None,
+                   collapse_dat_templates=True):
     nodes, wire_edges, ref_edges, op_by_path = walk_patch(
         root,
         include_comment=include_comment,
@@ -453,5 +540,6 @@ def snapshot_patch(root=None,
         include_render=include_render,
         include_dat_text=include_dat_text,
         dat_text_truncate=dat_text_truncate,
+        collapse_dat_templates=collapse_dat_templates,
     )
     return render_blocks(nodes, wire_edges, ref_edges, op_by_path)

@@ -94,12 +94,13 @@ Within a block:
 - `in[N] <- src` means input slot N is wired from `src`. Multi-output sources include `[out:K]`.
 - `ref par -> target` means a parameter on this operator references `target` (via an `op()` call in an expression, or by an OP-typed parameter value such as a Feedback TOP's `top` parameter).
 - `dat_text:` reproduces a DAT's text body as an indented block. When a length cap is set it ends with `(truncated, N chars total)`.
+- A DAT still holding the exact default text TouchDesigner gave it (a docked callbacks DAT, an Execute DAT's body) shows as one line, `dat_text: (unchanged <type> template, N chars)`. The texts are recorded per TouchDesigner build in [`dat-templates/`](dat-templates/README.md).
 
 Only parameters that differ from their defaults are shown — or any parameter driven by an expression, export, or bind, regardless of value. Stock settings are omitted to keep the output readable.
 
 ### Tuning what's captured
 
-`snapshot_patch()` takes keyword toggles, all enabled by default, so you can drop categories you don't need: `include_comment`, `include_tags`, `include_storage`, `include_bypass`, `include_display`, `include_viewer`, `include_render`, `include_dat_text`, and `dat_text_truncate` (set to an integer to cap each DAT body). For example, `snapshot_patch(include_dat_text=False)` omits DAT text entirely, and `snapshot_patch(dat_text_truncate=2000)` caps long DAT bodies at 2000 characters.
+`snapshot_patch()` takes keyword toggles, all enabled by default, so you can drop categories you don't need: `include_comment`, `include_tags`, `include_storage`, `include_bypass`, `include_display`, `include_viewer`, `include_render`, `include_dat_text`, `dat_text_truncate` (set to an integer to cap each DAT body), and `collapse_dat_templates` (set to `False` to show unchanged template text in full). For example, `snapshot_patch(include_dat_text=False)` omits DAT text entirely, and `snapshot_patch(dat_text_truncate=2000)` caps long DAT bodies at 2000 characters.
 
 
 
