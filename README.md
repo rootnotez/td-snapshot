@@ -118,6 +118,17 @@ result = snapshot_patch('/project1/mycomp')
 ```
 
 
+## Calling it from your own code (no side effects)
+
+`snapshot_patch(root)` returns the snapshot as a string and creates or modifies nothing in the network, so you can snapshot before and after a change and diff the two without extra DATs appearing. Pass an explicit root path:
+
+```python
+text = mod('core').snapshot_patch('/project1/geo1')   # TOX: `core` Text DAT beside you
+```
+
+`mod('core')` works from a textport, extension or other script wherever a `core` DAT is reachable (the TOX ships one; or paste `src/core.py` into a Text DAT named `core`). The runners are the ones with GUI side effects: `td-snapshot.py` is `core.py` with `quickpaste_runner.py` appended, so it always creates a Text DAT and opens a viewer. Use it only for Option 1.
+
+With a root given, `me` is not needed, so this works outside DAT scripts. When `me` is available, the component running the snapshot is still excluded. With no `me` and no root, it raises `ValueError` asking for a root.
 
 ## Usage Option 2: TOX component (reusable, button-triggered)
 
