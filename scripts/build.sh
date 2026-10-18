@@ -22,6 +22,13 @@ HEADER
 echo "Built td-snapshot.py"
 
 ./scripts/shrink.sh
+
+# The byte-exact tox checks moved to toetools with tests/toolchain/; this
+# confirms the freshly patched tree still round-trips.
+# shellcheck source=scripts/_toetools.sh
+source scripts/_toetools.sh
+toetools verify tox/td_snapshot.tox.dir
+
 ./scripts/hashes.sh
 
 echo "pytest..."

@@ -5,9 +5,9 @@ quickpaste_runner.py:          v1.0.0    483271940e07bb28d1b4f896443f8b6034e5ede
 tox_runner_copy.py:            v1.1.0    586c76ee733c52a5aa290bc43e16338d70a086ddc1a61c850f6ac20c58d47547
 tox_runner_inspect.py:         v1.1.0    f808762beabefaf78f5bb0933fd03bbf5cd21a0543698a10f23e349427fb9a1d
 
-td-snapshot — tocdir package
+td-snapshot — toetools (patches the tox/ tree)
 
-tocdir:                        v0.4.1    7bc55d7efa6426acb837a396eb4e1b6d55b991ae17c3af209b350c48f2f252f0
+toetools:                      git+https://github.com/rootnotez/toetools@v0.5.0
 
 td-snapshot — binary artifact checksum
 
