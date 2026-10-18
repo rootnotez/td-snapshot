@@ -20,18 +20,25 @@ def walk_patch(root=None,
                include_render=True,
                include_dat_text=True,
                dat_text_truncate=None):
+    # `me` only exists when run from a DAT script; callers elsewhere (textport,
+    # extensions, external exec) must pass a root and get no self-exclusion.
+    try:
+        self_op = me
+    except NameError:
+        self_op = None
     if root is None:
-        root_op = me.parent()
+        if self_op is None:
+            raise ValueError('walk_patch: no `me` available, pass a root path, e.g. snapshot_patch(\'/project1\')')
+        root_op = self_op.parent()
     else:
         root_op = op(root)
     ops = [root_op] + list(root_op.findChildren(includeUtility=True))
 
     # Exclude the component containing this script from the snapshot.
     # Walk up from me to find its direct child of root_op, then drop that subtree.
-    self_op = me
-    while self_op.parent() is not None and self_op.parent() != root_op:
+    while self_op is not None and self_op.parent() is not None and self_op.parent() != root_op:
         self_op = self_op.parent()
-    if self_op.parent() == root_op:
+    if self_op is not None and self_op.parent() == root_op:
         exclude = {self_op.path}
         try:
             for child in self_op.findChildren(includeUtility=True):
