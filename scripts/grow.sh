@@ -47,6 +47,15 @@ if [ ${#TARGETS[@]} -gt 0 ]; then
 fi
 
 cp td-snapshot.tox "$STAGE"
-"$TOEEXPAND" "$STAGE"
-rm "$STAGE"
+trap 'rm -f "$STAGE"' EXIT
+
+# toeexpand's exit code is inverted (1 on success, 0 on failure; see
+# toeexpand/FORMAT.md), so judge by the output it should have written. Any
+# prior expansion was deleted above, so whatever exists now is fresh.
+rc=0
+"$TOEEXPAND" "$STAGE" || rc=$?
+if [ ! -d "${STAGE}.dir" ] || [ ! -f "${STAGE}.toc" ]; then
+    echo "ERROR: toeexpand did not produce ${STAGE}.dir and ${STAGE}.toc (exit $rc)" >&2
+    exit 1
+fi
 echo "Expanded td-snapshot.tox -> tox/"
