@@ -159,7 +159,8 @@ pinned by `test_case_collision_suffix_disambiguation` against the
 
 ## E5 — `toecollapse` usually does not reproduce a TD save byte-for-byte
 
-**Status:** open · **First seen:** 2025.32460; checked at 2025.33230 ·
+**Status:** watching (explained 2026-10-18, harmless) · **First seen:**
+2025.32460; explained at 2025.33230 ·
 **Research:** [#35](https://github.com/rootnotez/td-snapshot/issues/35)
 
 **What we observed (1,025 files, 2025.33230 toolchain):** expanding a
@@ -172,109 +173,152 @@ a file that expands to the identical tree, but usually not the same bytes.
 | Golden set, excluding `td-snapshot.tox` | 0 / 13 |
 | `td-snapshot.tox` (written by `toecollapse`: `scripts/build.sh` → `scripts/shrink.sh`) | 1 / 1 |
 | `Keyframer.toe`, external project (Windows original + macOS re-save) | 0 / 2 |
-| Shipped `tfs` in the 2025.33230 app bundle (2026-10-13 sweep) | **8 / 804** |
-| Fresh TD saves in a throwaway project (2026-10-14) | **1 / 6** (`empty.tox`) |
+| Shipped `tfs` in the 2025.33230 app bundle (2026-10-13 sweep) | 8 / 804 |
+| Fresh TD saves in a throwaway project (2026-10-14) | 1 / 6 (`empty.tox`) |
+| Fresh TD saves, 2026-10-18 (incl. a flat COMP with custom pars) | 2 / 8 (`empty`, `flatpars`) |
 
-**Counterexamples.** These 8 shipped files come back byte-identical:
+**Cause (2026-10-18, 2025.33230).** Both writers use the same compression
+and the same cipher. They lay out the archive *inside* differently:
+`toecollapse` stores every entry under its full path, while TD's save
+stores basenames grouped under directory records. The two layouts are the
+same exactly when the tree has no subdirectories, which is why a flat COMP
+round-trips and a COMP with children never does. The container format
+itself is in [FORMAT.md, "Binary container"](FORMAT.md#binary-container--the-toe--tox-file).
 
-| File (under `Contents/Resources/tfs/`) | `.build` says |
-|---|---|
-| `Config/System/midi.tox` | 2017.20, Windows |
-| `Config/System/dialog_bookmarks.tox` | 2021.38420, Windows |
-| `Config/System/dialog_importfile.tox` | 2021.40650, Windows |
-| `Config/System/dialog_winplacement.tox` | 2022.29850, Windows |
-| `Config/System/keymanager.tox` | 2023.11469, macOS |
-| `Config/System/ui.tox` (1.1 MB) | 2025.32191, Windows |
-| `Samples/Setup/Base/NewProject.toe` | 2023.11290, `time` exactly `12:00:00` |
-| `Samples/Setup/Example/NewProject.toe` | 2023.11290, `time` exactly `12:00:00` |
+The evidence is the unpacked length the header carries in clear (the
+payload is encrypted, so we compare sizes and ciphertext blocks, never
+plaintext):
 
-So "a TD save never round-trips" is **false as a general rule**: an empty
-Base COMP saved by TD on 2026-10-14 comes back byte-identical, and so do
-the 8 shipped files above.
+- **`toecollapse` writes `17 + Σ (len(path) + 7 + size)`** over the `.toc`
+  entries, with `path` as the `.toc` spells it. Exact on every file tested:
+  synthetic trees, the 13 goldens, 4 `.toe`, the shipped files, and
+  multi-chunk files when summed over chunks.
+- **TD writes `17 + Σ (len(basename) + 7 + size) + Σ (len(dir leaf) + 5)`**,
+  the second sum taken over every directory the walk enters in `.toc` order
+  (each directory is entered once). Exact, with residual 0, on the 9
+  goldens and 9 fresh saves that are `.tox`, including 3-level nesting
+  (`deep`) and `every_op_COMP.tox` (41 directories, 544 bytes).
+- **ECB block comparison confirms it.** The cipher is ECB, so equal
+  plaintext blocks at equal offsets give equal ciphertext. 631 of the 796
+  differing shipped files share no 8-byte block with their rebuild, and the
+  first differing byte is in block 0 or 1 for 774 of them. The plaintext
+  differs from the start: this is not the same content reordered and not a
+  trailer or padding difference.
+- **Same compressor.** Swapping a Text DAT body changes the packed size of
+  `toecollapse` output by what `zlib.compress(body, 6)` predicts, and
+  incompressible bodies show up as stored blocks of about 16 KB. TD's save
+  of a flat tree comes out byte-identical, so it uses the same settings.
+- **The writers' sizes differ in both directions**: e.g. `ops` +8 bytes,
+  `big` −8. Packed sizes move in 8-byte cipher blocks, and TD's shorter
+  plaintext usually, but not always, compresses smaller.
 
-**Two writers, two encodings (2026-10-14, fresh saves).** For the same
-tree, TD's save and `toecollapse` usually write different bytes. What we
-can see is sizes and bytes; the payload can't be decoded outside TD, so
-*what* differs (entry order, compression settings, padding) is unknown.
+**Item 1: is the save time the only other difference? Yes.** For 6 nested
+COMPs (`ops`, `code`, `big`, `one`, `deep`, `rnd`), TD's save of the
+original and TD's save of the `toecollapse` rebuild, after `loadTox`, made
+in the same second, are byte-identical (6/6). Trap: `loadTox` makes the
+loaded COMP current, which writes `current on` into its `.n` `flags` line.
+The original has to be made current in its own parent
+(`orig.current = True`) before the comparison holds. `c.current = False`
+on the loaded copy does not clear it. The 2026-10-14 re-saves that
+"differed in 248–1,301 bytes" had different `.build` times.
 
-- **TD's save is deterministic apart from the save time.** `COMP.save()`
-  twice gave identical bytes (5/5 `.tox`); `project.save()` twice within
-  one second gave an identical `.toe`.
-- **TD re-encodes a `toecollapse` file its own way.** TD saved `ops` (398
-  bytes); expand → collapse gave 406 bytes; `loadTox` of that file in TD
-  and `save()` again gave 398 bytes, with a tree identical to the original
-  except the `.build` `time` line. Same for `code` (510 → 518 → 510) and
-  `big` (1,326 → 1,318 → 1,326). The re-save still differs from the
-  original in 248–1,301 bytes. We attribute this to the changed save time,
-  but that is not proven ([#35](https://github.com/rootnotez/td-snapshot/issues/35), item 1).
-- **The size gap goes both ways.** `ops` +8, `code` +8, `all` +48 bytes,
-  but `big` (60 Text DATs) −8.
-- **For some content the two writers agree.** That includes the empty COMP,
-  so the 8 shipped counterexamples don't require that Derivative packed them
-  with `toecollapse`. Which content makes them agree is unknown
-  ([#35](https://github.com/rootnotez/td-snapshot/issues/35), item 2).
-- The saving platform and build don't explain the difference: TD saves made
-  on macOS with the same build as the `toecollapse` binary
-  (`every_op_*.tox`, `features.tox`, the `Keyframer.toe` re-save) differ
-  from their rebuild just as Windows-authored files do.
+**Item 2: when do the writers agree?** When the archive layout is the same:
 
-**Size evidence (toolchain 2025.33230, macOS, 2026-10-13):**
+- **The tree is flat**: no `.toc` entry contains `/`. That covers TD's fresh
+  `empty.tox` and `flatpars.tox` (a Container COMP with custom
+  parameters, a 1.2 KB string parameter, storage and a comment, but no
+  children), and the shipped `midi`, `dialog_bookmarks`,
+  `dialog_importfile`, `dialog_winplacement` and `keymanager` `.tox` (2–5
+  entries each; their contents sit in a top-level `.lod`).
+- **The file was already in the full-path layout.** The shipped
+  `Config/System/ui.tox` (20,245 nested entries, 4 chunks) and both
+  `Samples/Setup/*/NewProject.toe` are nested, yet their unpacked lengths
+  equal the `toecollapse` formula exactly. Derivative wrote them with
+  `toecollapse` or an equivalent tool. `NewProject.toe`'s `.build` time is
+  exactly `12:00:00`.
 
-| Input | Written by | Size → after collapse |
-|---|---|---|
-| `every_op_CHOP.tox` | TD 2025.33230 save, macOS | 8,222 → 8,334 |
-| `features.tox` | TD 2025.33230 save, macOS | 10,622 → 10,782 |
-| `BlankProject.toe` | TD 2025.32460 save, macOS | 3,418 → 3,426 |
-| `Keyframer.toe` (external) | TD 2025.32050 save, Windows | 92,394 → 96,594 |
-| `Keyframer.toe` re-saved | TD 2025.33230 save, macOS | 92,370 → 96,578 |
-| `td-snapshot.tox` | `toecollapse` (`scripts/shrink.sh`) | 7,262 → 7,262 (identical) |
+Build, platform, operator kinds, entry count and file size don't predict
+agreement. `dialog_bookmarks` (2021.38420) agrees, and three other dialogs
+from the same build don't.
 
-In the golden set, 13 of 14 inputs have `collapse_equals_input: false`. The
-only `true` is `td-snapshot.tox`, which `toecollapse` wrote. All 14 have
-`refixed_point: true`. The 2026-09-26 sweep already noted this split
-("only `td-snapshot.tox` (toecollapse-produced) satisfies
-`collapse==input`"); this entry adds that the saving platform and build
-don't change it.
+**Item 3: what differs between the encodings?** Only the archive layout,
+above. The compression level (zlib 6), the cipher (ECB with 8-byte blocks),
+the 16-byte trailer and the chunking rule are shared. `toecollapse`
+follows the `.toc` order and doesn't sort (reversing a `.toc` changes the
+bytes). The header "u16" in earlier notes is the top half of the unpacked
+length (u32). `Keyframer.toe`'s `0x0008`/`0x0009` meant TD's plaintext was
+`0x0008xxxx` bytes and `toecollapse`'s `0x0009xxxx`.
 
-**What is known about the difference:**
-- `toecollapse` is deterministic: 5 parallel runs, `TZ=UTC`, and a tree whose
-  file mtimes were all set to 2000-01-01 produced the same sha256. Run order,
-  clock, timezone and file dates are not inputs.
-- After one collapse it is a fixed point: expand → collapse reproduces the
-  same bytes on every later round.
-- TD's saves of the same project on two platforms came out within 24 bytes of
-  each other (92,394 vs 92,370); `toecollapse` output was ~4.5 % larger.
-- A `.toe` starts `31 30 | <u32 BE payload length> | <u16>`; the payload
-  length equals file size − 10. The trailing u16 is `0x0008` on both TD saves
-  of `Keyframer.toe` and `0x0009` on both collapses of it, but `0x0000` on
-  `BlankProject.toe` and its collapse alike, so it doesn't mark the writer.
-  It may be part of a wider field (e.g. an unpacked size). A `.tox` starts
-  `00 00 00 01 31 30 …`, so the header layout differs by file type.
-- The payload is ~8 bits/byte of entropy and none of zlib, raw deflate, gzip,
-  xz or bz2 decodes it at offsets 0–15, so the bytes can't be compared
-  directly outside TD.
-- Two TD saves of the same project list the same `.toc` entries in a
-  different order. TD's serialization order varies between saves.
+**Item 4: does `toeexpand` drop anything?** For `.tox` saved by
+2025.33230: nothing we can detect. Every byte of TD's plaintext is
+accounted for by the expanded files and the directory records (residual 0
+on 18 files), and TD's re-save of the rebuilt file is byte-identical.
+For `.toe`, two residuals remain:
 
-**Impact on us.** Byte equality of a `.toe`/`.tox` against its rebuild is not
-a usable check. Compare expanded trees instead (`tocdir verify`, or
-expand → `diff -r`). Don't treat a rebuilt binary as a reproduction of the
-original file, and don't commit the binary expecting a stable diff.
+- **Empty directory records for clone COMPs** (`watching`). In a `.toe`, TD
+  doesn't store the children of some clone COMPs. The Sweet16 projects'
+  `docsHelper` (`clone` = `op.TDResources.op('docsHelper')`), `annotate52`
+  / `annotate58` and `annotate_networkLabel` (`op.TDAnnotate.op(...)`) are
+  examples. It still writes an empty directory record for each, costing
+  `len(name) + 5` (16 + 15 + 25 = 56 bytes, the full Sweet16 excess).
+  `toeexpand` has no way to represent an empty directory, so the record
+  is lost. It only carries a name that the COMP's own `.n` already
+  records, and TD rebuilds the clone internals on load (`.start` lists
+  `#expectednodes 135` against 43 stored `.n` files). A `.tox` save of the
+  same COMP stores the internals in full and has no residual.
+- **A constant 9 bytes in every `.toe`** (`open`,
+  [#43](https://github.com/rootnotez/td-snapshot/issues/43)). TD's `.toe` plaintext is
+  9 bytes larger than the model in all 6 `.toe` checked: 2025.32460
+  `BlankProject` and `SwitchMultiOutput`, the Sweet16 pair after removing
+  the 56, and two fresh 2025.33230 saves (a bare session, and one with a
+  nested COMP). `toecollapse`'s `.toe` output has no such 9 bytes. It is
+  the same size as one more directory record with a 4-character name, or an
+  entry with a 2-character name and an empty body. What it holds is
+  unknown. The `.toe` `.toc` also lacks the `# 4 0 0 0 1` header line
+  that `.tox` tocs have (FORMAT.md, `.toc`), which may be related.
 
-**Caveat on the re-save test.** Opening a `.toe` in TD and saving it also
+**Impact on us.** Byte equality of a `.toe`/`.tox` against its rebuild
+still isn't a usable check for TD-saved nested files. Compare expanded
+trees instead (`tocdir verify`, or expand → `diff -r`). Two new uses:
+
+- **Which writer wrote a file** can be read offline. Compare the summed
+  header unpacked lengths with `17 + Σ (len(path) + 7 + size)` over its
+  expansion: equal means a full-path (`toecollapse`-style) file, smaller
+  means a TD save. This applies to nested trees only, since flat trees
+  agree under both formulas.
+- **Rebuilding through TD gives TD's bytes back.** `toecollapse` → `loadTox`
+  → `save()` reproduces TD's own save exactly, given the same `.build`
+  time and the `current` flag.
+
+**Caveat on re-saving a `.toe`.** Opening a `.toe` in TD and saving it also
 writes runtime state: window and panel sizes (`w`/`h` in `.parm`,
 `screenw`/`screenh` in `.panel`), expression-driven values, timeline `.ts`
-state, `.start`'s `#expectednodes`. A re-saved tree is therefore not
-expected to match the original tree, and that comparison can't show whether
-`toeexpand` drops anything.
+state, `.start`'s `#expectednodes`. The item 1 result is for `.tox`
+through `loadTox`; for `.toe` it is untested.
 
-**Open questions** (tracked in [#35](https://github.com/rootnotez/td-snapshot/issues/35)).
-Is the save time the only difference between a TD save and its TD re-save?
-Which content makes the two writers agree? Does `toecollapse` follow the
-`.toc` order, and is the size gap from ordering, compression settings or
-padding? What does the header u16 mean?
+**Reproduce.**
+
+- **Container probes.** Build a tree by hand: `.build`, a root `r.n`, and
+  one Text DAT `r/t.{n,parm,text}` copied from `tox/`, plus a
+  `# 4 0 0 0 1` `.toc`. Swap the body with
+  `python -m tocdir set-text r/t.text BODY`, then run `toecollapse`.
+  Vary the body length and compressibility, flip single bytes, and diff
+  the outputs block by block (8-byte blocks from offset 14).
+- **Size models.** Walk the chunk chain and sum `unpacked_len`, then
+  compare with the two formulas over the file's own expansion:
+
+  ```python
+  collapse = 17 + sum(len(p.encode()) + 7 + size(p) for p in toc)
+  td = 17 + sum(len(basename(p).encode()) + 7 + size(p) for p in toc) \
+          + sum(len(leaf.encode()) + 5 for leaf in dirs_entered_in_toc_order)
+  ```
+- **Item 1 (TD side).** In a throwaway TD session, `c.save()` each probe
+  COMP. Then, in one exec: `loadTox` the `toecollapse` rebuild,
+  `orig.current = True`, save both, and check that the `.build` times
+  match. Compare with `cmp`.
 
 | Build checked | Date | Result |
 |---|---|---|
 | 2025.33230 | 2026-10-13 | 0/214 non-`tfs` files (excluding `toecollapse`-written `td-snapshot.tox`) and 796/804 shipped `tfs` files differ from their rebuild; 8 shipped files identical (writer unknown); collapse deterministic |
 | 2025.33230 | 2026-10-14 | Fresh TD saves: 1/6 identical after round trip (`empty.tox`); TD save deterministic apart from save time; TD re-save of `toecollapse` output returns to TD's original size |
+| 2025.33230 | 2026-10-18 | Explained: archive layout (full paths vs per-directory basenames); both size models exact; flat trees and full-path-layout files agree (8/8 shipped explained); same-second TD re-save of rebuild byte-identical 6/6; `.toe` residuals: clone-COMP empty dirs (explained), constant +9 (open) |

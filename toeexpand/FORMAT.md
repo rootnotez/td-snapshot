@@ -110,7 +110,7 @@ Confirmed across **all 8 affected samples in the 1 630-file stress corpus**, spa
 
 Parsers reading from the TOC must therefore translate a missing `<path> <N>` entry to `<path>.<N>` before opening it, where `<N>` is one or more digits.
 
-(Related: `toecollapse` is itself not a bit-exact inverse of `toeexpand` on the *first* pass — collapsed files are uniformly larger than originals by ~1–13 % — but it converges to a fixed point after exactly one round. Verified on all 8 case-collision samples × 4 successive expand/collapse rounds: every file's collapsed sha256, expanded tree sha, and TOC sha are identical from round 1 through round 4. The growth is therefore one-time canonicalization, not accumulating drift. **Note:** `.build` is preserved verbatim through the round-trip — osname/osversion/time/build number all survive. So the canonicalization is in the binary container layout written by `toecollapse`, not a metadata rewrite. The saving platform and build don't explain it: TD saves made on macOS with the same build as `toecollapse` differ from its output just as Windows-authored files do. Some shipped files do round-trip byte-for-byte — see [ERRATA E5](ERRATA.md#e5--toecollapse-usually-does-not-reproduce-a-td-save-byte-for-byte).)
+(Related: `toecollapse` is itself not a bit-exact inverse of `toeexpand` on the *first* pass — collapsed files are uniformly larger than originals by ~1–13 % — but it converges to a fixed point after exactly one round. Verified on all 8 case-collision samples × 4 successive expand/collapse rounds: every file's collapsed sha256, expanded tree sha, and TOC sha are identical from round 1 through round 4. The growth is therefore one-time canonicalization, not accumulating drift. **Note:** `.build` is preserved verbatim through the round-trip — osname/osversion/time/build number all survive. So the canonicalization is in the binary container layout written by `toecollapse` (full paths per entry, where TD writes basenames under directory records; see [Binary container](#binary-container--the-toe--tox-file)), not a metadata rewrite. The saving platform and build don't explain it: TD saves made on macOS with the same build as `toecollapse` differ from its output just as Windows-authored files do. Some shipped files do round-trip byte-for-byte — see [ERRATA E5](ERRATA.md#e5--toecollapse-usually-does-not-reproduce-a-td-save-byte-for-byte).)
 
 ## `.build` — build stamp
 
@@ -585,6 +585,61 @@ A `.lod` is a **depth-first** serialisation of a subtree:
 Earlier drafts of this spec only documented `FileRecord` because the survey samples were shallow `.lod` bundles. Wider testing on `Kantare.toe.dir/local/midi.lod` and similar surfaced the `0x36`/`0x35` markers.
 
 With the grammar above, round-tripping is byte-exact: `parser/lod.py` walks records linearly and emits them unchanged.
+
+## Binary container — the `.toe` / `.tox` file
+
+What `toeexpand` reads and `toecollapse` writes. Black-box findings from
+synthetic trees and TD saves, 2026-10-18, toolchain and TD **2025.33230**,
+macOS ([#35](https://github.com/rootnotez/td-snapshot/issues/35)). The
+payload is encrypted, and we have not decrypted it. Everything below comes
+from sizes, the clear header, and ciphertext comparison.
+
+**Chunks.** A file is a `.tox` prefix `00 00 00 01` (absent in a `.toe`)
+followed by one or more chunks:
+
+```
+31 30 | u32 BE packed_len | u32 BE unpacked_len | packed_len bytes of ciphertext
+```
+
+- `packed_len` is a multiple of 8. `unpacked_len` is the chunk's plaintext
+  length. Older notes read the top half of `unpacked_len` as a separate u16.
+- A chunk closes at the first entry boundary after roughly 2,000,000
+  plaintext bytes; observed second-and-later chunks are 2,000,455–2,004,125
+  bytes. One huge entry stays in a single chunk (13.2 MB in
+  `MultipleToxTesting.toe`). A file whose last chunk closed right at the end
+  gets a final empty chunk with `unpacked_len` 17 and 24 ciphertext bytes.
+- Files under about 2 MB of plaintext have one chunk, so
+  `packed_len = size − 14` (`.tox`) or `size − 10` (`.toe`).
+
+**Encoding.** The plaintext is zlib-compressed, level 6 and one stream per
+chunk as far as sizes show, then encrypted with an 8-byte block cipher in
+**ECB mode**. Flipping one byte of an incompressible Text DAT body changes
+exactly one aligned ciphertext block plus the final 16 bytes (a
+checksum-like trailer). Incompressible runs are zlib stored blocks of
+about 16 KB, laid out in order. In compressible data, one changed byte
+rewrites almost every block after the first few (dynamic Huffman). Both
+writers share all of this.
+
+**Archive layout (plaintext).** A 17-byte fixed part plus one record per
+`.toc` entry, costing `len(name) + 7 + len(body)`. That fits a name, a NUL
+and a u32 size, but the exact field layout is unverified. The writers
+differ in `name`:
+
+| Writer | Entry name | Extra records | Plaintext size |
+|---|---|---|---|
+| `toecollapse` | full `.toc` path (`r/t.n`) | none | `17 + Σ (len(path) + 7 + size)` |
+| TD save | basename (`t.n`) | a directory record each time the walk enters a directory, `len(leaf) + 5` | `17 + Σ (len(base) + 7 + size) + Σ (len(leaf) + 5)` |
+
+Both formulas are exact (residual 0) on the files checked; see
+[ERRATA E5](ERRATA.md#e5--toecollapse-usually-does-not-reproduce-a-td-save-byte-for-byte).
+Entries are in `.toc` order, and `toecollapse` doesn't reorder them. The
+layouts coincide for a flat tree, so only flat trees round-trip
+byte-for-byte from a TD save.
+
+`.toe` exceptions in TD saves: an empty directory record (`len(name) + 5`)
+for clone COMPs whose children TD omits, which `toeexpand` can't
+represent; and a constant 9 bytes not yet explained
+([#43](https://github.com/rootnotez/td-snapshot/issues/43)).
 
 ## Notes / open questions
 
