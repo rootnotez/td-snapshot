@@ -8,7 +8,7 @@ truev 0.77027
 rollu 0.040404
 rollv 0.797297
 children 1
-screenw 50
-screenh 40
-screenwm 50
-screenhm 40
+screenw 100
+screenh 75
+screenwm 100
+screenhm 75

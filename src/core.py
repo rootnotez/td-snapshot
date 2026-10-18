@@ -1,9 +1,9 @@
-# core.py v3.0.0 | sha256:dabd4f011e5f327fa951690623402e643395ca5982da5c1d9e92da8e9cef219d
+# core.py v3.1.0 | sha256:5ef5dd3561ccf006c40c4623ac1c871ee48becf6add929a71e48e03b526f356b
 import re
 
 # Snapshot script version, surfaced in the output preamble. Synced from the
 # `core.py` entry in src/versions.txt by scripts/stamp.sh — do not edit by hand.
-VERSION = '3.0.0'
+VERSION = '3.1.0'
 
 def op_display_type(o):
     return '{} {}'.format(o.label, o.family)
@@ -50,7 +50,8 @@ def walk_patch(root=None,
         root_op = self_op.parent()
     else:
         root_op = op(root)
-    ops = [root_op] + list(root_op.findChildren(includeUtility=True))
+    # A non-COMP root (e.g. a single MAT) has no children to walk.
+    ops = [root_op] + (list(root_op.findChildren(includeUtility=True)) if root_op.isCOMP else [])
 
     # Exclude the component containing this script from the snapshot.
     # Walk up from me to find its direct child of root_op, then drop that subtree.

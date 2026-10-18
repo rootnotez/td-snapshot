@@ -1,9 +1,9 @@
 td-snapshot — source file checksums
 
-core.py:                       v3.0.0    dabd4f011e5f327fa951690623402e643395ca5982da5c1d9e92da8e9cef219d
+core.py:                       v3.1.0    5ef5dd3561ccf006c40c4623ac1c871ee48becf6add929a71e48e03b526f356b
 quickpaste_runner.py:          v1.0.0    483271940e07bb28d1b4f896443f8b6034e5edea57ed352887f31bce7e04eb91
-tox_runner_copy.py:            v1.0.1    0b5137746c322ce135b0af0544d7b452a9a3aaadeb356c5abab90c43f3d9c4af
-tox_runner_inspect.py:         v1.0.1    19467831a364093deb7c6f338b5d3632155036b457b09ae64649b1ed681eb662
+tox_runner_copy.py:            v1.1.0    586c76ee733c52a5aa290bc43e16338d70a086ddc1a61c850f6ac20c58d47547
+tox_runner_inspect.py:         v1.1.0    f808762beabefaf78f5bb0933fd03bbf5cd21a0543698a10f23e349427fb9a1d
 
 td-snapshot — tocdir package
 
@@ -11,7 +11,7 @@ tocdir:                        v0.4.1    7bc55d7efa6426acb837a396eb4e1b6d55b991a
 
 td-snapshot — binary artifact checksum
 
-td-snapshot.tox:               9807f0a5f0e98c52848b5e086365d38b99e30e6d83b3ee4a8b881b374744f188
+td-snapshot.tox:               d55a0df56326c598ad2ea34bec6dc082b5e002b6aee753393c262078f1280efc
 
 td-snapshot — toeexpand toolchain (TouchDesigner 2025.33230)
 

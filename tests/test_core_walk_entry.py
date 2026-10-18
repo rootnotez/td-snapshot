@@ -17,6 +17,7 @@ class FakeOp:
     OPType = "baseCOMP"
     label = "Base"
     family = "COMP"
+    isCOMP = True
 
     def __init__(self, path, parent=None):
         self.path = path

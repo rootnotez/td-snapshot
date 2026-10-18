@@ -8,8 +8,8 @@ truev 0.486486
 rollu 0.121212
 rollv 0.905405
 children 1
-screenw 50
-screenh 40
-screenwm 50
-screenhm 40
+screenw 100
+screenh 75
+screenwm 100
+screenhm 75
 picked 1
