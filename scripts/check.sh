@@ -10,4 +10,8 @@ shellcheck scripts/*.sh
 echo "py_compile..."
 uv run --no-project python -m py_compile src/*.py
 
+echo "pytest..."
+# Whole suite: about 10 s, so no need to pick a fast subset.
+uvx pytest -q
+
 echo "All checks passed."
