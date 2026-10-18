@@ -193,6 +193,14 @@ You can also just drop the `.tox` into a project directly from the filesystem wh
 
 This repo can rebuild both `td-snapshot.py` and `td-snapshot.tox` from `src/` without opening TouchDesigner. After editing `src/core.py`, `src/tox_runner_copy.py`, or `src/tox_runner_inspect.py` (and bumping the file's version in `src/versions.txt`), run `./scripts/build.sh`. It lints, stamps version/hash headers onto `src/*.py`, rebuilds `td-snapshot.py`, then calls `shrink.sh`, which patches the `.text` DAT bodies in `tox/td_snapshot.tox.dir/` (via [toetools](https://github.com/rootnotez/toetools)' `set-text`, run through `uvx` at the release pinned in `scripts/_toetools.sh`) and runs `toecollapse` to rebuild the `.tox`, then `toetools verify` checks the patched tree still round-trips. Finally `hashes.sh` regenerates `src/hashes.txt` — recording the source-file checksums, the freshly built `.tox` checksum, and the `toeexpand`/`toecollapse` toolchain (with the TouchDesigner build) that produced it. This requires TouchDesigner installed at `/Applications/TouchDesigner.app` for the `toecollapse` CLI. For structural changes made in the GUI, **Save Component** over `td-snapshot.tox` and run `./scripts/grow.sh` to refresh `tox/` for git diffing.
 
+**Network dependency.** By default `scripts/_toetools.sh` fetches toetools from GitHub (`git+https://github.com/rootnotez/toetools@<tag>`), so `build.sh` and the textconv driver from `git-textconv-setup.sh` need network access the first time they run with each pin, and possibly again when uv re-resolves the tag. This also means they fail while rootnotez/toetools is private. To work offline, or before the repo is public, point `TOETOOLS_SPEC` at a local toetools checkout, pinned to the same tag:
+
+```
+export TOETOOLS_SPEC="git+file://$HOME/path/to/toetools@v0.5.0"
+```
+
+Re-run `./scripts/git-textconv-setup.sh` after changing it, because the setup writes the spec into `.git/config`.
+
 
 
 ## toeexpand parser (moved to toetools)
