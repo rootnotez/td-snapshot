@@ -30,6 +30,7 @@ def _flag_applies(o, families):
 
 def walk_patch(root=None,
                include_comment=True,
+               include_tags=True,
                include_storage=True,
                include_bypass=True,
                include_display=True,
@@ -210,6 +211,14 @@ def walk_patch(root=None,
             except:
                 pass
 
+        if include_tags:
+            try:
+                tags = sorted(str(t) for t in o.tags)
+                if tags:
+                    node['tags'] = tags
+            except:
+                pass
+
         flags = {}
         # Each flag emits only when diverged from the type's default:
         # bypass/viewer default False (emit when True); display/render default True (emit when False).
@@ -351,6 +360,13 @@ def _fmt_comment_block(comment, indent='    '):
     return out
 
 
+def _fmt_tags(tags):
+    # Tags are comma-separated; a tag with whitespace, a comma or a quote is shown
+    # as a Python repr so the list stays unambiguous. Plain tags stay bare.
+    return ', '.join(t if t and not any(c.isspace() or c in ',\'"' for c in t) else repr(t)
+                     for t in tags)
+
+
 def render_blocks(nodes, wire_edges, ref_edges, op_by_path):
     # Per-node-block format. See project_per_node_block_format memory for design rationale.
     # Operators are named by their path relative to the root (the first block, which
@@ -386,13 +402,15 @@ def render_blocks(nodes, wire_edges, ref_edges, op_by_path):
             s += ', expr={!r}'.format(par['expr'])
         return s + ')'
 
-    lines = ['# td-snapshot v{} — each node block: "path [type]" (relative to the first block\'s path), changed pars, "in[N] <- src" for incoming wires, "ref par -> target" for parameter refs, "storage key = value" for op.store() data.'.format(VERSION)]
+    lines = ['# td-snapshot v{} — each node block: "path [type]" (relative to the first block\'s path), changed pars, "in[N] <- src" for incoming wires, "ref par -> target" for parameter refs, "storage key = value" for op.store() data, "tags: a, b" for operator tags (a tag with spaces, commas or quotes is shown quoted).'.format(VERSION)]
 
     for n in nodes:
         lines.append('')
         lines.append(name_for(n['path']) + n['label'][len(n['path']):])
         if 'comment' in n:
             lines.extend(_fmt_comment_block(n['comment']))
+        if n.get('tags'):
+            lines.append('  tags: ' + _fmt_tags(n['tags']))
         if 'flags' in n:
             lines.append('  flags: ' + _fmt_flags(n['flags']))
         for key, summary in n.get('storage', []):
@@ -415,6 +433,7 @@ def render_blocks(nodes, wire_edges, ref_edges, op_by_path):
 
 def snapshot_patch(root=None,
                    include_comment=True,
+                   include_tags=True,
                    include_storage=True,
                    include_bypass=True,
                    include_display=True,
@@ -425,6 +444,7 @@ def snapshot_patch(root=None,
     nodes, wire_edges, ref_edges, op_by_path = walk_patch(
         root,
         include_comment=include_comment,
+        include_tags=include_tags,
         include_storage=include_storage,
         include_bypass=include_bypass,
         include_display=include_display,
