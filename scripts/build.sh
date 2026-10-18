@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-./scripts/check.sh
+SKIP_TESTS=1 ./scripts/check.sh
 ./scripts/stamp.sh
 
 {
@@ -23,3 +23,6 @@ echo "Built td-snapshot.py"
 
 ./scripts/shrink.sh
 ./scripts/hashes.sh
+
+echo "pytest..."
+uvx pytest -q

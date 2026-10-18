@@ -10,8 +10,12 @@ shellcheck scripts/*.sh
 echo "py_compile..."
 uv run --no-project python -m py_compile src/*.py
 
-echo "pytest..."
-# Whole suite: about 10 s, so no need to pick a fast subset.
-uvx pytest -q
+# build.sh sets SKIP_TESTS=1 and runs pytest itself after shrink, because some
+# tests check the rebuilt td-snapshot.tox (a fresh TD export won't pass them).
+if [ -z "${SKIP_TESTS:-}" ]; then
+    echo "pytest..."
+    # Whole suite: about 10 s, so no need to pick a fast subset.
+    uvx pytest -q
+fi
 
 echo "All checks passed."
