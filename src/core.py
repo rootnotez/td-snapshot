@@ -54,12 +54,17 @@ def walk_patch(root=None,
     nodes = []
 
     # Regex-scan an expression string for op('name') patterns and resolve each
-    # to a full operator path. Tries owner-relative, then absolute resolution.
+    # to a full operator path. TD evaluates a bare op('X') in a parameter
+    # expression against the network containing the owner (its siblings), so
+    # try the owner's parent first. A COMP owner's own children must not
+    # shadow a sibling of the same name. owner.op() keeps '../x' style paths
+    # resolving as before; op(raw) handles absolute paths and shortcuts.
     def op_refs_from_expr(expr, owner):
         refs = []
         for m in re.finditer(r"op\((['\"])(.*?)\1\)", expr):
             raw = m.group(2)
-            target = op(owner.path + '/' + raw) or owner.op(raw) or op(raw)
+            par = owner.parent()
+            target = (par.op(raw) if par is not None else None) or owner.op(raw) or op(raw)
             refs.append(target.path if target is not None else raw)
         return sorted(set(refs))
 
