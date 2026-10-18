@@ -98,6 +98,13 @@ EOF
         echo "toeexpand/ERRATA.md has no History row for $NEW_BUILD yet: re-check each"
         echo "entry (e.g. tests/toolchain/gen/run.sh probe_parm_flags) and record the result."
     fi
+    # Default DAT texts are recorded per build too, diff or not.
+    if [ ! -f "dat-templates/$NEW_BUILD.json" ]; then
+        echo ""
+        echo "dat-templates/ has no record for $NEW_BUILD yet: with TD running the bridge, run"
+        echo "scripts/capture-dat-templates.sh, then follow dat-templates/README.md (build table row,"
+        echo "core.py version bump, ./scripts/build.sh)."
+    fi
     if [ "$OTHER_FAIL" -eq 1 ]; then
         echo "One or more non-compare steps (pytest / corpus build / census) failed above — see their output."
     fi
