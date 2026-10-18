@@ -11,6 +11,23 @@ def op_display_type(o):
 def op_label(o):
     return '{} [{}]'.format(o.path, op_display_type(o))
 
+# Display/Render exist as attributes on every OP, so hasattr() cannot tell whether
+# a flag is meaningful. Per the TD docs (Display_Flag, Render_Flag, Flag; build
+# 2025.33230): Display is on TOPs, CHOPs, SOPs, POPs and Object COMPs (Geometry,
+# Camera, Light, Null, ...); Render is on SOPs, POPs and Object COMPs. Plain
+# Container/Base COMPs, DATs and MATs have neither. Object COMPs are detected via
+# op.isObject, not by family (their family is just 'COMP').
+_DISPLAY_FAMILIES = ('TOP', 'CHOP', 'SOP', 'POP')
+_RENDER_FAMILIES = ('SOP', 'POP')
+
+
+def _flag_applies(o, families):
+    try:
+        return o.family in families or bool(o.isObject)
+    except:
+        return False
+
+
 def walk_patch(root=None,
                include_comment=True,
                include_storage=True,
@@ -210,13 +227,13 @@ def walk_patch(root=None,
                 pass
         if include_display:
             try:
-                if hasattr(o, 'display') and o.display is False:
+                if _flag_applies(o, _DISPLAY_FAMILIES) and o.display is False:
                     flags['display'] = False
             except:
                 pass
         if include_render:
             try:
-                if hasattr(o, 'render') and o.render is False:
+                if _flag_applies(o, _RENDER_FAMILIES) and o.render is False:
                     flags['render'] = False
             except:
                 pass
