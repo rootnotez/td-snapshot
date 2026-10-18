@@ -50,7 +50,7 @@ cp td-snapshot.tox "$STAGE"
 trap 'rm -f "$STAGE"' EXIT
 
 # toeexpand's exit code is inverted (1 on success, 0 on failure; see
-# toeexpand/FORMAT.md), so judge by the output it should have written. Any
+# rootnotez/toetools docs/FORMAT.md), so judge by the output it should have written. Any
 # prior expansion was deleted above, so whatever exists now is fresh.
 rc=0
 "$TOEEXPAND" "$STAGE" || rc=$?
