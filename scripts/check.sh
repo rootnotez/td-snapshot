@@ -18,4 +18,9 @@ if [ -z "${SKIP_TESTS:-}" ]; then
     uvx pytest -q
 fi
 
+# A warning, not a failure: build.sh collapses the .tox with the installed TD,
+# whose DAT templates may not be recorded yet.
+echo "check-build..."
+./scripts/check-build.sh >/dev/null || true
+
 echo "All checks passed."

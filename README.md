@@ -25,7 +25,8 @@ src/
 scripts/
   build.sh               ← rebuilds td-snapshot.py AND td-snapshot.tox from src/
   stamp.sh               ← called by build.sh — stamps version/hash headers onto src/*.py
-  check.sh               ← called by build.sh — shellcheck on scripts + py_compile on src/*.py
+  check.sh               ← called by build.sh — shellcheck on scripts + py_compile on src/*.py, then check-build.sh as a warning
+  check-build.sh         ← run after updating TouchDesigner: warns when the installed build has no dat-templates/ record
   _toetools.sh           ← sourced by the scripts below — pins the toetools release (TOETOOLS_SPEC) used to edit tox/
   shrink.sh              ← called by build.sh — tocdir → .tox: patches DAT bodies in tox/ from src/*.py (via `toetools set-text`), runs toecollapse to rebuild td-snapshot.tox
   hashes.sh              ← called by build.sh after shrink — regenerates src/hashes.txt (source + toetools pin + .tox + toolchain checksums)
@@ -209,5 +210,6 @@ The pure-Python reader/writer for TouchDesigner's on-disk `.tox`/`.toe` expansio
 
 ### After updating TouchDesigner
 
-1. **Check the toolchain.** In a toetools checkout, run `./scripts/toolchain-check.sh` and follow its "After updating TouchDesigner" runbook (record and compare goldens, re-check errata, write up deltas).
-2. **Record its default DAT texts.** With the new TD running the td-claude-bridge component, run `scripts/capture-dat-templates.sh` here. It writes `dat-templates/<build>.json` and regenerates the template table in `src/core.py`. Add the build's row (and what changed since the previous build) to the table in [`dat-templates/README.md`](dat-templates/README.md), bump `core.py` in `src/versions.txt`, and run `./scripts/build.sh`. Until a build is recorded, untouched default DATs created in it are shown in full rather than collapsed. Commit `src/hashes.txt` (it records the toolchain that collapsed the `.tox`) along with the `dat-templates/` record.
+Run `./scripts/check-build.sh`. It reads the installed app's build (`TD_APP` overrides `/Applications/TouchDesigner.app`) and warns when `dat-templates/<build>.json` is missing, with the steps to record it: run `scripts/capture-dat-templates.sh`, add the build's row (and what changed since the previous build) to the table in [`dat-templates/README.md`](dat-templates/README.md), bump `core.py` in `src/versions.txt`, and run `./scripts/build.sh`. Until a build is recorded, untouched default DATs created in it are shown in full rather than collapsed. Commit `src/hashes.txt` (it records the toolchain that collapsed the `.tox`) along with the `dat-templates/` record. `check.sh`, and so `build.sh`, repeats the warning.
+
+The toeexpand/toecollapse toolchain itself is checked in toetools: in a toetools checkout, run `./scripts/toolchain-check.sh` and follow its runbook (goldens, errata, deltas).
