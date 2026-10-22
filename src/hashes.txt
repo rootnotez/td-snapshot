@@ -7,7 +7,7 @@ tox_runner_inspect.py:         v1.1.0    f808762beabefaf78f5bb0933fd03bbf5cd21a0
 
 td-snapshot — toetools (patches the tox/ tree)
 
-toetools:                      git+https://github.com/rootnotez/toetools@v0.5.0
+toetools:                      git+https://github.com/rootnotez/toetools@v0.6.0
 
 td-snapshot — binary artifact checksum
 

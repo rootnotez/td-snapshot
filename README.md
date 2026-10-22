@@ -25,15 +25,16 @@ src/
 scripts/
   build.sh               ← rebuilds td-snapshot.py AND td-snapshot.tox from src/
   stamp.sh               ← called by build.sh — stamps version/hash headers onto src/*.py
-  check.sh               ← called by build.sh — shellcheck on scripts + py_compile on src/*.py
+  check.sh               ← called by build.sh — shellcheck on scripts + py_compile on src/*.py, then check-build.sh as a warning
+  check-build.sh         ← run after updating TouchDesigner: warns when the installed build has no dat-templates/ record
   _toetools.sh           ← sourced by the scripts below — pins the toetools release (TOETOOLS_SPEC) used to edit tox/
   shrink.sh              ← called by build.sh — tocdir → .tox: patches DAT bodies in tox/ from src/*.py (via `toetools set-text`), runs toecollapse to rebuild td-snapshot.tox
   hashes.sh              ← called by build.sh after shrink — regenerates src/hashes.txt (source + toetools pin + .tox + toolchain checksums)
   grow.sh                ← .tox → tocdir: run after a TD GUI export to refresh tox/ for git diffing
   git-textconv-setup.sh  ← one-time per-clone setup: configures the `tocdir` git diff driver (see below)
-  capture-dat-templates.sh ← run once per new TD build, with TD live: records its default DAT texts into dat-templates/ and regenerates core.py's template table
+  capture-dat-templates.sh ← run once per new TD build: starts an independent TD session through td-claude-bridge, records its default DAT texts into dat-templates/ and regenerates core.py's template table
   dat_templates.py       ← used by capture-dat-templates.sh: assembles a dat-templates/ record; regenerates/checks the table in src/core.py
-tests/                   ← snapshot renderer tests (test_core_*.py, test_dat_templates.py) and .toe samples
+tests/                   ← snapshot renderer tests (test_core_*.py, test_dat_templates.py) and manual live-regression fixtures (see below)
 media/                   ← screenshots used by this README
 td-snapshot.py           ← BUILT — do not edit directly
 td-snapshot.tox          ← BUILT — the distributable component, drop into any project
@@ -41,6 +42,15 @@ tox/                     ← canonical text expansion of td-snapshot.tox, for gi
 dat-templates/           ← running record of TD's default DAT texts, one <build>.json per TD build (see its README)
 .gitattributes           ← routes tox/ .text/.table files to the toetools textconv diff driver
 ```
+
+`tests/baselines/` is a manual live-regression corpus, not run by pytest. Each `.txt` is a snapshot captured by hand in TouchDesigner (in an older output format), kept as a reference when changing how `core.py` walks or renders a network:
+
+- `BlankProject.toe` (in `tests/`) is an empty project to open first, so TD's default network doesn't leak into a capture.
+- `SwitchMultiOutput.toe` pairs with `SwitchMultiOutput.txt` (one output connector fanned out to two wires).
+- `MultipleToxTesting.toe` holds the palette components behind most other baselines (`TDFundamentals-*`, `TDIntermediate-201-*`, `sweet16*`) in one project.
+- The other baselines were captured from palette `.tox` files directly and have no `.toe` here.
+
+The same `.toe` files are copied in toetools, whose tests use them as toeexpand fixtures; the copies here exist for the live captures.
 
 After editing `src/core.py`, run `./scripts/build.sh` to regenerate both `td-snapshot.py` and `td-snapshot.tox` (it calls `stamp.sh`, `shrink.sh`, and `hashes.sh` automatically). To bump a file's version, edit the corresponding entry in `src/versions.txt` before running the build.
 
@@ -196,7 +206,7 @@ This repo can rebuild both `td-snapshot.py` and `td-snapshot.tox` from `src/` wi
 **Network dependency.** By default `scripts/_toetools.sh` fetches toetools from GitHub (`git+https://github.com/rootnotez/toetools@<tag>`), so `build.sh` and the textconv driver from `git-textconv-setup.sh` need network access the first time they run with each pin, and possibly again when uv re-resolves the tag. This also means they fail while rootnotez/toetools is private. To work offline, or before the repo is public, point `TOETOOLS_SPEC` at a local toetools checkout, pinned to the same tag:
 
 ```
-export TOETOOLS_SPEC="git+file://$HOME/path/to/toetools@v0.5.0"
+export TOETOOLS_SPEC="git+file://$HOME/path/to/toetools@v0.6.0"
 ```
 
 Re-run `./scripts/git-textconv-setup.sh` after changing it, because the setup writes the spec into `.git/config`.
@@ -209,5 +219,6 @@ The pure-Python reader/writer for TouchDesigner's on-disk `.tox`/`.toe` expansio
 
 ### After updating TouchDesigner
 
-1. **Check the toolchain.** In a toetools checkout, run `./scripts/toolchain-check.sh` and follow its "After updating TouchDesigner" runbook (record and compare goldens, re-check errata, write up deltas).
-2. **Record its default DAT texts.** With the new TD running the td-claude-bridge component, run `scripts/capture-dat-templates.sh` here. It writes `dat-templates/<build>.json` and regenerates the template table in `src/core.py`. Add the build's row (and what changed since the previous build) to the table in [`dat-templates/README.md`](dat-templates/README.md), bump `core.py` in `src/versions.txt`, and run `./scripts/build.sh`. Until a build is recorded, untouched default DATs created in it are shown in full rather than collapsed. Commit `src/hashes.txt` (it records the toolchain that collapsed the `.tox`) along with the `dat-templates/` record.
+Run `./scripts/check-build.sh`. It reads the installed app's build (`TD_APP` overrides `/Applications/TouchDesigner.app`) and warns when `dat-templates/<build>.json` is missing, with the steps to record it: run `scripts/capture-dat-templates.sh` (it starts and stops its own TouchDesigner session through [td-claude-bridge](https://github.com/rootnotez/td-claude-bridge)'s `tools/session.sh`, so your open project is not touched), add the build's row (and what changed since the previous build) to the table in [`dat-templates/README.md`](dat-templates/README.md), bump `core.py` in `src/versions.txt`, and run `./scripts/build.sh`. Until a build is recorded, untouched default DATs created in it are shown in full rather than collapsed. Commit `src/hashes.txt` (it records the toolchain that collapsed the `.tox`) along with the `dat-templates/` record. `check.sh`, and so `build.sh`, repeats the warning.
+
+The toeexpand/toecollapse toolchain itself is checked in toetools: in a toetools checkout, run `./scripts/toolchain-check.sh` and follow its runbook (goldens, errata, deltas).
