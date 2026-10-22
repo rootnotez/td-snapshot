@@ -34,7 +34,7 @@ scripts/
   git-textconv-setup.sh  ← one-time per-clone setup: configures the `tocdir` git diff driver (see below)
   capture-dat-templates.sh ← run once per new TD build: starts an independent TD session through td-claude-bridge, records its default DAT texts into dat-templates/ and regenerates core.py's template table
   dat_templates.py       ← used by capture-dat-templates.sh: assembles a dat-templates/ record; regenerates/checks the table in src/core.py
-tests/                   ← snapshot renderer tests (test_core_*.py, test_dat_templates.py) and .toe samples
+tests/                   ← snapshot renderer tests (test_core_*.py, test_dat_templates.py) and manual live-regression fixtures (see below)
 media/                   ← screenshots used by this README
 td-snapshot.py           ← BUILT — do not edit directly
 td-snapshot.tox          ← BUILT — the distributable component, drop into any project
@@ -42,6 +42,15 @@ tox/                     ← canonical text expansion of td-snapshot.tox, for gi
 dat-templates/           ← running record of TD's default DAT texts, one <build>.json per TD build (see its README)
 .gitattributes           ← routes tox/ .text/.table files to the toetools textconv diff driver
 ```
+
+`tests/baselines/` is a manual live-regression corpus, not run by pytest. Each `.txt` is a snapshot captured by hand in TouchDesigner (in an older output format), kept as a reference when changing how `core.py` walks or renders a network:
+
+- `BlankProject.toe` (in `tests/`) is an empty project to open first, so TD's default network doesn't leak into a capture.
+- `SwitchMultiOutput.toe` pairs with `SwitchMultiOutput.txt` (one output connector fanned out to two wires).
+- `MultipleToxTesting.toe` holds the palette components behind most other baselines (`TDFundamentals-*`, `TDIntermediate-201-*`, `sweet16*`) in one project.
+- The other baselines were captured from palette `.tox` files directly and have no `.toe` here.
+
+The same `.toe` files are copied in toetools, whose tests use them as toeexpand fixtures; the copies here exist for the live captures.
 
 After editing `src/core.py`, run `./scripts/build.sh` to regenerate both `td-snapshot.py` and `td-snapshot.tox` (it calls `stamp.sh`, `shrink.sh`, and `hashes.sh` automatically). To bump a file's version, edit the corresponding entry in `src/versions.txt` before running the build.
 
