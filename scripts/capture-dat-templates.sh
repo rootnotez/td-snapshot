@@ -28,15 +28,19 @@ fi
 TMP="$(mktemp -d)"
 trap 'rm -r "$TMP"' EXIT
 
+# td.sh exec -q prints only the script's stdout, and on an exception exits 1
+# with the bridge's whole reply on stderr.
 run_batch() {
-    local reply
-    reply="$( { printf 'START = %d\nEND = %d\n' "$1" "$2"; cat "$SCRIPT"; } | "$TD_BRIDGE/td.sh" exec)"
-    if ! grep -q '^status: ok' <<<"$reply"; then
-        echo "ERROR: batch $1-$2 failed inside TD:" >&2
-        printf '%s\n' "$reply" >&2
+    if ! { printf 'START = %d\nEND = %d\n' "$1" "$2"; cat "$SCRIPT"; } \
+            | "$TD_BRIDGE/td.sh" exec -q > "$TMP/reply"; then
+        echo "ERROR: batch $1-$2 failed (td.sh reported why above)" >&2
         exit 1
     fi
-    grep '^@@DATTEMPLATES@@ ' <<<"$reply"
+    if ! grep '^@@DATTEMPLATES@@ ' "$TMP/reply"; then
+        echo "ERROR: batch $1-$2 printed no @@DATTEMPLATES@@ line:" >&2
+        cat "$TMP/reply" >&2
+        exit 1
+    fi
 }
 
 # A zero-width batch reports the build and the number of op types.
