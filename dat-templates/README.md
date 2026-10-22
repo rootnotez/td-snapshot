@@ -24,13 +24,15 @@ Matching is by hash, not by the running build. A DAT saved under an older build 
 
 ## Recording a new build
 
-With the new TouchDesigner running the td-claude-bridge component:
+With the new TouchDesigner installed and a [td-claude-bridge](https://github.com/rootnotez/td-claude-bridge) checkout beside this repo (or at `TD_BRIDGE`):
 
 ```bash
 scripts/capture-dat-templates.sh          # writes dat-templates/<build>.json, then regenerates src/core.py's table
 ```
 
-It creates and destroys every op type inside `/project1/dat_templates_capture` in batches, and touches nothing else. Then:
+It creates and destroys every op type inside `/project1/dat_templates_capture` in batches, so it does that in an independent session: it starts a TouchDesigner instance of its own holding only the bridge (td-claude-bridge's `tools/session.sh start`, on the first free port from 9983, never 9982), and quits it without saving when it exits. Your open project is not touched. `--port P` picks the session's port. To use a session that is already running instead, set `TD_BRIDGE_PORT` (or `TD_PORT`) to its port; nothing is started or stopped then. `--force` overwrites an existing record.
+
+Then:
 
 1. Add a row to the table above. Fill in **Changes from the previous build** by diffing the two records, e.g. `diff <(jq -r '.templates[] | "\(.op_type) \(.role) \(.sha256)"' A.json) <(jq -r '… B.json')`.
 2. Bump `core.py` in `src/versions.txt` (the table changed) and run `./scripts/build.sh`.
@@ -42,7 +44,7 @@ It creates and destroys every op type inside `/project1/dat_templates_capture` i
 - `<build>.json`: one record per build.
   - `templates`: one entry per default text: `op_type` (the operator that creates it), `role` (`text` for the DAT's own body, `docked:<name>` for a DAT docked to the operator, `child:<path>` for a DAT inside a COMP), `dat_type`, `sha256`, `chars`, and the full `text`.
   - `skipped`, `failed`: op types with no record, as above.
-- `capture_td.py`: runs inside TouchDesigner, driven by `scripts/capture-dat-templates.sh`.
+- `capture_td.py`: runs inside TouchDesigner, sent in batches by `scripts/capture-dat-templates.sh` through `td.sh exec -q`.
 - `scripts/dat_templates.py`: assembles the batches into a record, and regenerates or checks the table in `src/core.py`.
 
 Only Text and Execute-family DATs are recorded. Tables, Info DATs and device or folder listings hold generated, machine-specific content, never a template.
