@@ -206,7 +206,7 @@ This repo can rebuild both `td-snapshot.py` and `td-snapshot.tox` from `src/` wi
 **Network dependency.** By default `scripts/_toetools.sh` fetches toetools from GitHub (`git+https://github.com/rootnotez/toetools@<tag>`), so `build.sh` and the textconv driver from `git-textconv-setup.sh` need network access the first time they run with each pin, and possibly again when uv re-resolves the tag. This also means they fail while rootnotez/toetools is private. To work offline, or before the repo is public, point `TOETOOLS_SPEC` at a local toetools checkout, pinned to the same tag:
 
 ```
-export TOETOOLS_SPEC="git+file://$HOME/path/to/toetools@v0.5.0"
+export TOETOOLS_SPEC="git+file://$HOME/path/to/toetools@v0.6.0"
 ```
 
 Re-run `./scripts/git-textconv-setup.sh` after changing it, because the setup writes the spec into `.git/config`.
